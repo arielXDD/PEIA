@@ -97,7 +97,7 @@ Antes de clonar y ejecutar el proyecto, asegurate de tener instaladas las siguie
 | AG | Ariel G. | Lider / Scrum Master / UX-UI / Modulo ERP |
 | JDS | Julian S. | Backend — Inventario y Base de datos |
 | JMVA | Jose M. | Backend — Logistica y SLAs |
-| JMM | Jennifer M. | Frontend — Dashboard y Reportes |
+| JMM | Jennifer Muñoz. | Frontend — Dashboard y Reportes |
 | MJSG | Mariano S. | Backend — Automatizacion y DevOps |
 | JCRF | Jose C. | Backend — Prediccion, Camaras y QA |
 
