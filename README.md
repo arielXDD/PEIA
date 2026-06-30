@@ -1,92 +1,49 @@
-# PEIA - Plataforma Empresarial Inteligente para Almacenes
+# PEIA — Plataforma Empresarial Inteligente para Almacenes
 
-## Descripcion
+PEIA es un monolito modular basado en **.NET 8** y **PostgreSQL**, diseñado para gestionar bodegas, inventarios y pedidos mediante una arquitectura robusta y segura (Clean Architecture + MediatR).
 
-PEIA es un sistema de gestion empresarial orientado a almacenes, desarrollado como plataforma web bajo una arquitectura de Monolito Modular. El sistema esta disenado para operar sobre dos centros de almacenamiento de forma simultanea, permitiendo el control centralizado del inventario, la logistica de salida, la generacion de reportes y la prediccion de demanda mediante inteligencia artificial.
+## Requisitos Previos
 
-El proyecto esta desarrollado con .NET 8 en C#, siguiendo la metodologia Scrum con entregas incrementales organizadas en fases.
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [PostgreSQL 14+](https://www.postgresql.org/download/)
 
----
+## Configuración y Ejecución
 
-## Funcionalidades principales
+### 1. Preparar la Base de Datos
+El proyecto requiere una base de datos PostgreSQL. Debes actualizar el archivo `appsettings.Development.json` con las credenciales reales de tu servidor local.
 
-- Gestion de usuarios, roles y permisos con soporte multi-centro
-- Control de inventario por centro con historial de movimientos y alertas de stock minimo
-- Seguimiento logistico de pedidos con control de SLAs y rastreo en tiempo real
-- Generacion de reportes exportables en PDF y Excel
-- Notificaciones en tiempo real mediante WebSockets (SignalR)
-- Prediccion de demanda utilizando modelos de aprendizaje automatico (ML.NET)
-- Panel administrativo con vista consolidada de ambos centros
-
----
-
-## Arquitectura
-
-El sistema sigue un patron de **Monolito Modular**. Cada modulo de negocio esta aislado en su propio proyecto de clase, con comunicacion entre modulos a traves de MediatR. Esto permite un despliegue sencillo como una sola aplicacion, con la posibilidad de extraer modulos a servicios independientes en el futuro.
-
-```
-PEIA.slnx
-src/
-  PEIA.Web                    -> Host principal (ASP.NET Core + Razor Pages)
-  Shared/
-    PEIA.Shared.Kernel        -> Contratos, DTOs y eventos compartidos
-    PEIA.Shared.Infra         -> Base de datos, identidad y repositorios
-  Modules/
-    PEIA.Modules.ERP          -> Usuarios, roles y centros
-    PEIA.Modules.Inventory    -> Inventario y movimientos
-    PEIA.Modules.Logistics    -> Pedidos, rutas y SLAs
-    PEIA.Modules.Reports      -> Reportes y graficas
-    PEIA.Modules.Automation   -> Notificaciones y automatizacion
-    PEIA.Modules.Prediction   -> Prediccion con ML.NET
-tests/
-  PEIA.Tests                  -> Pruebas unitarias y de integracion (xUnit)
+Abre `src/PEIA.Web/appsettings.Development.json` y cambia `TU_CONTRASEÑA_AQUI` por la contraseña de tu usuario postgres:
+```json
+"DefaultConnection": "Host=localhost;Database=peiadb;Username=postgres;Password=TU_CONTRASEÑA_AQUI"
 ```
 
----
+### 2. Levantar la aplicación
+Ejecuta el siguiente comando en la raíz del proyecto para compilar e iniciar el backend:
 
-## Requisitos para ejecutar el proyecto
+```powershell
+dotnet run --project src\PEIA.Web
+```
 
-Antes de clonar y ejecutar el proyecto, asegurate de tener instaladas las siguientes herramientas:
+### 3. Migraciones y Seed (Generación automática de datos)
+Al ejecutarse por primera vez, la aplicación (**SeedData.cs**) se encargará automáticamente de:
+1. Crear la base de datos `peiadb` y todas sus tablas mediante Migraciones de EF Core.
+2. Crear los roles principales (`Administrador`, `OperadorInventario`, `Logistica`, etc).
+3. Crear 2 bodegas por defecto (`Bodega Norte`, `Bodega Sur`).
+4. Insertar los **5 usuarios de prueba** con sus roles asignados.
 
-| Herramienta | Version minima | Descripcion |
-|---|---|---|
-| .NET SDK | 8.0 LTS | Entorno de ejecucion y compilacion principal |
-| SQL Server | 2019 o superior | Motor de base de datos relacional |
-| Visual Studio 2022 | 17.8 o superior | IDE recomendado (Community Edition es suficiente) |
-| Git | 2.40 o superior | Control de versiones |
+Alternativamente, puedes usar el script de SQL directo:
+Si prefieres hacerlo manualmente, puedes crear una base de datos vacía en PostgreSQL y ejecutar el archivo `migrations_script.sql` (que también incluye los usuarios iniciales).
 
-> SQL Server Express es suficiente para desarrollo local. Puedes descargarlo en https://www.microsoft.com/es-mx/sql-server/sql-server-downloads
+### 4. Acceder al Frontend
+Abre tu navegador y entra a:
+👉 **[https://localhost:5001](https://localhost:5001)**
 
----
-
-## Configuracion inicial
-
-1. Clona el repositorio:
-   ```bash
-   git clone https://github.com/arielXDD/PEIA.git
-   cd PEIA
-   ```
-
-2. Configura la cadena de conexion a tu instancia de SQL Server en `src/PEIA.Web/appsettings.Development.json`:
-   ```json
-   {
-     "ConnectionStrings": {
-       "DefaultConnection": "Server=localhost;Database=PeiaDb;Trusted_Connection=True;TrustServerCertificate=True"
-     }
-   }
-   ```
-
-3. Aplica las migraciones de base de datos:
-   ```bash
-   dotnet ef database update --project src/Shared/PEIA.Shared.Infra --startup-project src/PEIA.Web
-   ```
-
-4. Ejecuta el proyecto:
-   ```bash
-   dotnet run --project src/PEIA.Web
-   ```
-
-5. Accede a la aplicacion en `https://localhost:5001` o revisa el puerto asignado en la consola.
+### Usuarios de Prueba (Contraseña para todos: `Peia2025!`)
+- **Admin**: `admin` (`admin@peia.com`)
+- **Inventario**: `inventario` (`inventario@peia.com`)
+- **Logística**: `logistica` (`logistica@peia.com`)
+- **Reportes**: `reportes` (`reportes@peia.com`)
+- **Supervisor**: `supervisor` (`supervisor@peia.com`)
 
 ---
 
@@ -112,8 +69,8 @@ Consulta el archivo [PROGRESO.md](./PROGRESO.md) para ver el estado actual de ca
 ## Tecnologias utilizadas
 
 - .NET 8 / C# 12
-- ASP.NET Core (Razor Pages)
-- Entity Framework Core 8 + SQL Server
+- Frontend nativo HTML/CSS/JS
+- Entity Framework Core 8 + PostgreSQL
 - ASP.NET Identity + JWT Bearer
 - MediatR 12
 - SignalR

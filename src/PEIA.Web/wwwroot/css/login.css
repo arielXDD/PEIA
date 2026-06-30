@@ -1,0 +1,329 @@
+/* =============================================
+   PEIA — Login Styles
+   Font: Inter | Colors: Blue #1d4ed8 / Dark Navy
+   ============================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --blue-primary:  #1d4ed8;
+  --blue-hover:    #1e40af;
+  --blue-light:    #eff6ff;
+  --text-primary:  #111827;
+  --text-secondary:#6b7280;
+  --text-muted:    #9ca3af;
+  --border:        #e5e7eb;
+  --border-focus:  #3b82f6;
+  --bg-input:      #ffffff;
+  --error:         #ef4444;
+  --error-bg:      #fef2f2;
+  --shadow-sm:     0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:     0 4px 20px rgba(0,0,0,.1);
+  --radius:        8px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f1f5f9;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Wrapper ─────────────────────────────── */
+.login-wrapper {
+  display: flex;
+  width: min(100%, 1080px);
+  min-height: 680px;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0,0,0,.16);
+  margin: 24px;
+}
+
+/* ─── Left Panel ─────────────────────────── */
+.login-panel {
+  flex: 0 0 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 56px;
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Brand */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  display: flex;
+}
+
+.brand-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+/* Header */
+.login-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+
+.login-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+}
+
+.form-group input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-group input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+/* Password wrapper */
+.input-password-wrapper {
+  position: relative;
+}
+
+.input-password-wrapper input {
+  padding-right: 44px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: color .2s;
+}
+
+.toggle-password:hover {
+  color: var(--text-secondary);
+}
+
+/* Options row */
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+  flex-shrink: 0;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox-label input:checked + .checkmark {
+  background: var(--blue-primary);
+  border-color: var(--blue-primary);
+}
+
+.checkbox-label input:checked + .checkmark::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translateY(-1px);
+}
+
+.forgot-link {
+  font-size: 13.5px;
+  color: var(--blue-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color .2s;
+}
+
+.forgot-link:hover { color: var(--blue-hover); }
+
+/* Button */
+.btn-login {
+  width: 100%;
+  padding: 11px;
+  background: var(--blue-primary);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background .2s, transform .1s;
+  margin-top: 4px;
+}
+
+.btn-login:hover  { background: var(--blue-hover); }
+.btn-login:active { transform: scale(.99); }
+
+.btn-login:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+}
+
+.btn-spinner svg {
+  animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error alert */
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--error-bg);
+  border: 1px solid #fecaca;
+  color: var(--error);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  animation: fadeIn .25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Footer */
+.login-footer {
+  margin-top: 8px;
+}
+
+.login-footer p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ─── Right Hero Panel ───────────────────── */
+.login-hero {
+  flex: 1;
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=900&auto=format&fit=crop&q=80');
+  background-size: cover;
+  background-position: center;
+  min-height: 400px;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(30, 58, 138, 0.15) 0%,
+    rgba(15, 23, 42, 0.25) 100%
+  );
+}
+
+/* ─── Responsive ─────────────────────────── */
+@media (max-width: 768px) {
+  .login-wrapper {
+    flex-direction: column;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  .login-hero {
+    display: none;
+  }
+
+  .login-panel {
+    flex: 1;
+    padding: 40px 28px;
+  }
+}
