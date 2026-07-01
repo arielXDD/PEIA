@@ -1,0 +1,15 @@
+﻿# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+
+# Environment
+.env
+appsettings.Development.json
+
+# NuGet
+*.nupkg
+packages/

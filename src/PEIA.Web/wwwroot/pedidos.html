@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PEIA — Pedidos y Logística</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/inicio.css" />
+  <style>
+    /* Estilos Adicionales Específicos para Modals, Formularios y Timeline de Pedidos */
+    .btn-primary {
+      background-color: #3b82f6;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s;
+    }
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .btn-secondary:hover {
+      background-color: #e5e7eb;
+    }
+    .btn-action-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-assign {
+      background-color: rgba(59,130,246,0.1);
+      color: #2563eb;
+    }
+    .btn-assign:hover {
+      background-color: #3b82f6;
+      color: #fff;
+    }
+    .btn-track {
+      background-color: rgba(124,58,237,0.1);
+      color: #7c3aed;
+    }
+    .btn-track:hover {
+      background-color: #7c3aed;
+      color: #fff;
+    }
+    .btn-status {
+      background-color: rgba(34,197,94,0.1);
+      color: #16a34a;
+    }
+    .btn-status:hover {
+      background-color: #22c55e;
+      color: #fff;
+    }
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-start;
+    }
+    .actions-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 90%;
+      max-width: 500px;
+      padding: 24px;
+      transform: translateY(-20px);
+      transition: transform 0.2s ease-in-out;
+    }
+    .modal-overlay.open .modal-box {
+      transform: translateY(0);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .btn-close-modal {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #9ca3af;
+    }
+    .btn-close-modal:hover {
+      color: #374151;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4b5563;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #111827;
+      transition: border-color 0.15s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* Timeline Styles */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      margin-top: 20px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 5px;
+      bottom: 5px;
+      width: 2px;
+      background-color: #e5e7eb;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -21px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #3b82f6;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+    .timeline-item.pending::before {
+      background-color: #f59e0b;
+      box-shadow: 0 0 0 2px #f59e0b;
+    }
+    .timeline-item.delivered::before {
+      background-color: #10b981;
+      box-shadow: 0 0 0 2px #10b981;
+    }
+    .timeline-item.canceled::before {
+      background-color: #ef4444;
+      box-shadow: 0 0 0 2px #ef4444;
+    }
+    .timeline-time {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 2px;
+    }
+    .timeline-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .timeline-desc {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    
+    /* SLA Progress indicator */
+    .sla-progress-box {
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .sla-status-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .sla-status-Cumplido { background-color: #d1fae5; color: #065f46; }
+    .sla-status-EnRiesgo { background-color: #fef3c7; color: #92400e; }
+    .sla-status-Incumplido { background-color: #fee2e2; color: #991b1b; }
+    .sla-status-Cancelado { background-color: #f3f4f6; color: #374151; }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- ══════════════════════════════════
+         SIDEBAR
+    ══════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="8" width="10" height="10" rx="2" fill="#fff"/>
+            <rect x="16" y="2" width="10" height="10" rx="2" fill="#fff"/>
+            <rect x="10" y="16" width="10" height="10" rx="2" fill="rgba(255,255,255,.6)"/>
+          </svg>
+        </div>
+        <span>PEIA</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="inicio.html" id="nav-dashboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Inicio
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              Inventario
+            </a>
+          </li>
+          <li class="active">
+            <a href="pedidos.html" id="nav-pedidos">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+              Pedidos
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Reportes
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Reglas
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Cámaras
+            </a>
+          </li>
+          <li>
+            <a href="#" class="has-badge">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Notificaciones
+              <span class="badge">3</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Usuarios
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+              Configuración
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Bitácora
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" id="btnLogout">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- ══════════════════════════════════
+         MAIN
+    ══════════════════════════════════ -->
+    <main class="main-area">
+
+      <!-- Topbar / Navbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="warehouse-selector">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span id="activeCentro">Bodega Norte</span>
+            <svg class="chevron-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <div class="warehouse-dropdown" id="warehouseDropdown">
+              <!-- Cargado dinámicamente -->
+            </div>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="topbar-btn notif-btn" id="notifBtn" aria-label="Notificaciones">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-dot">10</span>
+          </button>
+
+          <div class="user-menu" id="userMenu">
+            <div class="avatar" id="userAvatar">JM</div>
+            <span class="user-name" id="userName">Jose M.</span>
+            <svg class="chevron-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="page-content">
+        <div class="page-header">
+          <h1>Logística y Distribución</h1>
+          <p>Gestión de envíos, asignación de rutas, control de SLAs y rastreo de entregas en tiempo real.</p>
+        </div>
+
+        <!-- KPI Cards -->
+        <section class="kpi-grid" aria-label="Indicadores de logística">
+          <div class="kpi-card">
+            <div class="kpi-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Pedidos Totales</p>
+              <p class="kpi-value" id="kpi-total">0</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Pendientes / Creados</p>
+              <p class="kpi-value" id="kpi-pendientes">0</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon teal">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Asignados</p>
+              <p class="kpi-value" id="kpi-asignados">0</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2" ry="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">En Ruta</p>
+              <p class="kpi-value" id="kpi-enruta">0</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Entregados</p>
+              <p class="kpi-value" id="kpi-entregados">0</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Actions Panel -->
+        <div class="actions-header">
+          <button class="btn-primary" id="btnOpenNewPedido">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo Pedido
+          </button>
+          <button class="btn-secondary" id="btnOpenNewRuta">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 15 9 18 3 15"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+            Crear Ruta
+          </button>
+        </div>
+
+        <!-- Main Content Grid -->
+        <section class="tables-grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+          
+          <!-- Lista de Pedidos -->
+          <div class="table-card">
+            <div class="table-header">
+              <h3>Pedidos del Almacén</h3>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table" id="tablePedidos">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Ruta</th>
+                    <th>Transportista</th>
+                    <th>SLA Estado</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyPedidos">
+                  <!-- Se llena dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Lista de Rutas -->
+          <div class="table-card">
+            <div class="table-header">
+              <h3>Rutas Activas</h3>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table" id="tableRutas">
+                <thead>
+                  <tr>
+                    <th>Ruta</th>
+                    <th>Trayecto</th>
+                    <th>Distancia</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyRutas">
+                  <!-- Se llena dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+      </div><!-- /page-content -->
+    </main>
+  </div><!-- /app-layout -->
+
+  <!-- ══════════════════════════════════
+       MODALS
+  ══════════════════════════════════ -->
+
+  <!-- 1. Modal: Nuevo Pedido -->
+  <div class="modal-overlay" id="modalNewPedido">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Registrar Nuevo Pedido</h3>
+        <button class="btn-close-modal" data-close="modalNewPedido">&times;</button>
+      </div>
+      <form id="formNewPedido">
+        <div class="form-group">
+          <label for="pedCodigo">Código del Pedido</label>
+          <input type="text" id="pedCodigo" class="form-control" placeholder="Ej: PED-0050" required />
+        </div>
+        <div class="form-group">
+          <label for="pedCliente">Cliente</label>
+          <input type="text" id="pedCliente" class="form-control" placeholder="Ej: Distribuidora del Norte S.A." required />
+        </div>
+        <div class="form-group">
+          <label for="pedDireccion">Dirección de Entrega</label>
+          <input type="text" id="pedDireccion" class="form-control" placeholder="Ej: Calle Industrial #420, Colonia Centro" required />
+        </div>
+        <div class="form-group">
+          <label for="pedFechaSla">Fecha Estimada de Entrega (SLA)</label>
+          <input type="datetime-local" id="pedFechaSla" class="form-control" required />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close="modalNewPedido">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar Pedido</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Modal: Crear Ruta -->
+  <div class="modal-overlay" id="modalNewRuta">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Crear Nueva Ruta</h3>
+        <button class="btn-close-modal" data-close="modalNewRuta">&times;</button>
+      </div>
+      <form id="formNewRuta">
+        <div class="form-group">
+          <label for="rutaNombre">Nombre de la Ruta</label>
+          <input type="text" id="rutaNombre" class="form-control" placeholder="Ej: Ruta Exprés Norte" required />
+        </div>
+        <div class="form-group">
+          <label for="rutaOrigen">Punto de Origen</label>
+          <input type="text" id="rutaOrigen" class="form-control" placeholder="Ej: Bodega Norte BN-01" required />
+        </div>
+        <div class="form-group">
+          <label for="rutaDestino">Punto de Destino</label>
+          <input type="text" id="rutaDestino" class="form-control" placeholder="Ej: Centro de Distribución Querétaro" required />
+        </div>
+        <div class="form-group">
+          <label for="rutaDistancia">Distancia (Km)</label>
+          <input type="number" id="rutaDistancia" step="0.1" class="form-control" placeholder="Ej: 145.5" required />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close="modalNewRuta">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar Ruta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Modal: Asignar Ruta y Transportista -->
+  <div class="modal-overlay" id="modalAssignPedido">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Asignar Ruta y Transportista</h3>
+        <button class="btn-close-modal" data-close="modalAssignPedido">&times;</button>
+      </div>
+      <form id="formAssignPedido">
+        <input type="hidden" id="assignPedidoId" />
+        <div class="form-group">
+          <label for="assignRuta">Seleccionar Ruta</label>
+          <select id="assignRuta" class="form-control" required>
+            <!-- Llenado dinámicamente -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="assignDriver">Seleccionar Transportista (Rol Logística)</label>
+          <select id="assignDriver" class="form-control" required>
+            <!-- Llenado dinámicamente -->
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close="modalAssignPedido">Cancelar</button>
+          <button type="submit" class="btn-primary">Confirmar Asignación</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Modal: Actualizar Estado / Rastreo -->
+  <div class="modal-overlay" id="modalUpdateEstado">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Actualizar Estado de Entrega</h3>
+        <button class="btn-close-modal" data-close="modalUpdateEstado">&times;</button>
+      </div>
+      <form id="formUpdateEstado">
+        <input type="hidden" id="updatePedidoId" />
+        <div class="form-group">
+          <label for="updateEstadoSelect">Nuevo Estado</label>
+          <select id="updateEstadoSelect" class="form-control" required>
+            <option value="EnRuta">En Ruta</option>
+            <option value="Entregado">Entregado</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="updateDesc">Notas / Bitácora de Ubicación</label>
+          <textarea id="updateDesc" class="form-control" placeholder="Ej: Pedido en tránsito en autopista km 40." rows="3" required></textarea>
+        </div>
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label for="updateLat">Latitud (GPS opcional)</label>
+            <input type="number" step="0.000001" id="updateLat" class="form-control" placeholder="Ej: 20.6736"/>
+          </div>
+          <div>
+            <label for="updateLon">Longitud (GPS opcional)</label>
+            <input type="number" step="0.000001" id="updateLon" class="form-control" placeholder="Ej: -103.344"/>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close="modalUpdateEstado">Cancelar</button>
+          <button type="submit" class="btn-primary">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Modal: Historial y Rastreo Completo -->
+  <div class="modal-overlay" id="modalTrackDetail">
+    <div class="modal-box" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="trackPedidoCode">Rastreo de Pedido</h3>
+        <button class="btn-close-modal" data-close="modalTrackDetail">&times;</button>
+      </div>
+      <div class="sla-progress-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+          <strong>Estado de SLA de Entrega:</strong>
+          <span id="trackSlaBadge" class="sla-status-badge">Cargando...</span>
+        </div>
+        <p style="font-size:12px; color: #4b5563; margin:0;" id="trackSlaDetail">Fecha límite: </p>
+      </div>
+      
+      <div style="max-height: 350px; overflow-y: auto; padding-right: 8px;">
+        <h4 style="margin: 0 0 10px 0; font-size:14px; color: #374151;">Historial de Ruta:</h4>
+        <div class="timeline" id="trackTimeline">
+          <!-- Historial de estados cargado por JS -->
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" data-close="modalTrackDetail">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/pedidos.js"></script>
+</body>
+</html>

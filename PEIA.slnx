@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PEIA.Web/PEIA.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/PEIA.Modules.Automation/PEIA.Modules.Automation.csproj" />
+    <Project Path="src/Modules/PEIA.Modules.ERP/PEIA.Modules.ERP.csproj" />
+    <Project Path="src/Modules/PEIA.Modules.Inventory/PEIA.Modules.Inventory.csproj" />
+    <Project Path="src/Modules/PEIA.Modules.Logistics/PEIA.Modules.Logistics.csproj" />
+    <Project Path="src/Modules/PEIA.Modules.Prediction/PEIA.Modules.Prediction.csproj" />
+    <Project Path="src/Modules/PEIA.Modules.Reports/PEIA.Modules.Reports.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/PEIA.Shared.Infra/PEIA.Shared.Infra.csproj" />
+    <Project Path="src/Shared/PEIA.Shared.Kernel/PEIA.Shared.Kernel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PEIA.Tests/PEIA.Tests.csproj" />
+  </Folder>
+</Solution>
