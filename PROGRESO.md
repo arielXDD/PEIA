@@ -85,14 +85,14 @@
 
 | Estado | Tarea | Ultima actualizacion |
 |---|---|---|
-| `[ ]` | Pantalla de Login (diseno segun UX) | — |
-| `[ ]` | Dashboard principal (tarjetas de resumen) | — |
-| `[ ]` | Pantalla de gestion de usuarios | — |
-| `[ ]` | Pantalla de gestion de roles | — |
-| `[ ]` | Pantalla de inventario y productos | — |
-| `[ ]` | Selector de centro activo en navbar | — |
-| `[ ]` | Componente de tabla reutilizable con paginacion | — |
-| `[ ]` | Componente de formulario modal reutilizable | — |
+| `[x]` | Pantalla de Login (diseno segun UX) | 01/07/2026 |
+| `[x]` | Dashboard principal (tarjetas de resumen) | 01/07/2026 |
+| `[x]` | Pantalla de gestion de usuarios | 01/07/2026 |
+| `[x]` | Pantalla de gestion de roles | 01/07/2026 |
+| `[x]` | Pantalla de inventario y productos | 01/07/2026 |
+| `[x]` | Selector de centro activo en navbar | 01/07/2026 |
+| `[x]` | Componente de tabla reutilizable con paginacion | 01/07/2026 |
+| `[x]` | Componente de formulario modal reutilizable | 01/07/2026 |
 
 ---
 
@@ -116,11 +116,11 @@
 
 | Estado | Tarea | Ultima actualizacion |
 |---|---|---|
-| `[ ]` | Reporte de inventario por centro | — |
-| `[ ]` | Reporte de movimientos por rango de fecha | — |
-| `[ ]` | Reporte de pedidos y estado logistico | — |
-| `[ ]` | Exportacion a PDF / Excel | — |
-| `[ ]` | Graficas en dashboard (linea, barra, pastel) | — |
+| `[x]` | Reporte de inventario por centro | 01/07/2026 |
+| `[x]` | Reporte de movimientos por rango de fecha | 01/07/2026 |
+| `[x]` | Reporte de pedidos y estado logistico | 01/07/2026 |
+| `[x]` | Exportacion a PDF / Excel | 01/07/2026 |
+| `[x]` | Graficas en dashboard (linea, barra, pastel) | 01/07/2026 |
 | `[ ]` | Endpoint: `/api/reportes/*` | — |
 
 ---
@@ -137,7 +137,7 @@
 | `[ ]` | Notificaciones de SLA vencido | — |
 | `[ ]` | Notificaciones de nuevos pedidos | — |
 | `[ ]` | Reglas de automatizacion configurables por admin | — |
-| `[ ]` | Panel de notificaciones en UI (JMM) | — |
+| `[x]` | Panel de notificaciones en UI (JMM) | 01/07/2026 |
 | `[ ]` | Pipeline CI/CD basico (GitHub Actions) | — |
 | `[ ]` | Configuracion de entorno de pruebas | — |
 
@@ -179,7 +179,7 @@
 | Fecha | Clave | Descripcion del avance |
 |---|---|---|
 | 18/06/2026 | AG | Estructura inicial de la solucion creada. 10 proyectos compilando. NuGet instalados. Subida a GitHub. |
-| | | |
+| 01/07/2026 | JMM | Frontend completo: Login, Dashboard, Usuarios, Roles, Inventario, Reportes (con export PDF/Excel), Notificaciones. Componentes reutilizables (DataTable con paginacion, Modal de formulario). Navegacion sidebar funcional. |
 | | | |
 | | | |
 | | | |

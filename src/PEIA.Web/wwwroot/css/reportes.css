@@ -1,0 +1,11 @@
+/* PEIA — Reportes page-specific styles */
+
+.report-chart-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.report-chart-row .chart-card {
+  min-width: 260px;
+}
