@@ -332,7 +332,7 @@ public class PedidosController : ControllerBase
 
     private Guid? GetCurrentUserId()
     {
-        var userIdClaim = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value 
+        var userIdClaim = User.FindFirst("sub")?.Value 
                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
         if (Guid.TryParse(userIdClaim, out var guid))
