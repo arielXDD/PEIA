@@ -13,7 +13,6 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
 
     public DbSet<Centro> Centros => Set<Centro>();
     public DbSet<UsuarioCentro> UsuarioCentros => Set<UsuarioCentro>();
-    
     // DbSets de Logística
     public DbSet<Ruta> Rutas => Set<Ruta>();
     public DbSet<Pedido> Pedidos => Set<Pedido>();
@@ -66,7 +65,6 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
                 .HasForeignKey(uc => uc.CentroId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
-
         // Configuración de Rutas
         builder.Entity<Ruta>(b =>
         {

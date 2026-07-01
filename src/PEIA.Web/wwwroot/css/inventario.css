@@ -1,0 +1,23 @@
+/* PEIA — Inventario page-specific styles */
+/* Most styling comes from inicio.css + components.css */
+
+.stock-bar {
+  width: 80px;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 100px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.stock-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width .3s ease;
+}
+
+.stock-bar-fill.green  { background: var(--green);  }
+.stock-bar-fill.orange { background: var(--orange); }
+.stock-bar-fill.red    { background: var(--red);    }
