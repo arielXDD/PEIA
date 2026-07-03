@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PEIA — Bitácora</title>
+  <meta name="description" content="Registro de auditoría y actividad de la Plataforma Empresarial Inteligente para Almacenes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/inicio.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/bitacora.css" />
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="8" width="10" height="10" rx="2" fill="#fff"/>
+            <rect x="16" y="2" width="10" height="10" rx="2" fill="#fff"/>
+            <rect x="10" y="16" width="10" height="10" rx="2" fill="rgba(255,255,255,.6)"/>
+          </svg>
+        </div>
+        <span>PEIA</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="inicio.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Inicio</a></li>
+          <li><a href="inventario.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Inventario</a></li>
+          <li><a href="pedidos.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+            Pedidos</a></li>
+          <li><a href="reportes.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Reportes</a></li>
+          <li><a href="roles.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Roles</a></li>
+          <li><a href="#">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Cámaras</a></li>
+          <li><a href="notificaciones.html" class="has-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notificaciones
+            <span class="badge">3</span></a></li>
+          <li><a href="usuarios.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Usuarios</a></li>
+          <li><a href="configuracion.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            Configuración</a></li>
+          <li class="active"><a href="bitacora.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Bitácora</a></li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" id="btnLogout">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="warehouse-selector">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span id="activeCentro">Bodega Norte</span>
+            <svg class="chevron-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <div class="warehouse-dropdown" id="warehouseDropdown">
+              <button class="warehouse-opt active" data-id="norte">Bodega Norte</button>
+              <button class="warehouse-opt" data-id="sur">Bodega Sur</button>
+            </div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="user-menu" id="userMenu">
+            <div class="avatar" id="userAvatar">AG</div>
+            <span class="user-name" id="userName">Ariel Guevara</span>
+            <svg class="chevron-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="page-header">
+          <h1>Bitácora</h1>
+          <p>Registro de auditoría de todas las acciones realizadas en el sistema</p>
+        </div>
+
+        <!-- KPI mini -->
+        <div class="kpi-mini-grid">
+          <div class="kpi-mini">
+            <div class="kpi-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <div class="kpi-mini-body">
+              <p class="kpi-mini-label">Eventos hoy</p>
+              <!-- ⚠️ PENDIENTE BACKEND: GET /api/bitacora/resumen -->
+              <p class="kpi-mini-value pending-kpi" id="kpi-eventos-hoy">—</p>
+            </div>
+          </div>
+          <div class="kpi-mini">
+            <div class="kpi-icon red">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="kpi-mini-body">
+              <p class="kpi-mini-label">Errores hoy</p>
+              <p class="kpi-mini-value pending-kpi" id="kpi-errores-hoy">—</p>
+            </div>
+          </div>
+          <div class="kpi-mini">
+            <div class="kpi-icon green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            <div class="kpi-mini-body">
+              <p class="kpi-mini-label">Usuarios activos hoy</p>
+              <p class="kpi-mini-value pending-kpi" id="kpi-usuarios-activos">—</p>
+            </div>
+          </div>
+          <div class="kpi-mini">
+            <div class="kpi-icon orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="kpi-mini-body">
+              <p class="kpi-mini-label">Total eventos (mes)</p>
+              <p class="kpi-mini-value pending-kpi" id="kpi-eventos-mes">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+          <div class="action-bar-left">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchBitacora" placeholder="Buscar por usuario, módulo o acción..." />
+            </div>
+            <select class="filter-select" id="filterModulo">
+              <option value="">Todos los módulos</option>
+              <option value="Auth">Autenticación</option>
+              <option value="Inventario">Inventario</option>
+              <option value="Pedidos">Pedidos</option>
+              <option value="Usuarios">Usuarios</option>
+              <option value="Roles">Roles</option>
+              <option value="Reportes">Reportes</option>
+              <option value="Configuracion">Configuración</option>
+            </select>
+            <select class="filter-select" id="filterNivel">
+              <option value="">Todos los niveles</option>
+              <option value="Info">Info</option>
+              <option value="Warning">Warning</option>
+              <option value="Error">Error</option>
+            </select>
+            <div class="date-range">
+              <label>Desde</label>
+              <input type="date" id="fechaDesde" />
+              <label>Hasta</label>
+              <input type="date" id="fechaHasta" />
+            </div>
+          </div>
+          <div class="action-bar-right">
+            <div class="export-group">
+              <button class="btn-export" id="btnExportCSV" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Exportar CSV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending notice principal -->
+        <div class="pending-notice pending-notice-lg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Backend pendiente</strong> — Esta vista requiere los siguientes endpoints:
+            <code>GET /api/bitacora</code> (listado paginado con filtros),
+            <code>GET /api/bitacora/resumen</code> (KPIs del día),
+            <code>GET /api/bitacora/export</code> (descarga CSV).
+            Los datos de abajo son de demostración.
+          </div>
+        </div>
+
+        <!-- DataTable de la bitácora -->
+        <div class="dt-wrapper">
+          <div class="dt-scroll">
+            <table class="dt-table" id="tableBitacora">
+              <thead>
+                <tr>
+                  <th>Fecha / Hora</th>
+                  <th>Usuario</th>
+                  <th>Módulo</th>
+                  <th>Acción</th>
+                  <th>Detalle</th>
+                  <th>Centro</th>
+                  <th>Nivel</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBitacora">
+                <!-- Filas de demostración (serán reemplazadas por el backend) -->
+                <tr>
+                  <td class="cell-mono">03/07/2026 07:12:31</td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar-sm">JM</div>
+                      <span>Jennifer Muñoz</span>
+                    </div>
+                  </td>
+                  <td><span class="module-badge module-inventario">Inventario</span></td>
+                  <td class="cell-primary">Crear producto</td>
+                  <td class="cell-detail">Producto "Caja Estándar L" creado con stock inicial 200</td>
+                  <td>Bodega Norte</td>
+                  <td><span class="level-badge level-info">Info</span></td>
+                  <td class="cell-mono small">192.168.1.10</td>
+                </tr>
+                <tr>
+                  <td class="cell-mono">03/07/2026 06:58:04</td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar-sm">AG</div>
+                      <span>Ariel Guevara</span>
+                    </div>
+                  </td>
+                  <td><span class="module-badge module-auth">Auth</span></td>
+                  <td class="cell-primary">Inicio de sesión</td>
+                  <td class="cell-detail">Autenticación exitosa desde Chrome / Windows</td>
+                  <td>Global</td>
+                  <td><span class="level-badge level-info">Info</span></td>
+                  <td class="cell-mono small">200.68.42.11</td>
+                </tr>
+                <tr>
+                  <td class="cell-mono">03/07/2026 06:45:12</td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar-sm">JM</div>
+                      <span>Jose M.</span>
+                    </div>
+                  </td>
+                  <td><span class="module-badge module-pedidos">Pedidos</span></td>
+                  <td class="cell-primary">Actualizar estado</td>
+                  <td class="cell-detail">Pedido #P-0042 → estado "En tránsito"</td>
+                  <td>Bodega Sur</td>
+                  <td><span class="level-badge level-info">Info</span></td>
+                  <td class="cell-mono small">10.0.0.5</td>
+                </tr>
+                <tr>
+                  <td class="cell-mono">03/07/2026 06:10:00</td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar-sm">SY</div>
+                      <span>Sistema</span>
+                    </div>
+                  </td>
+                  <td><span class="module-badge module-inventario">Inventario</span></td>
+                  <td class="cell-primary">Alerta stock mínimo</td>
+                  <td class="cell-detail">Producto "Pallet madera" bajó del umbral mínimo (stock: 3)</td>
+                  <td>Bodega Norte</td>
+                  <td><span class="level-badge level-warning">Warning</span></td>
+                  <td class="cell-mono small">—</td>
+                </tr>
+                <tr>
+                  <td class="cell-mono">02/07/2026 23:45:00</td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar-sm">SY</div>
+                      <span>Sistema</span>
+                    </div>
+                  </td>
+                  <td><span class="module-badge module-auth">Auth</span></td>
+                  <td class="cell-primary">Intento de sesión fallido</td>
+                  <td class="cell-detail">Usuario "admin@peia.mx" — contraseña incorrecta (3er intento)</td>
+                  <td>Global</td>
+                  <td><span class="level-badge level-error">Error</span></td>
+                  <td class="cell-mono small">181.22.99.3</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="dt-footer">
+            <span class="dt-info" id="bitacoraInfo">Mostrando datos de demostración — conectar con <code>GET /api/bitacora</code></span>
+            <div class="dt-pagination" id="bitacoraPagination">
+              <button id="btnPrevBit" disabled>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button class="active">1</button>
+              <button id="btnNextBit" disabled>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /page-content -->
+    </main>
+  </div><!-- /app-layout -->
+
+  <script src="js/bitacora.js"></script>
+</body>
+</html>
