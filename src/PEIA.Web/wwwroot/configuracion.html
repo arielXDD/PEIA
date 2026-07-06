@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PEIA — Configuración</title>
+  <meta name="description" content="Configuración general de la Plataforma Empresarial Inteligente para Almacenes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/inicio.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/configuracion.css" />
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="8" width="10" height="10" rx="2" fill="#fff"/>
+            <rect x="16" y="2" width="10" height="10" rx="2" fill="#fff"/>
+            <rect x="10" y="16" width="10" height="10" rx="2" fill="rgba(255,255,255,.6)"/>
+          </svg>
+        </div>
+        <span>PEIA</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="inicio.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Inicio</a></li>
+          <li><a href="inventario.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Inventario</a></li>
+          <li><a href="pedidos.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+            Pedidos</a></li>
+          <li><a href="reportes.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Reportes</a></li>
+          <li><a href="roles.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Roles</a></li>
+          <li><a href="#">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Cámaras</a></li>
+          <li><a href="notificaciones.html" class="has-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notificaciones
+            <span class="badge">3</span></a></li>
+          <li><a href="usuarios.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Usuarios</a></li>
+          <li class="active"><a href="configuracion.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            Configuración</a></li>
+          <li><a href="bitacora.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Bitácora</a></li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" id="btnLogout">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="warehouse-selector">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span id="activeCentro">Bodega Norte</span>
+            <svg class="chevron-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <div class="warehouse-dropdown" id="warehouseDropdown">
+              <button class="warehouse-opt active" data-id="norte">Bodega Norte</button>
+              <button class="warehouse-opt" data-id="sur">Bodega Sur</button>
+            </div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="user-menu" id="userMenu">
+            <div class="avatar" id="userAvatar">AG</div>
+            <span class="user-name" id="userName">Ariel Guevara</span>
+            <svg class="chevron-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="page-header">
+          <h1>Configuración</h1>
+          <p>Ajustes generales del sistema y preferencias de la plataforma</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" role="tablist">
+          <button class="tab-btn active" id="tab-general" data-tab="general" role="tab">General</button>
+          <button class="tab-btn" id="tab-notif" data-tab="notificaciones" role="tab">Notificaciones</button>
+          <button class="tab-btn" id="tab-seguridad" data-tab="seguridad" role="tab">Seguridad</button>
+          <button class="tab-btn" id="tab-integraciones" data-tab="integraciones" role="tab">Integraciones</button>
+          <button class="tab-btn" id="tab-sistema" data-tab="sistema" role="tab">Sistema</button>
+        </div>
+
+        <!-- ── Tab: General ─────────────────────── -->
+        <div class="tab-panel active" id="panel-general">
+          <div class="config-grid">
+
+            <!-- Información de la empresa -->
+            <div class="config-card">
+              <div class="config-card-header">
+                <div class="config-card-icon blue">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <div>
+                  <h3>Información de la empresa</h3>
+                  <p>Datos generales de la organización</p>
+                </div>
+              </div>
+              <div class="config-card-body">
+                <div class="form-field">
+                  <label>Nombre de la empresa <span class="required">*</span></label>
+                  <input type="text" id="empresaNombre" placeholder="Ej. Corporación XYZ" value="PEIA Corp." />
+                </div>
+                <div class="form-row">
+                  <div class="form-field">
+                    <label>RFC / NIT</label>
+                    <input type="text" id="empresaRfc" placeholder="Ej. ABC123456XYZ" />
+                  </div>
+                  <div class="form-field">
+                    <label>Teléfono</label>
+                    <input type="text" id="empresaTel" placeholder="+52 (55) 0000-0000" />
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label>Dirección fiscal</label>
+                  <input type="text" id="empresaDireccion" placeholder="Calle, número, ciudad, estado" />
+                </div>
+                <div class="form-field">
+                  <label>Correo de contacto</label>
+                  <input type="email" id="empresaEmail" placeholder="contacto@empresa.com" />
+                </div>
+                <div class="pending-notice">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Backend pendiente: <code>POST /api/configuracion/empresa</code></span>
+                </div>
+                <div class="config-card-footer">
+                  <button class="btn btn-primary" id="btnGuardarEmpresa" disabled>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar cambios
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Centros -->
+            <div class="config-card">
+              <div class="config-card-header">
+                <div class="config-card-icon orange">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                </div>
+                <div>
+                  <h3>Centros / Bodegas</h3>
+                  <p>Administra los centros de distribución</p>
+                </div>
+              </div>
+              <div class="config-card-body">
+                <div class="centros-list" id="centrosList">
+                  <div class="centro-item">
+                    <div class="centro-info">
+                      <span class="centro-name">Bodega Norte</span>
+                      <span class="status-badge status-active"><span class="status-dot-sm"></span>Activo</span>
+                    </div>
+                    <button class="btn-icon" title="Editar" disabled>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                  </div>
+                  <div class="centro-item">
+                    <div class="centro-info">
+                      <span class="centro-name">Bodega Sur</span>
+                      <span class="status-badge status-active"><span class="status-dot-sm"></span>Activo</span>
+                    </div>
+                    <button class="btn-icon" title="Editar" disabled>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="pending-notice">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Backend pendiente: <code>GET /api/centros</code>, <code>POST /api/centros</code>, <code>PUT /api/centros/{id}</code></span>
+                </div>
+                <div class="config-card-footer">
+                  <button class="btn btn-secondary" id="btnNuevoCentro" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nuevo centro
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preferencias -->
+            <div class="config-card config-card-full">
+              <div class="config-card-header">
+                <div class="config-card-icon purple">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                </div>
+                <div>
+                  <h3>Preferencias del sistema</h3>
+                  <p>Personaliza el comportamiento de la plataforma</p>
+                </div>
+              </div>
+              <div class="config-card-body">
+                <div class="prefs-grid">
+                  <div class="pref-item">
+                    <div class="pref-info">
+                      <span class="pref-label">Zona horaria</span>
+                      <span class="pref-desc">Para fechas y reportes</span>
+                    </div>
+                    <select class="filter-select" id="prefTimezone">
+                      <option value="America/Mexico_City" selected>Ciudad de México (UTC-6)</option>
+                      <option value="America/Monterrey">Monterrey (UTC-6)</option>
+                      <option value="America/Tijuana">Tijuana (UTC-8)</option>
+                    </select>
+                  </div>
+                  <div class="pref-item">
+                    <div class="pref-info">
+                      <span class="pref-label">Formato de fecha</span>
+                      <span class="pref-desc">Cómo se muestran las fechas</span>
+                    </div>
+                    <select class="filter-select" id="prefDateFmt">
+                      <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                      <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                      <option value="YYYY-MM-DD">YYYY-MM-DD (ISO)</option>
+                    </select>
+                  </div>
+                  <div class="pref-item">
+                    <div class="pref-info">
+                      <span class="pref-label">Moneda</span>
+                      <span class="pref-desc">Moneda predeterminada</span>
+                    </div>
+                    <select class="filter-select" id="prefCurrency">
+                      <option value="MXN" selected>MXN — Peso mexicano</option>
+                      <option value="USD">USD — Dólar americano</option>
+                      <option value="EUR">EUR — Euro</option>
+                    </select>
+                  </div>
+                  <div class="pref-item">
+                    <div class="pref-info">
+                      <span class="pref-label">Registros por página</span>
+                      <span class="pref-desc">Paginación predeterminada</span>
+                    </div>
+                    <select class="filter-select" id="prefPageSize">
+                      <option value="10" selected>10 registros</option>
+                      <option value="25">25 registros</option>
+                      <option value="50">50 registros</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="pending-notice">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Backend pendiente: <code>GET /api/configuracion/preferencias</code>, <code>PUT /api/configuracion/preferencias</code></span>
+                </div>
+                <div class="config-card-footer">
+                  <button class="btn btn-primary" id="btnGuardarPrefs" disabled>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar preferencias
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Tab: Notificaciones ──────────────── -->
+        <div class="tab-panel" id="panel-notificaciones">
+          <div class="config-grid">
+            <div class="config-card config-card-full">
+              <div class="config-card-header">
+                <div class="config-card-icon teal">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </div>
+                <div>
+                  <h3>Preferencias de notificaciones</h3>
+                  <p>Elige qué eventos generan alertas en el sistema</p>
+                </div>
+              </div>
+              <div class="config-card-body">
+                <div class="notif-prefs-list">
+                  <div class="notif-pref-item">
+                    <div class="notif-pref-info">
+                      <span class="notif-pref-label">Stock mínimo alcanzado</span>
+                      <span class="notif-pref-desc">Alerta cuando un producto baja del umbral configurado</span>
+                    </div>
+                    <label class="toggle"><input type="checkbox" checked id="chk-stock" /><span class="toggle-slider"></span></label>
+                  </div>
+                  <div class="notif-pref-item">
+                    <div class="notif-pref-info">
+                      <span class="notif-pref-label">SLA próximo a vencer</span>
+                      <span class="notif-pref-desc">Notifica cuando un pedido tiene el plazo próximo a expirar</span>
+                    </div>
+                    <label class="toggle"><input type="checkbox" checked id="chk-sla" /><span class="toggle-slider"></span></label>
+                  </div>
+                  <div class="notif-pref-item">
+                    <div class="notif-pref-info">
+                      <span class="notif-pref-label">Nuevo pedido registrado</span>
+                      <span class="notif-pref-desc">Notifica al crear un pedido en cualquier centro</span>
+                    </div>
+                    <label class="toggle"><input type="checkbox" checked id="chk-pedido" /><span class="toggle-slider"></span></label>
+                  </div>
+                  <div class="notif-pref-item">
+                    <div class="notif-pref-info">
+                      <span class="notif-pref-label">Incidencia detectada por cámara</span>
+                      <span class="notif-pref-desc">Alerta cuando el sistema de cámaras detecta un evento</span>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="chk-camara" /><span class="toggle-slider"></span></label>
+                  </div>
+                  <div class="notif-pref-item">
+                    <div class="notif-pref-info">
+                      <span class="notif-pref-label">Notificaciones por correo</span>
+                      <span class="notif-pref-desc">Envía las alertas críticas al correo del usuario</span>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="chk-email" /><span class="toggle-slider"></span></label>
+                  </div>
+                </div>
+                <div class="pending-notice">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Backend pendiente: <code>GET/PUT /api/configuracion/notificaciones</code> y hub SignalR (<code>PeiaHub</code>)</span>
+                </div>
+                <div class="config-card-footer">
+                  <button class="btn btn-primary" id="btnGuardarNotif" disabled>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar preferencias
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Tab: Seguridad ──────────────────── -->
+        <div class="tab-panel" id="panel-seguridad">
+          <div class="config-grid">
+            <div class="config-card">
+              <div class="config-card-header">
+                <div class="config-card-icon red">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                  <h3>Política de contraseñas</h3>
+                  <p>Reglas de seguridad para las cuentas de usuario</p>
+                </div>
+              </div>
+              <div class="config-card-body">
+                <div class="pref-item">
+                  <div class="pref-info">
+                    <span class="pref-label">Longitud mínima</span>
+                    <span class="pref-desc">Número mínimo de caracteres requeridos</span>
+                  </div>
+                  <select class="filter-select" id="pwdMinLen">
+                    <option value="6">6 caracteres</option>
+                    <option value="8" selected>8 caracteres</option>
+                    <option value="10">10 caracteres</option>
+                    <option value="12">12 caracteres</option>
+                  </select>
+                </div>
+                <div class="pref-item">
+                  <div class="pref-info">
+                    <span class="pref-label">Expiración de sesión</span>
+                    <span class="pref-desc">Inactividad antes de cerrar sesión</span>
+                  </div>
+                  <select class="filter-select" id="sessionTimeout">
+                    <option value="30">30 minutos</option>
+                    <option value="60" selected>1 hora</option>
+                    <option value="480">8 horas</option>
+                    <option value="0">Nunca</option>
+                  </select>
+                </div>
+                <div class="notif-pref-item">
+                  <div class="notif-pref-info">
+                    <span class="notif-pref-label">Requerir mayúsculas y números</span>
+                    <span class="notif-pref-desc">La contraseña debe incluir al menos una mayúscula y un número</span>
+                  </div>
+                  <label class="toggle"><input type="checkbox" checked id="chk-pwdComplex" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="notif-pref-item">
+                  <div class="notif-pref-info">
+                    <span class="notif-pref-label">Doble factor (2FA)</span>
+                    <span class="notif-pref-desc">Requiere verificación adicional al iniciar sesión</span>
+                  </div>
+                  <label class="toggle"><input type="checkbox" id="chk-2fa" /><span class="toggle-slider"></span></label>
+                </div>
+                <div class="pending-notice">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Backend pendiente: <code>PUT /api/configuracion/seguridad</code> + configurar ASP.NET Identity</span>
+                </div>
+                <div class="config-card-footer">
+                  <button class="btn btn-primary" id="btnGuardarSeg" disabled>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar política
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="config-card">
+              <div class="config-card-header">
+                <div class="config-card-icon green">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div>
+                  <h3>Sesiones activas</h3>
+                  <p>Dispositivos con sesión iniciada actualmente</p>
+                </div>
+              </div>
+              <div class="config-card-body">
+                <div class="sessions-list" id="sessionsList">
+                  <div class="session-item">
+                    <div class="session-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                    </div>
+                    <div class="session-info">
+                      <span class="session-device">Windows · Chrome</span>
+                      <span class="session-meta">Ciudad de México — <span class="session-current">Sesión actual</span></span>
+                    </div>
+                    <span class="status-badge status-active"><span class="status-dot-sm"></span>Activa</span>
+                  </div>
+                </div>
+                <div class="pending-notice">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Backend pendiente: <code>GET /api/auth/sesiones</code>, <code>DELETE /api/auth/sesiones/{id}</code></span>
+                </div>
+                <div class="config-card-footer">
+                  <button class="btn btn-danger" id="btnCerrarSesiones" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Cerrar otras sesiones
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Tab: Integraciones ──────────────── -->
+        <div class="tab-panel" id="panel-integraciones">
+          <div class="config-grid">
+            <div class="config-card config-card-full">
+              <div class="config-card-header">
+                <div class="config-card-icon purple">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+                </div>
+                <div>
+                  <h3>Integraciones externas</h3>
+                  <p>Conecta PEIA con servicios de terceros</p>
+                </div>
+              </div>
+              <div class="config-card-body">
+                <div class="integrations-grid">
+                  <div class="integration-item">
+                    <div class="integration-logo">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                    </div>
+                    <div class="integration-info">
+                      <span class="integration-name">ERP externo</span>
+                      <span class="integration-desc">Sincroniza pedidos con sistema ERP</span>
+                    </div>
+                    <div class="integration-status">
+                      <span class="status-badge status-inactive"><span class="status-dot-sm"></span>No configurado</span>
+                      <button class="btn btn-sm btn-secondary" disabled>Configurar</button>
+                    </div>
+                  </div>
+                  <div class="integration-item">
+                    <div class="integration-logo">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <div class="integration-info">
+                      <span class="integration-name">Correo (SMTP)</span>
+                      <span class="integration-desc">Servidor de correo para notificaciones</span>
+                    </div>
+                    <div class="integration-status">
+                      <span class="status-badge status-inactive"><span class="status-dot-sm"></span>No configurado</span>
+                      <button class="btn btn-sm btn-secondary" disabled>Configurar</button>
+                    </div>
+                  </div>
+                  <div class="integration-item">
+                    <div class="integration-logo">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </div>
+                    <div class="integration-info">
+                      <span class="integration-name">SMS / Notificaciones push</span>
+                      <span class="integration-desc">Alertas críticas por mensaje de texto</span>
+                    </div>
+                    <div class="integration-status">
+                      <span class="status-badge status-inactive"><span class="status-dot-sm"></span>No configurado</span>
+                      <button class="btn btn-sm btn-secondary" disabled>Configurar</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="pending-notice">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Backend pendiente: definir e implementar endpoints de integraciones</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Tab: Sistema ────────────────────── -->
+        <div class="tab-panel" id="panel-sistema">
+          <div class="config-grid">
+            <div class="config-card config-card-full">
+              <div class="config-card-header">
+                <div class="config-card-icon teal">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                </div>
+                <div>
+                  <h3>Información del sistema</h3>
+                  <p>Estado actual del servidor y la base de datos</p>
+                </div>
+              </div>
+              <div class="config-card-body">
+                <div class="sys-info-grid">
+                  <div class="sys-info-item">
+                    <span class="sys-info-label">Versión de PEIA</span>
+                    <span class="sys-info-value">v1.0.0-beta</span>
+                  </div>
+                  <div class="sys-info-item">
+                    <span class="sys-info-label">Framework</span>
+                    <span class="sys-info-value">ASP.NET Core 8.0</span>
+                  </div>
+                  <div class="sys-info-item">
+                    <span class="sys-info-label">Entorno</span>
+                    <span class="sys-info-value">Development</span>
+                  </div>
+                  <div class="sys-info-item">
+                    <span class="sys-info-label">Base de datos</span>
+                    <span class="sys-info-value pending-value">Pendiente de conexión</span>
+                  </div>
+                  <div class="sys-info-item">
+                    <span class="sys-info-label">SignalR Hub</span>
+                    <span class="sys-info-value pending-value">Pendiente de configuración</span>
+                  </div>
+                  <div class="sys-info-item">
+                    <span class="sys-info-label">Última migración</span>
+                    <span class="sys-info-value pending-value">Sin migraciones aplicadas</span>
+                  </div>
+                </div>
+                <div class="pending-notice">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>Backend pendiente: <code>GET /api/sistema/salud</code> y health checks de EF Core + SignalR</span>
+                </div>
+                <div class="config-card-footer">
+                  <button class="btn btn-secondary" id="btnRefreshSys" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Actualizar estado
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /page-content -->
+    </main>
+  </div><!-- /app-layout -->
+
+  <script src="js/configuracion.js"></script>
+</body>
+</html>

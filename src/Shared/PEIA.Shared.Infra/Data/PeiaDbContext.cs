@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PEIA.Shared.Infra.Identity;
+using PEIA.Shared.Infra.Logistics;
 
 namespace PEIA.Shared.Infra.Data;
 
@@ -12,6 +13,11 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
 
     public DbSet<Centro> Centros => Set<Centro>();
     public DbSet<UsuarioCentro> UsuarioCentros => Set<UsuarioCentro>();
+    // DbSets de Logística
+    public DbSet<Ruta> Rutas => Set<Ruta>();
+    public DbSet<Pedido> Pedidos => Set<Pedido>();
+    public DbSet<SLA> SLAs => Set<SLA>();
+    public DbSet<EntregaEstado> EntregaEstados => Set<EntregaEstado>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -58,6 +64,78 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
                 .WithMany(c => c.UsuarioCentros)
                 .HasForeignKey(uc => uc.CentroId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+        // Configuración de Rutas
+        builder.Entity<Ruta>(b =>
+        {
+            b.ToTable("Rutas");
+            b.HasKey(r => r.Id);
+            b.Property(r => r.Nombre).HasMaxLength(150).IsRequired();
+            b.Property(r => r.Origen).HasMaxLength(250).IsRequired();
+            b.Property(r => r.Destino).HasMaxLength(250).IsRequired();
+            b.Property(r => r.DistanciaKm).HasPrecision(10, 2).IsRequired();
+        });
+
+        // Configuración de Pedidos
+        builder.Entity<Pedido>(b =>
+        {
+            b.ToTable("Pedidos");
+            b.HasKey(p => p.Id);
+            b.Property(p => p.Codigo).HasMaxLength(50).IsRequired();
+            b.Property(p => p.Cliente).HasMaxLength(200).IsRequired();
+            b.Property(p => p.DireccionEntrega).HasMaxLength(300).IsRequired();
+            b.Property(p => p.Estado).HasMaxLength(50).IsRequired();
+
+            b.HasOne(p => p.Centro)
+                .WithMany()
+                .HasForeignKey(p => p.CentroId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasOne(p => p.Ruta)
+                .WithMany(r => r.Pedidos)
+                .HasForeignKey(p => p.RutaId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            b.HasOne(p => p.Transportista)
+                .WithMany()
+                .HasForeignKey(p => p.TransportistaId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            b.HasIndex(p => p.Codigo).IsUnique();
+        });
+
+        // Configuración de SLAs
+        builder.Entity<SLA>(b =>
+        {
+            b.ToTable("SLAs");
+            b.HasKey(s => s.Id);
+            b.Property(s => s.EstadoSLA).HasMaxLength(50).IsRequired();
+
+            b.HasOne(s => s.Pedido)
+                .WithOne(p => p.SLA)
+                .HasForeignKey<SLA>(s => s.PedidoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Configuración de EntregaEstados
+        builder.Entity<EntregaEstado>(b =>
+        {
+            b.ToTable("EntregaEstados");
+            b.HasKey(ee => ee.Id);
+            b.Property(ee => ee.Estado).HasMaxLength(50).IsRequired();
+            b.Property(ee => ee.Descripcion).HasMaxLength(500);
+            b.Property(ee => ee.Latitud).HasPrecision(9, 6);
+            b.Property(ee => ee.Longitud).HasPrecision(9, 6);
+
+            b.HasOne(ee => ee.Pedido)
+                .WithMany(p => p.EntregaEstados)
+                .HasForeignKey(ee => ee.PedidoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(ee => ee.ActualizadoPor)
+                .WithMany()
+                .HasForeignKey(ee => ee.ActualizadoPorId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }
