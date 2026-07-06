@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PEIA — Inicio</title>
+  <title>PEIA — Predicción de demanda</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="css/inicio.css" />
+  <link rel="stylesheet" href="css/prediccion.css" />
 </head>
 <body>
   <div class="app-layout">
 
-    <!-- ══════════════════════════════════
-         SIDEBAR
-    ══════════════════════════════════ -->
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
         <div class="brand-icon">
@@ -30,8 +29,8 @@
 
       <nav class="sidebar-nav">
         <ul>
-          <li class="active">
-            <a href="inicio.html" id="nav-dashboard">
+          <li>
+            <a href="inicio.html">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
               Inicio
               <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
@@ -63,16 +62,16 @@
               Reglas
             </a>
           </li>
+          <li class="active">
+            <a href="prediccion.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Predicción
+            </a>
+          </li>
           <li>
             <a href="camaras.html">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               Cámaras
-            </a>
-          </li>
-          <li>
-            <a href="prediccion.html">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-              Predicción
             </a>
           </li>
           <li>
@@ -96,8 +95,8 @@
           </li>
           <li>
             <a href="#">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Bitácora
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Búsqueda
             </a>
           </li>
         </ul>
@@ -111,12 +110,10 @@
       </div>
     </aside>
 
-    <!-- ══════════════════════════════════
-         MAIN
-    ══════════════════════════════════ -->
+    <!-- MAIN -->
     <main class="main-area">
 
-      <!-- Topbar / Navbar -->
+      <!-- Topbar -->
       <header class="topbar">
         <div class="topbar-left">
           <div class="warehouse-selector">
@@ -137,8 +134,8 @@
           </button>
 
           <div class="user-menu" id="userMenu">
-            <div class="avatar" id="userAvatar">AG</div>
-            <span class="user-name" id="userName">Ariel Guevara</span>
+            <div class="avatar" id="userAvatar">JC</div>
+            <span class="user-name" id="userName">Jose C.</span>
             <svg class="chevron-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
@@ -147,207 +144,142 @@
       <!-- Content -->
       <div class="page-content">
         <div class="page-header">
-          <h1>Inicio</h1>
-          <p>
-            Resumen operativo en tiempo real de Bodega Norte
-            <span class="status-dot"></span>
-            <span class="status-text">Todo en orden</span>
-          </p>
+          <h1>Predicción de demanda</h1>
+          <p>Pronóstico de inventario basado en datos históricos y modelo ML.NET.</p>
         </div>
 
         <!-- KPI Cards -->
-        <section class="kpi-grid" aria-label="Indicadores clave">
-
+        <section class="kpi-grid" aria-label="Métricas de predicción">
           <div class="kpi-card">
-            <div class="kpi-icon blue">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <div class="kpi-icon purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </div>
             <div class="kpi-body">
-              <p class="kpi-label">Productos en stock</p>
-              <p class="kpi-value" id="kpi-stock">8,247</p>
-              <p class="kpi-trend up">▲ 8.2% <span>vs ayer</span></p>
+              <p class="kpi-label">Demanda estimada (próx. 7d)</p>
+              <p class="kpi-value" id="kpi-demanda">4,280</p>
+              <p class="kpi-trend up">▲ 12.4% <span>vs período anterior</span></p>
             </div>
           </div>
-
+          <div class="kpi-card">
+            <div class="kpi-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Precisión del modelo</p>
+              <p class="kpi-value" id="kpi-precision">94.7%</p>
+              <p class="kpi-trend up">▲ 2.1% <span>último mes</span></p>
+            </div>
+          </div>
           <div class="kpi-card">
             <div class="kpi-icon orange">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </div>
             <div class="kpi-body">
-              <p class="kpi-label">Pedidos pendientes</p>
-              <p class="kpi-value" id="kpi-pedidos">126</p>
-              <p class="kpi-trend up">▲ 12.5% <span>vs ayer</span></p>
+              <p class="kpi-label">Productos con alerta</p>
+              <p class="kpi-value" id="kpi-alertas">12</p>
+              <p class="kpi-trend down">▼ 3 <span>vs ayer</span></p>
             </div>
           </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon red">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </div>
-            <div class="kpi-body">
-              <p class="kpi-label">Alertas activas</p>
-              <p class="kpi-value" id="kpi-alertas">23</p>
-              <p class="kpi-trend up">▲ 4 <span>vs ayer</span></p>
-            </div>
-          </div>
-
           <div class="kpi-card">
             <div class="kpi-icon green">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
             </div>
             <div class="kpi-body">
-              <p class="kpi-label">Entradas hoy</p>
-              <p class="kpi-value" id="kpi-entradas">342</p>
-              <p class="kpi-trend up">▲ 15.3% <span>vs ayer</span></p>
+              <p class="kpi-label">Categorías analizadas</p>
+              <p class="kpi-value">6</p>
+              <p class="kpi-trend up">▲ 2 <span>nuevas</span></p>
             </div>
           </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon purple">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
-            </div>
-            <div class="kpi-body">
-              <p class="kpi-label">Salidas hoy</p>
-              <p class="kpi-value" id="kpi-salidas">287</p>
-              <p class="kpi-trend down">▼ 9.7% <span>vs ayer</span></p>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon teal">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </div>
-            <div class="kpi-body">
-              <p class="kpi-label">Incidencias cámara</p>
-              <p class="kpi-value" id="kpi-incidencias">5</p>
-              <p class="kpi-trend up">▲ 1 <span>vs ayer</span></p>
-            </div>
-          </div>
-
         </section>
 
-        <!-- Charts Row -->
-        <section class="charts-grid">
+        <!-- Charts -->
+        <section class="pred-grid">
 
-          <!-- Chart 1: Movimientos inventario -->
-          <div class="chart-card wide">
+          <!-- Chart 1: Histórico + Predicción principal -->
+          <div class="chart-card wide" id="chartPrincipal">
             <div class="chart-header">
-              <h3>Movimientos de inventario</h3>
-              <select class="chart-period" aria-label="Período">
-                <option>Últimos 7 días</option>
-                <option>Últimos 30 días</option>
+              <h3>Demanda histórica vs predicción</h3>
+              <select class="chart-period" id="periodoSelect">
+                <option value="7">Próximos 7 días</option>
+                <option value="14" selected>Próximos 14 días</option>
+                <option value="30">Próximo mes</option>
               </select>
             </div>
             <div class="chart-body">
-              <canvas id="chartMovimientos"></canvas>
+              <canvas id="chartPrincipal"></canvas>
             </div>
             <div class="chart-legend">
-              <span class="legend-item"><i class="dot blue"></i>Entradas</span>
-              <span class="legend-item"><i class="dot green"></i>Salidas</span>
+              <span class="legend-item"><i class="dot blue"></i>Histórico</span>
+              <span class="legend-item"><i class="dot purple"></i>Predicción</span>
+              <span class="legend-item"><i class="dot gray"></i>Intervalo de confianza</span>
             </div>
           </div>
 
-          <!-- Chart 2: Top productos por movimiento -->
+          <!-- Chart 2: Por categoría -->
           <div class="chart-card">
             <div class="chart-header">
-              <h3>Top productos por movimiento</h3>
-              <select class="chart-period" aria-label="Período">
-                <option>Últimos 7 días</option>
-              </select>
-            </div>
-            <div class="chart-body chart-body-bar">
-              <canvas id="chartTopProductos"></canvas>
-            </div>
-          </div>
-
-          <!-- Chart 3: Estado de pedidos (Donut) -->
-          <div class="chart-card donut-card">
-            <div class="chart-header">
-              <h3>Estado de pedidos</h3>
-              <span class="chart-subtitle">Total: 126</span>
-            </div>
-            <div class="chart-body chart-body-donut">
-              <canvas id="chartEstados"></canvas>
-            </div>
-            <div class="donut-legend" id="donutLegend"></div>
-          </div>
-
-          <!-- Chart 4: Predicción demanda -->
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3>Predicción de demanda</h3>
+              <h3>Predicción por categoría</h3>
               <span class="chart-subtitle">Próximos 14 días</span>
             </div>
             <div class="chart-body">
-              <canvas id="chartPrediccion"></canvas>
+              <canvas id="chartCategorias"></canvas>
             </div>
+          </div>
+
+          <!-- Chart 3: Top productos recomendados -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Top productos a reabastecer</h3>
+              <span class="chart-subtitle">Según predicción</span>
+            </div>
+            <div class="chart-body chart-body-bar">
+              <canvas id="chartReabastecer"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 4: Tendencia semanal -->
+          <div class="chart-card donut-card">
+            <div class="chart-header">
+              <h3>Tendencia semanal</h3>
+              <span class="chart-subtitle">Variación estimada</span>
+            </div>
+            <div class="chart-body chart-body-donut">
+              <canvas id="chartTendencia"></canvas>
+            </div>
+            <div class="donut-legend" id="donutLegendPred"></div>
           </div>
 
         </section>
 
-        <!-- Tables Row -->
-        <section class="tables-grid">
-
-          <!-- Últimos movimientos -->
+        <!-- Table: Productos con predicción -->
+        <section class="pred-table-section">
           <div class="table-card">
             <div class="table-header">
-              <h3>Últimos movimientos</h3>
-              <a href="#" class="link-ver">Ver todos</a>
+              <h3>Detalle de predicción por producto</h3>
+              <a href="#" class="link-ver">Exportar</a>
             </div>
             <div class="table-scroll">
-              <table class="data-table" id="tableMovimientos">
+              <table class="data-table" id="tablePrediccion">
                 <thead>
                   <tr>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
                     <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Ubic.</th>
+                    <th>Categoría</th>
+                    <th>Stock actual</th>
+                    <th>Demanda estimada</th>
+                    <th>Recomendado</th>
+                    <th>Confianza</th>
                   </tr>
                 </thead>
-                <tbody id="tbodyMovimientos">
-                  <!-- Datos inyectados por JS -->
-                </tbody>
+                <tbody id="tbodyPrediccion"></tbody>
               </table>
             </div>
           </div>
-
-          <!-- Pedidos recientes -->
-          <div class="table-card">
-            <div class="table-header">
-              <h3>Pedidos recientes</h3>
-              <a href="#" class="link-ver">Ver todos</a>
-            </div>
-            <div class="table-scroll">
-              <table class="data-table" id="tablePedidos">
-                <thead>
-                  <tr>
-                    <th>Pedido</th>
-                    <th>Cliente</th>
-                    <th>Estado</th>
-                    <th>Fecha</th>
-                  </tr>
-                </thead>
-                <tbody id="tbodyPedidos"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Alertas recientes -->
-          <div class="table-card alerts-card">
-            <div class="table-header">
-              <h3>Alertas recientes</h3>
-              <a href="#" class="link-ver">Ver todas</a>
-            </div>
-            <ul class="alerts-list" id="alertsList"></ul>
-          </div>
-
         </section>
 
       </div><!-- /page-content -->
     </main>
   </div><!-- /app-layout -->
 
-  <script src="js/inicio.js"></script>
+  <script src="js/prediccion.js"></script>
 </body>
 </html>

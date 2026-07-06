@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using PEIA.Modules.Prediction.Services;
 using PEIA.Shared.Infra.Data;
 using PEIA.Shared.Infra.Identity;
 using PEIA.Shared.Infra.Seed;
@@ -64,6 +65,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<IPredictionService, PredictionService>();
 
 var app = builder.Build();
 
