@@ -22,6 +22,7 @@ public class LogisticsTests
     {
         var options = new DbContextOptionsBuilder<PeiaDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
         return new PeiaDbContext(options);
@@ -145,6 +146,12 @@ public class LogisticsTests
 
         var controller = new PedidosController(context, userManagerMock.Object);
 
+        // Mock ClaimsPrincipal para simular usuario autenticado
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
+        }, "mock"));
+        controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = user } };
+
         var request = new ActualizarEstadoRequest
         {
             Estado = "Entregado",
@@ -178,6 +185,12 @@ public class LogisticsTests
         await context.SaveChangesAsync();
 
         var controller = new PedidosController(context, userManagerMock.Object);
+
+        // Mock ClaimsPrincipal para simular usuario autenticado
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
+        }, "mock"));
+        controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = user } };
 
         var request = new ActualizarEstadoRequest
         {
