@@ -4,8 +4,11 @@ using PEIA.Modules.Prediction.Services;
 using PEIA.Shared.Infra.Data;
 using PEIA.Shared.Infra.Identity;
 using PEIA.Shared.Infra.Seed;
+using PEIA.Web.Hubs;
+using PEIA.Web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,15 +67,52 @@ builder.Services.AddAuthentication(options =>
 // Para API o Web
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "PEIA API", Version = "v1" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Ingresa el token JWT obtenido en /api/auth/login."
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
+    typeof(PEIA.Shared.Kernel.Class1).Assembly,
+    typeof(PEIA.Modules.ERP.Class1).Assembly,
+    typeof(PEIA.Modules.Inventory.Class1).Assembly,
+    typeof(PEIA.Modules.Logistics.Class1).Assembly,
+    typeof(PEIA.Modules.Reports.Class1).Assembly,
+    typeof(PEIA.Modules.Automation.Class1).Assembly,
+    typeof(PEIA.Modules.Prediction.Services.PredictionService).Assembly,
+    typeof(PeiaHub).Assembly));
+builder.Services.AddSignalR();
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddHostedService<SlaMonitorService>();
+}
 
-builder.Services.AddSingleton<IPredictionService, PredictionService>();
+builder.Services.AddScoped<IPredictionService, PredictionService>();
 
 var app = builder.Build();
 
 // ── Seed: roles, centros y usuarios iniciales
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var logger = scope.ServiceProvider
         .GetRequiredService<ILoggerFactory>()
         .CreateLogger("SeedData");
@@ -98,6 +138,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<PeiaHub>("/hubs/peia");
 
 app.MapGet("/", () => Results.Redirect("/login.html"));
 

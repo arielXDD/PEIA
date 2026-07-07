@@ -82,8 +82,11 @@ public static class SeedData
                 await userManager.AddToRoleAsync(newUser, u.Rol);
                 logger.LogInformation("Usuario creado: {User} [{Rol}]", u.Username, u.Rol);
 
-                // Asociar usuario con todas las bodegas creadas
-                var centros = await db.Centros.ToListAsync();
+                // Regla ERP: un usuario puede estar asignado a máximo 2 centros.
+                var centros = await db.Centros
+                    .OrderBy(c => c.Codigo)
+                    .Take(2)
+                    .ToListAsync();
                 foreach (var centro in centros)
                 {
                     db.UsuarioCentros.Add(new UsuarioCentro

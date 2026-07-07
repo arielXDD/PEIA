@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
+using PEIA.Modules.Logistics.Notifications;
 using PEIA.Shared.Infra.Data;
 using PEIA.Shared.Infra.Identity;
 using PEIA.Shared.Infra.Logistics;
@@ -20,11 +22,13 @@ public class PedidosController : ControllerBase
 {
     private readonly PeiaDbContext _context;
     private readonly UserManager<Usuario> _userManager;
+    private readonly IMediator? _mediator;
 
-    public PedidosController(PeiaDbContext context, UserManager<Usuario> userManager)
+    public PedidosController(PeiaDbContext context, UserManager<Usuario> userManager, IMediator? mediator = null)
     {
         _context = context;
         _userManager = userManager;
+        _mediator = mediator;
     }
 
     [HttpGet]
@@ -168,6 +172,16 @@ public class PedidosController : ControllerBase
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            if (_mediator is not null)
+            {
+                await _mediator.Publish(new PedidoCreadoNotification(
+                    pedido.Id,
+                    pedido.Codigo,
+                    pedido.Cliente,
+                    pedido.CentroId,
+                    pedido.FechaEstimadaEntrega));
+            }
 
             return CreatedAtAction(nameof(GetPedidoDetalle), new { id = pedido.Id }, pedido);
         }

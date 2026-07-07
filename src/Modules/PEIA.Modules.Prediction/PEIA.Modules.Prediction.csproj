@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Shared\PEIA.Shared.Kernel\PEIA.Shared.Kernel.csproj" />
+    <ProjectReference Include="..\..\Shared\PEIA.Shared.Infra\PEIA.Shared.Infra.csproj" />
   </ItemGroup>
 
   <ItemGroup>

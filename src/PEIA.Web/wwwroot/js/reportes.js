@@ -1,60 +1,41 @@
 // PEIA — Reportes JS
-// Tabs, Charts, DataTables, PDF/Excel export
+// Conectado a /api/reportes, /api/inventario y /api/pedidos
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!PEIA.requireAuth()) return;
+  PEIA.hydrateShell();
+  PEIA.bindWarehouseSelector();
 
-  // ─── Chart.js global ────────────────────────
   Chart.defaults.font.family = "'Inter', sans-serif";
   Chart.defaults.font.size = 11;
   Chart.defaults.color = '#9ca3af';
 
-  // ─── Mock Data ──────────────────────────────
+  let productos = [];
+  let movimientos = [];
+  let pedidos = [];
 
-  // Inventory report
-  const invData = [
-    { producto: 'Tarima de Madera',     categoria: 'Almacenamiento', centro: 'Bodega Norte', stock: 320, minimo: 50,  valor: 144000 },
-    { producto: 'Caja Plástica 60L',    categoria: 'Almacenamiento', centro: 'Bodega Norte', stock: 185, minimo: 40,  valor: 22200  },
-    { producto: 'Pallet Plástico',      categoria: 'Almacenamiento', centro: 'Bodega Sur',   stock: 95,  minimo: 30,  valor: 74100  },
-    { producto: 'Cinta Adhesiva 48mm',  categoria: 'Embalaje',       centro: 'Bodega Norte', stock: 25,  minimo: 50,  valor: 875    },
-    { producto: 'Film Stretch',         categoria: 'Embalaje',       centro: 'Bodega Sur',   stock: 150, minimo: 30,  valor: 14250  },
-    { producto: 'Guantes de Nitrilo L', categoria: 'Seguridad',      centro: 'Bodega Norte', stock: 0,   minimo: 100, valor: 0      },
-    { producto: 'Casco de Seguridad',   categoria: 'Seguridad',      centro: 'Bodega Sur',   stock: 42,  minimo: 20,  valor: 3570   },
-    { producto: 'Etiquetas Código',     categoria: 'Embalaje',       centro: 'Bodega Norte', stock: 2400,minimo: 500, valor: 19200  },
-    { producto: 'Escáner de Código',    categoria: 'Herramientas',   centro: 'Bodega Sur',   stock: 12,  minimo: 5,   valor: 14400  },
-    { producto: 'Desengrasante Ind.',   categoria: 'Limpieza',       centro: 'Bodega Norte', stock: 18,  minimo: 25,  valor: 1170   },
-  ];
+  let chartInvCategoria = null;
+  let chartMovTrend = null;
+  let chartPedEstados = null;
+  let invTable = null;
+  let movTable = null;
+  let pedTable = null;
 
-  // Movements report
-  const movData = [
-    { fecha: '01/07/2026', tipo: 'Entrada', producto: 'Tarima de Madera',   cantidad: 120, ubicacion: 'A-01-01', usuario: 'admin' },
-    { fecha: '01/07/2026', tipo: 'Salida',  producto: 'Caja Plástica 60L',  cantidad: 45,  ubicacion: 'B-03-03', usuario: 'inventario' },
-    { fecha: '01/07/2026', tipo: 'Entrada', producto: 'Film Stretch',       cantidad: 80,  ubicacion: 'C-07-02', usuario: 'inventario' },
-    { fecha: '30/06/2026', tipo: 'Salida',  producto: 'Pallet Plástico',    cantidad: 20,  ubicacion: 'A-02-03', usuario: 'logistica' },
-    { fecha: '30/06/2026', tipo: 'Entrada', producto: 'Etiquetas Código',   cantidad: 500, ubicacion: 'C-05-01', usuario: 'admin' },
-    { fecha: '29/06/2026', tipo: 'Salida',  producto: 'Cinta Adhesiva 48mm',cantidad: 30,  ubicacion: 'C-01-02', usuario: 'inventario' },
-    { fecha: '29/06/2026', tipo: 'Entrada', producto: 'Casco de Seguridad', cantidad: 15,  ubicacion: 'D-01-03', usuario: 'inventario' },
-    { fecha: '28/06/2026', tipo: 'Salida',  producto: 'Film Stretch',       cantidad: 60,  ubicacion: 'C-07-02', usuario: 'logistica' },
-    { fecha: '28/06/2026', tipo: 'Entrada', producto: 'Desengrasante Ind.', cantidad: 24,  ubicacion: 'F-03-02', usuario: 'admin' },
-    { fecha: '27/06/2026', tipo: 'Salida',  producto: 'Tarima de Madera',   cantidad: 50,  ubicacion: 'A-01-01', usuario: 'logistica' },
-    { fecha: '27/06/2026', tipo: 'Entrada', producto: 'Caja Plástica 60L',  cantidad: 100, ubicacion: 'B-03-03', usuario: 'inventario' },
-    { fecha: '26/06/2026', tipo: 'Salida',  producto: 'Escáner de Código',  cantidad: 2,   ubicacion: 'E-01-01', usuario: 'admin' },
-  ];
-
-  // Orders report
-  const pedData = [
-    { pedido: 'PED-0045', cliente: 'Distribuciones del Sur', estado: 'En preparación', fecha: '01/07/2026', items: 8,  total: 12500 },
-    { pedido: 'PED-0044', cliente: 'LogExpress S.A.',        estado: 'Pendiente',      fecha: '01/07/2026', items: 3,  total: 4200  },
-    { pedido: 'PED-0043', cliente: 'Almacenes Andinos',      estado: 'Enviado',        fecha: '30/06/2026', items: 12, total: 28700 },
-    { pedido: 'PED-0042', cliente: 'Retail Corp',            estado: 'Pendiente',      fecha: '30/06/2026', items: 5,  total: 8900  },
-    { pedido: 'PED-0041', cliente: 'SuperMarket Plus',       estado: 'Completado',     fecha: '29/06/2026', items: 7,  total: 15300 },
-    { pedido: 'PED-0040', cliente: 'Distribuciones del Sur', estado: 'Completado',     fecha: '28/06/2026', items: 4,  total: 6100  },
-    { pedido: 'PED-0039', cliente: 'FarmaCentral',           estado: 'Enviado',        fecha: '28/06/2026', items: 9,  total: 21000 },
-    { pedido: 'PED-0038', cliente: 'TechStore',              estado: 'Cancelado',      fecha: '27/06/2026', items: 2,  total: 3400  },
-    { pedido: 'PED-0037', cliente: 'LogExpress S.A.',        estado: 'Completado',     fecha: '27/06/2026', items: 6,  total: 11800 },
-    { pedido: 'PED-0036', cliente: 'Almacenes Andinos',      estado: 'Completado',     fecha: '26/06/2026', items: 10, total: 32000 },
-  ];
-
-  const estadoPill = { 'En preparación': 'status-info', 'Pendiente': 'status-pending', 'Enviado': 'status-active', 'Completado': 'status-active', 'Cancelado': 'status-critical' };
+  const estadoPill = {
+    Creado: 'status-pending',
+    Asignado: 'status-info',
+    EnRuta: 'status-info',
+    Entregado: 'status-active',
+    Cancelado: 'status-critical',
+  };
+  const estadoLabel = {
+    Creado: 'Creado',
+    Asignado: 'Asignado',
+    EnRuta: 'En ruta',
+    Entregado: 'Entregado',
+    Cancelado: 'Cancelado',
+  };
+  const donutColors = { Creado: '#f59e0b', Asignado: '#3b82f6', EnRuta: '#6366f1', Entregado: '#22c55e', Cancelado: '#ef4444' };
 
   // ─── Tabs ───────────────────────────────────
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -66,109 +47,197 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ─── Tab 1: Inventory Report ────────────────
-  // Chart
-  const catGroups = {};
-  invData.forEach(r => { catGroups[r.categoria] = (catGroups[r.categoria] || 0) + r.stock; });
-  const catColors = ['#3b82f6', '#22c55e', '#f59e0b', '#7c3aed', '#0891b2'];
+  // ─── Tab 1: Inventario ──────────────────────
+  async function loadInventario() {
+    const centro = PEIA.getActiveCentro();
+    if (!centro?.id) throw new Error('Selecciona un centro activo.');
 
-  new Chart(document.getElementById('chartInvCategoria'), {
-    type: 'bar',
-    data: {
-      labels: Object.keys(catGroups),
-      datasets: [{ data: Object.values(catGroups), backgroundColor: catColors.slice(0, Object.keys(catGroups).length), borderRadius: 6, barThickness: 32 }],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' }, border: { display: false } } },
-    },
-  });
+    const [resumen, productosRaw] = await Promise.all([
+      PEIA.request(`/api/reportes/inventario?centroId=${centro.id}`),
+      PEIA.request(`/api/inventario/productos?centroId=${centro.id}`),
+    ]);
 
-  // Table
-  const invTable = new DataTable(document.getElementById('tableInvReport'), {
-    columns: [
-      { key: 'producto', label: 'Producto', render: v => `<span class="cell-primary">${v}</span>` },
-      { key: 'categoria', label: 'Categoría', render: v => `<span class="tag">${v}</span>` },
-      { key: 'centro', label: 'Centro' },
-      { key: 'stock', label: 'Stock', render: v => `<span class="cell-bold">${v}</span>` },
-      { key: 'minimo', label: 'Mínimo' },
-      { key: 'valor', label: 'Valor ($)', render: v => `<span class="cell-bold">$${v.toLocaleString()}</span>` },
-    ],
-    data: invData,
-    pageSize: 8,
-  });
+    productos = productosRaw.map(p => ({
+      producto: p.nombre,
+      categoria: p.categoria,
+      stock: p.stock,
+      minimo: p.stockMinimo,
+      valor: p.stock * Number(p.precioUnitario || 0),
+    }));
 
-  document.getElementById('filterCentroInv').addEventListener('change', (e) => {
-    const c = e.target.value;
-    invTable.setData(c ? invData.filter(r => r.centro === c) : [...invData]);
-  });
+    const filter = document.getElementById('filterCategoriaInv');
+    const current = filter.value;
+    const categoriasUnicas = [...new Set(productos.map(p => p.categoria))];
+    filter.innerHTML = '<option value="">Todas las categorías</option>' +
+      categoriasUnicas.map(c => `<option value="${c}">${c}</option>`).join('');
+    filter.value = current;
 
-  // ─── Tab 2: Movements Report ────────────────
-  const trendLabels = ['26/06','27/06','28/06','29/06','30/06','01/07'];
-  const entradas = [0, 100, 24, 15, 500, 200];
-  const salidas  = [2, 50, 60, 30, 20, 45];
+    if (chartInvCategoria) chartInvCategoria.destroy();
+    const catColors = ['#3b82f6', '#22c55e', '#f59e0b', '#7c3aed', '#0891b2', '#ef4444'];
+    const categorias = resumen.categorias || [];
+    chartInvCategoria = new Chart(document.getElementById('chartInvCategoria'), {
+      type: 'bar',
+      data: {
+        labels: categorias.map(c => c.nombre),
+        datasets: [{ data: categorias.map(c => c.cantidad), backgroundColor: catColors.slice(0, categorias.length), borderRadius: 6, barThickness: 32 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' }, border: { display: false } } },
+      },
+    });
 
-  new Chart(document.getElementById('chartMovTrend'), {
-    type: 'line',
-    data: {
-      labels: trendLabels,
-      datasets: [
-        { label: 'Entradas', data: entradas, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.08)', tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: '#3b82f6', borderWidth: 2 },
-        { label: 'Salidas',  data: salidas,  borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.06)',  tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: '#ef4444', borderWidth: 2 },
-      ],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } } },
-      scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' }, border: { display: false } } },
-    },
-  });
+    if (!invTable) {
+      invTable = new DataTable(document.getElementById('tableInvReport'), {
+        columns: [
+          { key: 'producto', label: 'Producto', render: v => `<span class="cell-primary">${v}</span>` },
+          { key: 'categoria', label: 'Categoría', render: v => `<span class="tag">${v}</span>` },
+          { key: 'stock', label: 'Stock', render: v => `<span class="cell-bold">${v}</span>` },
+          { key: 'minimo', label: 'Mínimo' },
+          { key: 'valor', label: 'Valor ($)', render: v => `<span class="cell-bold">$${v.toLocaleString('es-MX')}</span>` },
+        ],
+        data: productos,
+        pageSize: 8,
+      });
+    } else {
+      invTable.setData(productos);
+    }
 
-  new DataTable(document.getElementById('tableMovReport'), {
-    columns: [
-      { key: 'fecha', label: 'Fecha' },
-      { key: 'tipo', label: 'Tipo', render: v => `<span class="${v === 'Entrada' ? 'tipo-entrada' : 'tipo-salida'}">${v}</span>` },
-      { key: 'producto', label: 'Producto', render: v => `<span class="cell-primary">${v}</span>` },
-      { key: 'cantidad', label: 'Cantidad', render: v => `<span class="cell-bold">${v}</span>` },
-      { key: 'ubicacion', label: 'Ubicación', render: v => `<span class="cell-mono">${v}</span>` },
-      { key: 'usuario', label: 'Usuario' },
-    ],
-    data: movData,
-    pageSize: 8,
-  });
+    applyInvFilter();
+  }
 
-  // ─── Tab 3: Orders Report ──────────────────
-  const estadoCounts = {};
-  pedData.forEach(p => { estadoCounts[p.estado] = (estadoCounts[p.estado] || 0) + 1; });
-  const donutColors = { 'Pendiente': '#f59e0b', 'En preparación': '#3b82f6', 'Enviado': '#22c55e', 'Completado': '#6366f1', 'Cancelado': '#ef4444' };
+  function applyInvFilter() {
+    const cat = document.getElementById('filterCategoriaInv').value;
+    invTable.setData(cat ? productos.filter(p => p.categoria === cat) : [...productos]);
+  }
 
-  new Chart(document.getElementById('chartPedEstados'), {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(estadoCounts),
-      datasets: [{ data: Object.values(estadoCounts), backgroundColor: Object.keys(estadoCounts).map(k => donutColors[k] || '#9ca3af'), borderWidth: 0, hoverOffset: 6 }],
-    },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10 } } } },
-  });
+  document.getElementById('filterCategoriaInv').addEventListener('change', applyInvFilter);
 
-  const pedTable = new DataTable(document.getElementById('tablePedReport'), {
-    columns: [
-      { key: 'pedido', label: 'Pedido', render: v => `<span class="cell-mono">${v}</span>` },
-      { key: 'cliente', label: 'Cliente', render: v => `<span class="cell-primary">${v}</span>` },
-      { key: 'estado', label: 'Estado', render: v => `<span class="status-badge ${estadoPill[v] || ''}">${v}</span>` },
-      { key: 'fecha', label: 'Fecha' },
-      { key: 'items', label: 'Items', render: v => `<span class="cell-bold">${v}</span>` },
-      { key: 'total', label: 'Total ($)', render: v => `<span class="cell-bold">$${v.toLocaleString()}</span>` },
-    ],
-    data: pedData,
-    pageSize: 8,
-  });
+  // ─── Tab 2: Movimientos ─────────────────────
+  async function loadMovimientos() {
+    const centro = PEIA.getActiveCentro();
+    if (!centro?.id) throw new Error('Selecciona un centro activo.');
 
-  document.getElementById('filterEstadoPed').addEventListener('change', (e) => {
-    const s = e.target.value;
-    pedTable.setData(s ? pedData.filter(p => p.estado === s) : [...pedData]);
-  });
+    const desde = document.getElementById('dateFrom').value;
+    const hasta = document.getElementById('dateTo').value;
+    const params = new URLSearchParams({ centroId: centro.id });
+    if (desde) params.set('fechaInicio', desde);
+    if (hasta) params.set('fechaFin', hasta);
+
+    const movimientosRaw = await PEIA.request(`/api/reportes/movimientos?${params}`);
+    movimientos = movimientosRaw.map(m => ({
+      fecha: new Date(m.fecha).toLocaleDateString('es-MX'),
+      fechaRaw: m.fecha,
+      tipo: m.tipo,
+      producto: m.producto,
+      cantidad: m.cantidad,
+      referencia: m.referencia || '-',
+    }));
+
+    const porDia = {};
+    movimientos.forEach(m => {
+      const dia = m.fecha;
+      porDia[dia] = porDia[dia] || { entradas: 0, salidas: 0 };
+      if (m.tipo === 'Entrada') porDia[dia].entradas += m.cantidad;
+      else if (m.tipo === 'Salida') porDia[dia].salidas += m.cantidad;
+    });
+    const dias = Object.keys(porDia).sort((a, b) => new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-')));
+
+    if (chartMovTrend) chartMovTrend.destroy();
+    chartMovTrend = new Chart(document.getElementById('chartMovTrend'), {
+      type: 'line',
+      data: {
+        labels: dias,
+        datasets: [
+          { label: 'Entradas', data: dias.map(d => porDia[d].entradas), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.08)', tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: '#3b82f6', borderWidth: 2 },
+          { label: 'Salidas', data: dias.map(d => porDia[d].salidas), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.06)', tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: '#ef4444', borderWidth: 2 },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' }, border: { display: false } } },
+      },
+    });
+
+    if (!movTable) {
+      movTable = new DataTable(document.getElementById('tableMovReport'), {
+        columns: [
+          { key: 'fecha', label: 'Fecha' },
+          { key: 'tipo', label: 'Tipo', render: v => `<span class="${v === 'Entrada' ? 'tipo-entrada' : 'tipo-salida'}">${v}</span>` },
+          { key: 'producto', label: 'Producto', render: v => `<span class="cell-primary">${v}</span>` },
+          { key: 'cantidad', label: 'Cantidad', render: v => `<span class="cell-bold">${v}</span>` },
+          { key: 'referencia', label: 'Referencia', render: v => `<span class="cell-mono">${v}</span>` },
+        ],
+        data: movimientos,
+        pageSize: 8,
+      });
+    } else {
+      movTable.setData(movimientos);
+    }
+  }
+
+  document.getElementById('dateFrom').addEventListener('change', () => loadMovimientos().catch(err => alert(err.message)));
+  document.getElementById('dateTo').addEventListener('change', () => loadMovimientos().catch(err => alert(err.message)));
+
+  // ─── Tab 3: Pedidos ─────────────────────────
+  async function loadPedidos() {
+    const centro = PEIA.getActiveCentro();
+    if (!centro?.id) throw new Error('Selecciona un centro activo.');
+
+    const [resumen, pedidosRaw] = await Promise.all([
+      PEIA.request(`/api/reportes/pedidos?centroId=${centro.id}`),
+      PEIA.request(`/api/pedidos?centroId=${centro.id}`),
+    ]);
+
+    pedidos = pedidosRaw.map(p => ({
+      pedido: p.codigo,
+      cliente: p.cliente,
+      estado: p.estado,
+      fecha: new Date(p.fechaPedido).toLocaleDateString('es-MX'),
+      fechaEstimada: new Date(p.fechaEstimadaEntrega).toLocaleDateString('es-MX'),
+      sla: p.sla?.estadoSLA || '-',
+    }));
+
+    const estados = resumen.estados || {};
+    if (chartPedEstados) chartPedEstados.destroy();
+    const labels = Object.keys(estados).filter(k => estados[k] > 0);
+    chartPedEstados = new Chart(document.getElementById('chartPedEstados'), {
+      type: 'doughnut',
+      data: {
+        labels: labels.map(l => estadoLabel[l] || l),
+        datasets: [{ data: labels.map(l => estados[l]), backgroundColor: labels.map(l => donutColors[l] || '#9ca3af'), borderWidth: 0, hoverOffset: 6 }],
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10 } } } },
+    });
+
+    if (!pedTable) {
+      pedTable = new DataTable(document.getElementById('tablePedReport'), {
+        columns: [
+          { key: 'pedido', label: 'Pedido', render: v => `<span class="cell-mono">${v}</span>` },
+          { key: 'cliente', label: 'Cliente', render: v => `<span class="cell-primary">${v}</span>` },
+          { key: 'estado', label: 'Estado', render: v => `<span class="status-badge ${estadoPill[v] || ''}">${estadoLabel[v] || v}</span>` },
+          { key: 'fecha', label: 'Fecha pedido' },
+          { key: 'fechaEstimada', label: 'Entrega estimada' },
+          { key: 'sla', label: 'SLA' },
+        ],
+        data: pedidos,
+        pageSize: 8,
+      });
+    } else {
+      pedTable.setData(pedidos);
+    }
+
+    applyPedFilter();
+  }
+
+  function applyPedFilter() {
+    const s = document.getElementById('filterEstadoPed').value;
+    pedTable.setData(s ? pedidos.filter(p => p.estado === s) : [...pedidos]);
+  }
+
+  document.getElementById('filterEstadoPed').addEventListener('change', applyPedFilter);
 
   // ─── Export: PDF ────────────────────────────
   function exportPDF(title, headers, rows) {
@@ -191,45 +260,43 @@ document.addEventListener('DOMContentLoaded', () => {
     XLSX.writeFile(wb, `PEIA_${title.replace(/\s/g, '_')}.xlsx`);
   }
 
-  // Inventory exports
   document.getElementById('exportInvPdf').addEventListener('click', () => {
-    exportPDF('Reporte Inventario', ['Producto','Categoría','Centro','Stock','Mínimo','Valor ($)'],
-      invData.map(r => [r.producto, r.categoria, r.centro, r.stock, r.minimo, `$${r.valor.toLocaleString()}`]));
+    exportPDF('Reporte Inventario', ['Producto', 'Categoría', 'Stock', 'Mínimo', 'Valor ($)'],
+      productos.map(r => [r.producto, r.categoria, r.stock, r.minimo, `$${r.valor.toLocaleString()}`]));
   });
   document.getElementById('exportInvExcel').addEventListener('click', () => {
-    exportExcel('Inventario', ['Producto','Categoría','Centro','Stock','Mínimo','Valor ($)'],
-      invData.map(r => [r.producto, r.categoria, r.centro, r.stock, r.minimo, r.valor]));
+    exportExcel('Inventario', ['Producto', 'Categoría', 'Stock', 'Mínimo', 'Valor ($)'],
+      productos.map(r => [r.producto, r.categoria, r.stock, r.minimo, r.valor]));
   });
 
-  // Movements exports
   document.getElementById('exportMovPdf').addEventListener('click', () => {
-    exportPDF('Reporte Movimientos', ['Fecha','Tipo','Producto','Cantidad','Ubicación','Usuario'],
-      movData.map(r => [r.fecha, r.tipo, r.producto, r.cantidad, r.ubicacion, r.usuario]));
+    exportPDF('Reporte Movimientos', ['Fecha', 'Tipo', 'Producto', 'Cantidad', 'Referencia'],
+      movimientos.map(r => [r.fecha, r.tipo, r.producto, r.cantidad, r.referencia]));
   });
   document.getElementById('exportMovExcel').addEventListener('click', () => {
-    exportExcel('Movimientos', ['Fecha','Tipo','Producto','Cantidad','Ubicación','Usuario'],
-      movData.map(r => [r.fecha, r.tipo, r.producto, r.cantidad, r.ubicacion, r.usuario]));
+    exportExcel('Movimientos', ['Fecha', 'Tipo', 'Producto', 'Cantidad', 'Referencia'],
+      movimientos.map(r => [r.fecha, r.tipo, r.producto, r.cantidad, r.referencia]));
   });
 
-  // Orders exports
   document.getElementById('exportPedPdf').addEventListener('click', () => {
-    exportPDF('Reporte Pedidos', ['Pedido','Cliente','Estado','Fecha','Items','Total ($)'],
-      pedData.map(r => [r.pedido, r.cliente, r.estado, r.fecha, r.items, `$${r.total.toLocaleString()}`]));
+    exportPDF('Reporte Pedidos', ['Pedido', 'Cliente', 'Estado', 'Fecha pedido', 'Entrega estimada', 'SLA'],
+      pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado] || r.estado, r.fecha, r.fechaEstimada, r.sla]));
   });
   document.getElementById('exportPedExcel').addEventListener('click', () => {
-    exportExcel('Pedidos', ['Pedido','Cliente','Estado','Fecha','Items','Total ($)'],
-      pedData.map(r => [r.pedido, r.cliente, r.estado, r.fecha, r.items, r.total]));
+    exportExcel('Pedidos', ['Pedido', 'Cliente', 'Estado', 'Fecha pedido', 'Entrega estimada', 'SLA'],
+      pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado] || r.estado, r.fecha, r.fechaEstimada, r.sla]));
   });
 
-  // ─── Common: Warehouse selector, Logout ─────
-  const ws = document.querySelector('.warehouse-selector');
-  ws.addEventListener('click', (e) => { e.stopPropagation(); ws.classList.toggle('open'); });
-  document.querySelectorAll('.warehouse-opt').forEach(btn => {
-    btn.addEventListener('click', (e) => { e.stopPropagation(); document.querySelectorAll('.warehouse-opt').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('activeCentro').textContent = btn.textContent; ws.classList.remove('open'); });
+  // ─── Reload on centro change ────────────────
+  window.addEventListener('peia:centro-changed', () => {
+    loadInventario().catch(err => alert(err.message));
+    loadMovimientos().catch(err => alert(err.message));
+    loadPedidos().catch(err => alert(err.message));
   });
-  document.addEventListener('click', () => ws.classList.remove('open'));
 
-  document.getElementById('btnLogout').addEventListener('click', () => { localStorage.removeItem('peia_token'); localStorage.removeItem('peia_user'); window.location.href = '/login.html'; });
-  const user = JSON.parse(localStorage.getItem('peia_user') || '{}');
-  if (user.nombreCompleto) { document.getElementById('userName').textContent = user.nombreCompleto; document.getElementById('userAvatar').textContent = user.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(); }
+  try {
+    await Promise.all([loadInventario(), loadMovimientos(), loadPedidos()]);
+  } catch (error) {
+    alert(error.message);
+  }
 });

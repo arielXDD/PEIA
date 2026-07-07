@@ -1,20 +1,13 @@
 // PEIA — Notificaciones JS
-// Mock notifications, filters, mark as read
+// Conectado a /api/notificaciones + SignalR en vivo
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!PEIA.requireAuth()) return;
+  PEIA.hydrateShell();
+  PEIA.bindWarehouseSelector();
 
-  const notificaciones = [
-    { id: 1, tipo: 'stock',  titulo: 'Stock bajo: Cinta Adhesiva 48mm',           desc: 'Quedan 25 unidades — el mínimo es 50. Se recomienda realizar un pedido de reabastecimiento.', tiempo: 'Hace 12 minutos',  leida: false },
-    { id: 2, tipo: 'camara', titulo: 'Movimiento no autorizado — Cámara 2',       desc: 'Se detectó actividad fuera de horario en el Área C-07 a las 03:42 AM. Revisar grabación.', tiempo: 'Hace 35 minutos',  leida: false },
-    { id: 3, tipo: 'sla',    titulo: 'SLA próximo a vencer: PED-0044',             desc: 'El pedido PED-0044 de LogExpress S.A. tiene plazo hasta mañana 12:00 PM. Estado actual: Pendiente.', tiempo: 'Hace 1 hora',  leida: false },
-    { id: 4, tipo: 'stock',  titulo: 'Producto agotado: Guantes de Nitrilo L',     desc: 'El stock de Guantes de Nitrilo talla L está en 0 unidades. Prioridad alta de reabastecimiento.', tiempo: 'Hace 2 horas', leida: true },
-    { id: 5, tipo: 'pedido', titulo: 'Nuevo pedido recibido: PED-0045',            desc: 'Distribuciones del Sur ha realizado un pedido con 8 items por un total de $12,500.', tiempo: 'Hace 3 horas', leida: true },
-    { id: 6, tipo: 'stock',  titulo: 'Stock bajo: Desengrasante Industrial',       desc: 'Quedan 18 unidades — el mínimo es 25. Ubicación: F-03-02.', tiempo: 'Hace 4 horas', leida: true },
-    { id: 7, tipo: 'camara', titulo: 'Temperatura elevada en Zona B',              desc: 'Sensor 03 reporta 28°C en la Zona B del almacén. Temperatura máxima permitida: 25°C.', tiempo: 'Hace 5 horas', leida: true },
-    { id: 8, tipo: 'pedido', titulo: 'Pedido completado: PED-0041',                desc: 'El pedido de SuperMarket Plus ha sido entregado exitosamente. 7 items por $15,300.', tiempo: 'Hace 6 horas', leida: true },
-    { id: 9, tipo: 'sla',    titulo: 'SLA cumplido: PED-0040',                     desc: 'El pedido PED-0040 se entregó dentro del plazo acordado. Cumplimiento: 100%.', tiempo: 'Ayer 16:30', leida: true },
-    { id: 10, tipo: 'sistema', titulo: 'Respaldo de base de datos completado',     desc: 'El respaldo automático de la base de datos peiadb se completó exitosamente a las 02:00 AM.', tiempo: 'Ayer 02:00', leida: true },
-  ];
+  let notificaciones = [];
+  let activeFilter = 'todas';
 
   const iconSVGs = {
     stock: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
@@ -24,7 +17,36 @@ document.addEventListener('DOMContentLoaded', () => {
     sistema: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>',
   };
 
-  let activeFilter = 'todas';
+  function timeAgo(fecha) {
+    const diffMs = Date.now() - new Date(fecha).getTime();
+    const min = Math.floor(diffMs / 60000);
+    if (min < 1) return 'Justo ahora';
+    if (min < 60) return `Hace ${min} minuto${min === 1 ? '' : 's'}`;
+    const hrs = Math.floor(min / 60);
+    if (hrs < 24) return `Hace ${hrs} hora${hrs === 1 ? '' : 's'}`;
+    const dias = Math.floor(hrs / 24);
+    if (dias === 1) return 'Ayer';
+    return `Hace ${dias} días`;
+  }
+
+  function mapNotificacion(n) {
+    return {
+      id: n.id,
+      tipo: n.tipo,
+      titulo: n.titulo,
+      desc: n.descripcion || '',
+      fecha: n.fecha || n.fechaCreacion,
+      leida: n.leida ?? false,
+    };
+  }
+
+  async function loadData() {
+    const centro = PEIA.getActiveCentro();
+    if (!centro?.id) throw new Error('Selecciona un centro activo.');
+    const data = await PEIA.request(`/api/notificaciones?centroId=${centro.id}`);
+    notificaciones = data.map(mapNotificacion);
+    renderNotifications();
+  }
 
   function renderNotifications() {
     const list = document.getElementById('notifList');
@@ -40,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <h3>Sin notificaciones</h3>
           <p>No hay notificaciones que coincidan con el filtro seleccionado.</p>
         </div>`;
+      updateBadge();
       return;
     }
 
@@ -51,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="notif-desc">${n.desc}</div>
           <div class="notif-time">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            ${n.tiempo}
+            ${timeAgo(n.fecha)}
           </div>
         </div>
         <div class="notif-actions">
@@ -70,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateBadge() {
     const unread = notificaciones.filter(n => !n.leida).length;
-    const badge = document.getElementById('navBadge');
+    const badge = document.querySelector('a[href="notificaciones.html"] .badge');
     if (badge) {
       badge.textContent = unread;
       badge.style.display = unread > 0 ? '' : 'none';
@@ -88,42 +111,69 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Mark all as read
-  document.getElementById('btnMarkAll').addEventListener('click', () => {
-    notificaciones.forEach(n => n.leida = true);
-    renderNotifications();
+  document.getElementById('btnMarkAll').addEventListener('click', async () => {
+    const centro = PEIA.getActiveCentro();
+    try {
+      await PEIA.request(`/api/notificaciones/marcar-todas?centroId=${centro.id}`, { method: 'PUT' });
+      notificaciones.forEach(n => n.leida = true);
+      renderNotifications();
+    } catch (error) {
+      alert(error.message);
+    }
   });
 
   // Event delegation for mark read / delete
-  document.getElementById('notifList').addEventListener('click', (e) => {
+  document.getElementById('notifList').addEventListener('click', async (e) => {
     const markBtn = e.target.closest('.btn-mark-read');
     const delBtn = e.target.closest('.btn-delete');
 
     if (markBtn) {
-      const id = parseInt(markBtn.dataset.id);
-      const notif = notificaciones.find(n => n.id === id);
-      if (notif) { notif.leida = true; renderNotifications(); }
+      const id = markBtn.dataset.id;
+      try {
+        await PEIA.request(`/api/notificaciones/${id}/leer`, { method: 'PUT' });
+        const notif = notificaciones.find(n => n.id === id);
+        if (notif) { notif.leida = true; renderNotifications(); }
+      } catch (error) {
+        alert(error.message);
+      }
     }
 
     if (delBtn) {
-      const id = parseInt(delBtn.dataset.id);
-      const idx = notificaciones.findIndex(n => n.id === id);
-      if (idx > -1) { notificaciones.splice(idx, 1); renderNotifications(); }
+      const id = delBtn.dataset.id;
+      try {
+        await PEIA.request(`/api/notificaciones/${id}`, { method: 'DELETE' });
+        notificaciones = notificaciones.filter(n => n.id !== id);
+        renderNotifications();
+      } catch (error) {
+        alert(error.message);
+      }
     }
   });
 
-  // Initial render
-  renderNotifications();
+  window.addEventListener('peia:centro-changed', () => loadData().catch(error => alert(error.message)));
 
-  // Warehouse selector
-  const ws = document.querySelector('.warehouse-selector');
-  ws.addEventListener('click', (e) => { e.stopPropagation(); ws.classList.toggle('open'); });
-  document.querySelectorAll('.warehouse-opt').forEach(btn => {
-    btn.addEventListener('click', (e) => { e.stopPropagation(); document.querySelectorAll('.warehouse-opt').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('activeCentro').textContent = btn.textContent; ws.classList.remove('open'); });
-  });
-  document.addEventListener('click', () => ws.classList.remove('open'));
+  async function connectLive() {
+    const hub = await PEIA.connectHub().catch(() => null);
+    if (!hub) return;
+    hub.on('notificacion', payload => {
+      const centro = PEIA.getActiveCentro();
+      if (centro?.id && payload.centroId && payload.centroId !== centro.id) return;
+      notificaciones.unshift(mapNotificacion({
+        id: payload.id,
+        tipo: payload.tipo,
+        titulo: payload.titulo,
+        descripcion: payload.descripcion,
+        fecha: payload.fecha,
+        leida: false,
+      }));
+      renderNotifications();
+    });
+  }
 
-  // Logout
-  document.getElementById('btnLogout').addEventListener('click', () => { localStorage.removeItem('peia_token'); localStorage.removeItem('peia_user'); window.location.href = '/login.html'; });
-  const user = JSON.parse(localStorage.getItem('peia_user') || '{}');
-  if (user.nombreCompleto) { document.getElementById('userName').textContent = user.nombreCompleto; document.getElementById('userAvatar').textContent = user.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(); }
+  try {
+    await loadData();
+    await connectLive();
+  } catch (error) {
+    alert(error.message);
+  }
 });

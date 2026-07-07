@@ -1,6 +1,8 @@
 using Microsoft.ML;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.ML.Transforms.TimeSeries;
 using PEIA.Modules.Prediction.Models;
+using PEIA.Shared.Infra.Data;
 
 namespace PEIA.Modules.Prediction.Services;
 
@@ -11,12 +13,14 @@ public class PredictionService : IPredictionService
     private readonly float[] _historicalData;
     private readonly string[] _historicalLabels;
     private readonly List<ProductoHistory> _productHistory;
+    private readonly PeiaDbContext? _context;
 
-    public PredictionService()
+    public PredictionService(PeiaDbContext? context = null)
     {
+        _context = context;
         _ml = new MLContext(seed: 42);
-        (_historicalData, _historicalLabels) = GenerateHistoricalData(90);
-        _productHistory = GenerateProductHistory();
+        (_historicalData, _historicalLabels) = LoadHistoricalDataFromMovements() ?? GenerateHistoricalData(90);
+        _productHistory = LoadProductHistoryFromMovements() ?? GenerateProductHistory();
         _model = TrainModel(_historicalData);
     }
 
@@ -153,6 +157,110 @@ public class PredictionService : IPredictionService
         }
 
         return (data, labels);
+    }
+
+    private (float[] Data, string[] Labels)? LoadHistoricalDataFromMovements()
+    {
+        if (_context is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var startDate = DateTime.UtcNow.Date.AddDays(-90);
+            var movements = _context.Movimientos
+                .AsNoTracking()
+                .Where(m => m.Tipo == "Salida" && m.FechaMovimiento >= startDate)
+                .GroupBy(m => m.FechaMovimiento.Date)
+                .Select(g => new { Date = g.Key, Demand = g.Sum(m => m.Cantidad) })
+                .ToList();
+
+            if (movements.Count < 14)
+            {
+                return null;
+            }
+
+            var byDate = movements.ToDictionary(x => x.Date, x => x.Demand);
+            var data = new float[90];
+            var labels = new string[90];
+
+            for (var i = 0; i < 90; i++)
+            {
+                var date = startDate.AddDays(i);
+                data[i] = byDate.TryGetValue(date, out var demand) ? demand : 0;
+                labels[i] = date.ToString("dd MMM");
+            }
+
+            return (data, labels);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private List<ProductoHistory>? LoadProductHistoryFromMovements()
+    {
+        if (_context is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var startDate = DateTime.UtcNow.Date.AddDays(-60);
+            var productos = _context.Productos
+                .AsNoTracking()
+                .Include(p => p.Categoria)
+                .Include(p => p.Stocks)
+                .Where(p => p.Activo)
+                .OrderBy(p => p.Nombre)
+                .Take(20)
+                .ToList();
+
+            if (productos.Count == 0)
+            {
+                return null;
+            }
+
+            var movimientos = _context.Movimientos
+                .AsNoTracking()
+                .Where(m => m.Tipo == "Salida" && m.FechaMovimiento >= startDate)
+                .GroupBy(m => new { m.ProductoId, Date = m.FechaMovimiento.Date })
+                .Select(g => new { g.Key.ProductoId, g.Key.Date, Demand = g.Sum(m => m.Cantidad) })
+                .ToList();
+
+            if (movimientos.Count < 14)
+            {
+                return null;
+            }
+
+            var byProductAndDate = movimientos.ToDictionary(x => (x.ProductoId, x.Date), x => x.Demand);
+            return productos.Select((producto, index) =>
+            {
+                var history = new float[60];
+                for (var i = 0; i < 60; i++)
+                {
+                    var date = startDate.AddDays(i);
+                    history[i] = byProductAndDate.TryGetValue((producto.Id, date), out var demand) ? demand : 0;
+                }
+
+                return new ProductoHistory
+                {
+                    Id = index + 1,
+                    Nombre = producto.Nombre,
+                    Categoria = producto.Categoria?.Nombre ?? "Sin categoría",
+                    StockActual = producto.Stocks.Sum(s => s.Cantidad),
+                    DemandaEstimadaMediana = (int)Math.Round(history.Average()),
+                    History = history
+                };
+            }).ToList();
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static List<ProductoHistory> GenerateProductHistory()

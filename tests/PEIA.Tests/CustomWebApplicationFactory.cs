@@ -13,6 +13,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             Path.Combine(assemblyDir, "..", "..", "..", "..", "..", "src", "PEIA.Web"));
 
         builder.UseContentRoot(webProjectDir);
-        builder.UseEnvironment("Development");
+        builder.UseEnvironment("Testing");
     }
 }

@@ -50,9 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Guardar token y redirigir al dashboard
-        localStorage.setItem('peia_token', data.token);
-        localStorage.setItem('peia_user',  JSON.stringify(data.user));
+        PEIA.setSession(data.token, data.user);
         window.location.href = '/inicio.html';
       } else {
         const err = await response.json().catch(() => ({}));

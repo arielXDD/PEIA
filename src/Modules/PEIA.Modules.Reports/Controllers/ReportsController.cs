@@ -82,40 +82,84 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("inventario")]
-    public IActionResult GetInventarioReport([FromQuery] Guid? centroId)
+    public async Task<IActionResult> GetInventarioReport([FromQuery] Guid? centroId)
     {
-        // Mock de datos de inventario mientras el módulo de inventario no está implementado
+        if (centroId == null || centroId == Guid.Empty)
+        {
+            return BadRequest(new { message = "El parámetro centroId es obligatorio." });
+        }
+
+        var productos = await _context.Productos
+            .Include(p => p.Categoria)
+            .Include(p => p.Stocks)
+            .Where(p => p.Activo)
+            .Select(p => new
+            {
+                p.Sku,
+                p.Nombre,
+                p.StockMinimo,
+                Categoria = p.Categoria != null ? p.Categoria.Nombre : "Sin categoría",
+                Stock = p.Stocks.Where(s => s.CentroId == centroId).Select(s => s.Cantidad).FirstOrDefault()
+            })
+            .ToListAsync();
+
+        var categorias = productos
+            .GroupBy(p => p.Categoria)
+            .Select(g => new { Nombre = g.Key, Cantidad = g.Sum(p => p.Stock) })
+            .OrderByDescending(c => c.Cantidad)
+            .ToList();
+
+        var alertas = productos
+            .Where(p => p.Stock <= p.StockMinimo)
+            .OrderBy(p => p.Stock)
+            .Select(p => new { Codigo = p.Sku, Nombre = p.Nombre, StockActual = p.Stock, StockMinimo = p.StockMinimo })
+            .ToList();
+
         return Ok(new
         {
-            TotalProductos = 150,
-            StockTotal = 8247,
-            Categorias = new[]
-            {
-                new { Nombre = "Maderas", Cantidad = 1200 },
-                new { Nombre = "Plásticos", Cantidad = 2010 },
-                new { Nombre = "Embalajes", Cantidad = 1160 },
-                new { Nombre = "Cintas", Cantidad = 640 },
-                new { Nombre = "Otros", Cantidad = 3237 }
-            },
-            AlertasStockMinimo = new[]
-            {
-                new { Codigo = "PROD-0012", Nombre = "Cinta Adhesiva 48mm", StockActual = 25, StockMinimo = 50 },
-                new { Codigo = "PROD-0045", Nombre = "Guantes de Nitrilo", StockActual = 0, StockMinimo = 100 }
-            }
+            TotalProductos = productos.Count,
+            StockTotal = productos.Sum(p => p.Stock),
+            Categorias = categorias,
+            AlertasStockMinimo = alertas
         });
     }
 
     [HttpGet("movimientos")]
-    public IActionResult GetMovimientosReport([FromQuery] Guid? centroId, [FromQuery] DateTime? fechaInicio, [FromQuery] DateTime? fechaFin)
+    public async Task<IActionResult> GetMovimientosReport([FromQuery] Guid? centroId, [FromQuery] DateTime? fechaInicio, [FromQuery] DateTime? fechaFin)
     {
-        // Mock de movimientos
-        return Ok(new[]
+        if (centroId == null || centroId == Guid.Empty)
         {
-            new { Fecha = DateTime.UtcNow.AddHours(-1), Tipo = "Entrada", Producto = "Tarima de Madera", Cantidad = 120, Ubicacion = "A-01-01" },
-            new { Fecha = DateTime.UtcNow.AddHours(-2), Tipo = "Salida", Producto = "Caja Plástica 60L", Cantidad = 45, Ubicacion = "B-03-03" },
-            new { Fecha = DateTime.UtcNow.AddHours(-4), Tipo = "Entrada", Producto = "Film Stretch", Cantidad = 80, Ubicacion = "C-07-02" },
-            new { Fecha = DateTime.UtcNow.AddHours(-5), Tipo = "Salida", Producto = "Pallet Plástico", Cantidad = 20, Ubicacion = "A-02-03" }
-        });
+            return BadRequest(new { message = "El parámetro centroId es obligatorio." });
+        }
+
+        var query = _context.Movimientos
+            .Include(m => m.Producto)
+            .Where(m => m.CentroId == centroId);
+
+        if (fechaInicio.HasValue)
+        {
+            query = query.Where(m => m.FechaMovimiento >= fechaInicio.Value.ToUniversalTime());
+        }
+
+        if (fechaFin.HasValue)
+        {
+            query = query.Where(m => m.FechaMovimiento <= fechaFin.Value.ToUniversalTime());
+        }
+
+        var movimientos = await query
+            .OrderByDescending(m => m.FechaMovimiento)
+            .Take(500)
+            .Select(m => new
+            {
+                Fecha = m.FechaMovimiento,
+                m.Tipo,
+                Producto = m.Producto != null ? m.Producto.Nombre : string.Empty,
+                m.Cantidad,
+                m.Referencia
+            })
+            .ToListAsync();
+
+        return Ok(movimientos);
     }
 
     [HttpGet("exportar")]

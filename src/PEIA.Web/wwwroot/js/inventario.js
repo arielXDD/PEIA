@@ -1,34 +1,22 @@
-// PEIA — Inventario JS
-// Mock products data, DataTable, filters, CRUD modals
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!PEIA.requireAuth()) return;
+  PEIA.hydrateShell();
+  PEIA.bindWarehouseSelector();
 
-document.addEventListener('DOMContentLoaded', () => {
-
-  const productos = [
-    { id: 1,  sku: 'TAR-001', nombre: 'Tarima de Madera',      categoria: 'Almacenamiento', stock: 320, minimo: 50,  ubicacion: 'A-01-01', ultimaEntrada: '01/07/2026', precio: 450 },
-    { id: 2,  sku: 'CAJ-002', nombre: 'Caja Plástica 60L',     categoria: 'Almacenamiento', stock: 185, minimo: 40,  ubicacion: 'B-03-03', ultimaEntrada: '30/06/2026', precio: 120 },
-    { id: 3,  sku: 'PAL-003', nombre: 'Pallet Plástico',       categoria: 'Almacenamiento', stock: 95,  minimo: 30,  ubicacion: 'A-02-03', ultimaEntrada: '29/06/2026', precio: 780 },
-    { id: 4,  sku: 'CIN-004', nombre: 'Cinta Adhesiva 48mm',   categoria: 'Embalaje',       stock: 25,  minimo: 50,  ubicacion: 'C-01-02', ultimaEntrada: '28/06/2026', precio: 35  },
-    { id: 5,  sku: 'FIL-005', nombre: 'Film Stretch',          categoria: 'Embalaje',       stock: 150, minimo: 30,  ubicacion: 'C-07-02', ultimaEntrada: '01/07/2026', precio: 95  },
-    { id: 6,  sku: 'GUA-006', nombre: 'Guantes de Nitrilo L',  categoria: 'Seguridad',      stock: 0,   minimo: 100, ubicacion: 'D-02-01', ultimaEntrada: '25/06/2026', precio: 15  },
-    { id: 7,  sku: 'CAS-007', nombre: 'Casco de Seguridad',    categoria: 'Seguridad',      stock: 42,  minimo: 20,  ubicacion: 'D-01-03', ultimaEntrada: '27/06/2026', precio: 85  },
-    { id: 8,  sku: 'ETI-008', nombre: 'Etiquetas Código Barras',categoria:'Embalaje',       stock: 2400,minimo: 500, ubicacion: 'C-05-01', ultimaEntrada: '01/07/2026', precio: 8   },
-    { id: 9,  sku: 'ESC-009', nombre: 'Escáner de Código',     categoria: 'Herramientas',   stock: 12,  minimo: 5,   ubicacion: 'E-01-01', ultimaEntrada: '20/06/2026', precio: 1200},
-    { id: 10, sku: 'DES-010', nombre: 'Desengrasante Industrial',categoria:'Limpieza',      stock: 18,  minimo: 25,  ubicacion: 'F-03-02', ultimaEntrada: '26/06/2026', precio: 65  },
-    { id: 11, sku: 'BOL-011', nombre: 'Bolsas de Plástico XL', categoria: 'Embalaje',       stock: 800, minimo: 200, ubicacion: 'C-02-01', ultimaEntrada: '30/06/2026', precio: 5   },
-    { id: 12, sku: 'CHA-012', nombre: 'Chaleco Reflectante',   categoria: 'Seguridad',      stock: 35,  minimo: 15,  ubicacion: 'D-03-01', ultimaEntrada: '28/06/2026', precio: 45  },
-  ];
+  let productos = [];
+  let categorias = [];
 
   function getStockStatus(stock, minimo) {
     if (stock === 0) return { label: 'Agotado', cls: 'status-critical', barCls: 'red', pct: 0 };
-    if (stock < minimo) return { label: 'Stock bajo', cls: 'status-warning', barCls: 'orange', pct: Math.round((stock / minimo) * 100) };
-    return { label: 'Normal', cls: 'status-active', barCls: 'green', pct: Math.min(100, Math.round((stock / minimo) * 100)) };
+    if (stock < minimo) return { label: 'Stock bajo', cls: 'status-warning', barCls: 'orange', pct: Math.round((stock / Math.max(1, minimo)) * 100) };
+    return { label: 'Normal', cls: 'status-active', barCls: 'green', pct: Math.min(100, Math.round((stock / Math.max(1, minimo)) * 100)) };
   }
 
   const table = new DataTable(document.getElementById('productsTable'), {
     columns: [
-      { key: 'sku', label: 'SKU', render: (val) => `<span class="cell-mono">${val}</span>` },
-      { key: 'nombre', label: 'Producto', render: (val) => `<span class="cell-primary">${val}</span>` },
-      { key: 'categoria', label: 'Categoría', render: (val) => `<span class="tag">${val}</span>` },
+      { key: 'sku', label: 'SKU', render: val => `<span class="cell-mono">${val}</span>` },
+      { key: 'nombre', label: 'Producto', render: val => `<span class="cell-primary">${val}</span>` },
+      { key: 'categoria', label: 'Categoría', render: val => `<span class="tag">${val}</span>` },
       { key: 'stock', label: 'Stock', render: (val, row) => {
         const s = getStockStatus(val, row.minimo);
         return `<span class="cell-bold">${val}</span> <span style="color:var(--text-muted);font-size:11px;">/ ${row.minimo} mín</span>
@@ -38,20 +26,73 @@ document.addEventListener('DOMContentLoaded', () => {
         const s = getStockStatus(val, row.minimo);
         return `<span class="status-badge ${s.cls}"><span class="status-dot-sm"></span>${s.label}</span>`;
       }},
-      { key: 'ubicacion', label: 'Ubicación', render: (val) => `<span class="cell-mono">${val}</span>` },
-      { key: 'ultimaEntrada', label: 'Últ. entrada' },
-      { key: 'id', label: 'Acciones', sortable: false, render: (val, row) => `
+      { key: 'ubicacion', label: 'Ubicación', render: val => `<span class="cell-mono">${val || '-'}</span>` },
+      { key: 'precio', label: 'Precio', render: val => `$${Number(val || 0).toLocaleString('es-MX')}` },
+      { key: 'id', label: 'Acciones', sortable: false, render: val => `
         <div class="cell-actions">
           <button class="btn-icon btn-edit" data-id="${val}" title="Editar">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
+          <button class="btn-icon btn-move" data-id="${val}" title="Movimiento">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12H3"/><path d="M16 7l5 5-5 5"/></svg>
+          </button>
         </div>` },
     ],
-    data: productos,
+    data: [],
     pageSize: 8,
   });
 
-  // Search & Filters
+  function mapProducto(p) {
+    return {
+      id: p.id,
+      sku: p.sku,
+      nombre: p.nombre,
+      descripcion: p.descripcion || '',
+      categoria: p.categoria,
+      categoriaId: p.categoriaId,
+      stock: p.stock,
+      minimo: p.stockMinimo,
+      ubicacion: p.ubicacion,
+      precio: p.precioUnitario,
+      unidadMedida: p.unidadMedida,
+      activo: p.activo
+    };
+  }
+
+  async function loadData() {
+    const centro = PEIA.getActiveCentro();
+    if (!centro?.id) throw new Error('Selecciona un centro activo.');
+    const [productosRaw, categoriasRaw] = await Promise.all([
+      PEIA.request(`/api/inventario/productos?centroId=${centro.id}`),
+      PEIA.request('/api/inventario/categorias')
+    ]);
+    productos = productosRaw.map(mapProducto);
+    categorias = categoriasRaw;
+    hydrateCategoriaFilter();
+    applyFilters();
+    updateKpis();
+  }
+
+  function hydrateCategoriaFilter() {
+    const filter = document.getElementById('filterCategoria');
+    const current = filter.value;
+    filter.innerHTML = '<option value="">Todas las categorías</option>' +
+      categorias.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+    filter.value = current;
+  }
+
+  function updateKpis() {
+    const total = productos.length;
+    const bajo = productos.filter(p => p.stock > 0 && p.stock < p.minimo).length;
+    const agotado = productos.filter(p => p.stock === 0).length;
+    const totalEl = document.getElementById('kpi-total');
+    const bajoEl = document.getElementById('kpi-bajo');
+    const agotadoEl = document.getElementById('kpi-agotado');
+    if (totalEl) totalEl.textContent = total;
+    if (bajoEl) bajoEl.textContent = bajo;
+    if (agotadoEl) agotadoEl.textContent = agotado;
+  }
+
   const searchInput = document.getElementById('searchProducts');
   const filterCat = document.getElementById('filterCategoria');
   const filterStock = document.getElementById('filterStock');
@@ -71,70 +112,133 @@ document.addEventListener('DOMContentLoaded', () => {
     table.setData(data);
   }
 
+  function productFields() {
+    return [
+      { key: 'sku', label: 'SKU', type: 'text', required: true, half: true },
+      { key: 'nombre', label: 'Nombre del producto', type: 'text', required: true, half: true },
+      { key: 'categoriaId', label: 'Categoría', type: 'select', required: true, half: true, options: categorias.map(c => ({ value: c.id, label: c.nombre })) },
+      { key: 'ubicacion', label: 'Ubicación', type: 'text', placeholder: 'A-01-01', half: true },
+      { key: 'stock', label: 'Stock inicial', type: 'number', min: 0, half: true },
+      { key: 'minimo', label: 'Stock mínimo', type: 'number', min: 0, half: true },
+      { key: 'precio', label: 'Precio unitario ($)', type: 'number', min: 0, half: true },
+      { key: 'unidadMedida', label: 'Unidad', type: 'text', value: 'Pieza', half: true },
+      { key: 'descripcion', label: 'Descripción', type: 'textarea' },
+    ];
+  }
+
+  function buildProductPayload(data) {
+    return {
+      sku: data.sku,
+      nombre: data.nombre,
+      descripcion: data.descripcion || '',
+      unidadMedida: data.unidadMedida || 'Pieza',
+      precioUnitario: data.precio || 0,
+      stockMinimo: data.minimo || 0,
+      activo: true,
+      categoriaId: data.categoriaId,
+      centroId: PEIA.getActiveCentro().id
+    };
+  }
+
   searchInput.addEventListener('input', applyFilters);
   filterCat.addEventListener('change', applyFilters);
   filterStock.addEventListener('change', applyFilters);
-
-  // New product
-  const productFields = [
-    { key: 'sku', label: 'SKU', type: 'text', placeholder: 'TAR-001', required: true, half: true },
-    { key: 'nombre', label: 'Nombre del producto', type: 'text', placeholder: 'Tarima de Madera', required: true, half: true },
-    { key: 'categoria', label: 'Categoría', type: 'select', required: true, half: true, options: [
-      { value: 'Embalaje', label: 'Embalaje' }, { value: 'Almacenamiento', label: 'Almacenamiento' },
-      { value: 'Seguridad', label: 'Seguridad' }, { value: 'Herramientas', label: 'Herramientas' },
-      { value: 'Limpieza', label: 'Limpieza' },
-    ]},
-    { key: 'ubicacion', label: 'Ubicación', type: 'text', placeholder: 'A-01-01', required: true, half: true },
-    { key: 'stock', label: 'Stock inicial', type: 'number', placeholder: '0', min: 0, half: true },
-    { key: 'minimo', label: 'Stock mínimo', type: 'number', placeholder: '50', min: 0, half: true },
-    { key: 'precio', label: 'Precio unitario ($)', type: 'number', placeholder: '0.00', min: 0, half: true },
-  ];
+  window.addEventListener('peia:centro-changed', () => loadData().catch(error => alert(error.message)));
 
   document.getElementById('btnNuevoProducto').addEventListener('click', () => {
     new ModalForm({
       title: 'Nuevo producto',
-      fields: productFields,
-      onSave: (data) => {
-        productos.push({
-          id: productos.length + 1, sku: data.sku, nombre: data.nombre,
-          categoria: data.categoria, stock: data.stock || 0, minimo: data.minimo || 0,
-          ubicacion: data.ubicacion, ultimaEntrada: new Date().toLocaleDateString('es-MX'),
-          precio: data.precio || 0,
-        });
-        applyFilters();
+      fields: productFields(),
+      onSave: async data => {
+        try {
+          const created = await PEIA.request('/api/inventario/productos', { method: 'POST', body: JSON.stringify(buildProductPayload(data)) });
+          if (data.stock > 0) {
+            await PEIA.request('/api/inventario/movimientos', {
+              method: 'POST',
+              body: JSON.stringify({
+                productoId: created.id,
+                centroId: PEIA.getActiveCentro().id,
+                tipo: 'Entrada',
+                cantidad: data.stock,
+                ubicacion: data.ubicacion || '',
+                motivo: 'Stock inicial',
+                referencia: 'Alta producto'
+              })
+            });
+          }
+          await loadData();
+        } catch (error) {
+          alert(error.message);
+        }
       },
     });
   });
 
-  // Edit
-  document.getElementById('productsTable').addEventListener('click', (e) => {
+  document.getElementById('productsTable').addEventListener('click', e => {
     const editBtn = e.target.closest('.btn-edit');
+    const moveBtn = e.target.closest('.btn-move');
+
     if (editBtn) {
-      const id = parseInt(editBtn.dataset.id);
-      const prod = productos.find(p => p.id === id);
+      const prod = productos.find(p => p.id === editBtn.dataset.id);
       if (!prod) return;
       new ModalForm({
-        title: `Editar — ${prod.nombre}`,
-        fields: productFields,
+        title: `Editar - ${prod.nombre}`,
+        fields: productFields().filter(f => f.key !== 'stock'),
         initialData: prod,
-        onSave: (data) => {
-          Object.assign(prod, data);
-          applyFilters();
+        onSave: async data => {
+          try {
+            await PEIA.request(`/api/inventario/productos/${prod.id}`, { method: 'PUT', body: JSON.stringify(buildProductPayload(data)) });
+            await loadData();
+          } catch (error) {
+            alert(error.message);
+          }
+        },
+      });
+    }
+
+    if (moveBtn) {
+      const prod = productos.find(p => p.id === moveBtn.dataset.id);
+      if (!prod) return;
+      new ModalForm({
+        title: `Movimiento - ${prod.nombre}`,
+        fields: [
+          { key: 'tipo', label: 'Tipo', type: 'select', required: true, options: [
+            { value: 'Entrada', label: 'Entrada' },
+            { value: 'Salida', label: 'Salida' },
+            { value: 'Ajuste', label: 'Ajuste' },
+          ]},
+          { key: 'cantidad', label: 'Cantidad', type: 'number', min: 1, required: true, half: true },
+          { key: 'ubicacion', label: 'Ubicación', type: 'text', value: prod.ubicacion || '', half: true },
+          { key: 'motivo', label: 'Motivo', type: 'textarea' },
+          { key: 'referencia', label: 'Referencia', type: 'text' },
+        ],
+        initialData: { tipo: 'Entrada', ubicacion: prod.ubicacion || '' },
+        onSave: async data => {
+          try {
+            await PEIA.request('/api/inventario/movimientos', {
+              method: 'POST',
+              body: JSON.stringify({
+                productoId: prod.id,
+                centroId: PEIA.getActiveCentro().id,
+                tipo: data.tipo,
+                cantidad: data.cantidad,
+                ubicacion: data.ubicacion,
+                motivo: data.motivo,
+                referencia: data.referencia
+              })
+            });
+            await loadData();
+          } catch (error) {
+            alert(error.message);
+          }
         },
       });
     }
   });
 
-  // Warehouse selector
-  const ws = document.querySelector('.warehouse-selector');
-  ws.addEventListener('click', (e) => { e.stopPropagation(); ws.classList.toggle('open'); });
-  document.querySelectorAll('.warehouse-opt').forEach(btn => {
-    btn.addEventListener('click', (e) => { e.stopPropagation(); document.querySelectorAll('.warehouse-opt').forEach(b => b.classList.remove('active')); btn.classList.add('active'); document.getElementById('activeCentro').textContent = btn.textContent; ws.classList.remove('open'); });
-  });
-  document.addEventListener('click', () => ws.classList.remove('open'));
-
-  // Logout & User
-  document.getElementById('btnLogout').addEventListener('click', () => { localStorage.removeItem('peia_token'); localStorage.removeItem('peia_user'); window.location.href = '/login.html'; });
-  const user = JSON.parse(localStorage.getItem('peia_user') || '{}');
-  if (user.nombreCompleto) { document.getElementById('userName').textContent = user.nombreCompleto; document.getElementById('userAvatar').textContent = user.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(); }
+  try {
+    await loadData();
+  } catch (error) {
+    alert(error.message);
+  }
 });

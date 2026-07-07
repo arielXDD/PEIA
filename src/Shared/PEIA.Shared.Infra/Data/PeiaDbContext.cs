@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PEIA.Shared.Infra.Configuration;
 using PEIA.Shared.Infra.Identity;
+using PEIA.Shared.Infra.Inventory;
 using PEIA.Shared.Infra.Logistics;
+using PEIA.Shared.Infra.Notifications;
 
 namespace PEIA.Shared.Infra.Data;
 
@@ -13,11 +16,17 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
 
     public DbSet<Centro> Centros => Set<Centro>();
     public DbSet<UsuarioCentro> UsuarioCentros => Set<UsuarioCentro>();
+    public DbSet<Categoria> Categorias => Set<Categoria>();
+    public DbSet<Producto> Productos => Set<Producto>();
+    public DbSet<Stock> Stocks => Set<Stock>();
+    public DbSet<Movimiento> Movimientos => Set<Movimiento>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     // DbSets de Logística
     public DbSet<Ruta> Rutas => Set<Ruta>();
     public DbSet<Pedido> Pedidos => Set<Pedido>();
     public DbSet<SLA> SLAs => Set<SLA>();
     public DbSet<EntregaEstado> EntregaEstados => Set<EntregaEstado>();
+    public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -65,6 +74,84 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
                 .HasForeignKey(uc => uc.CentroId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+        // Configuración de Inventario
+        builder.Entity<Categoria>(b =>
+        {
+            b.ToTable("Categorias");
+            b.HasKey(c => c.Id);
+            b.Property(c => c.Nombre).HasMaxLength(120).IsRequired();
+            b.Property(c => c.Descripcion).HasMaxLength(500);
+            b.HasIndex(c => c.Nombre).IsUnique();
+        });
+
+        builder.Entity<Producto>(b =>
+        {
+            b.ToTable("Productos");
+            b.HasKey(p => p.Id);
+            b.Property(p => p.Sku).HasMaxLength(60).IsRequired();
+            b.Property(p => p.Nombre).HasMaxLength(180).IsRequired();
+            b.Property(p => p.Descripcion).HasMaxLength(500);
+            b.Property(p => p.UnidadMedida).HasMaxLength(40).IsRequired();
+            b.Property(p => p.PrecioUnitario).HasPrecision(12, 2);
+            b.HasIndex(p => p.Sku).IsUnique();
+
+            b.HasOne(p => p.Categoria)
+                .WithMany(c => c.Productos)
+                .HasForeignKey(p => p.CategoriaId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Stock>(b =>
+        {
+            b.ToTable("Stocks");
+            b.HasKey(s => s.Id);
+            b.Property(s => s.Ubicacion).HasMaxLength(120);
+            b.HasIndex(s => new { s.ProductoId, s.CentroId }).IsUnique();
+
+            b.HasOne(s => s.Producto)
+                .WithMany(p => p.Stocks)
+                .HasForeignKey(s => s.ProductoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(s => s.Centro)
+                .WithMany()
+                .HasForeignKey(s => s.CentroId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Movimiento>(b =>
+        {
+            b.ToTable("Movimientos");
+            b.HasKey(m => m.Id);
+            b.Property(m => m.Tipo).HasMaxLength(30).IsRequired();
+            b.Property(m => m.Motivo).HasMaxLength(300);
+            b.Property(m => m.Referencia).HasMaxLength(120);
+            b.HasIndex(m => new { m.CentroId, m.FechaMovimiento });
+
+            b.HasOne(m => m.Producto)
+                .WithMany(p => p.Movimientos)
+                .HasForeignKey(m => m.ProductoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasOne(m => m.Centro)
+                .WithMany()
+                .HasForeignKey(m => m.CentroId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasOne(m => m.Usuario)
+                .WithMany()
+                .HasForeignKey(m => m.UsuarioId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<SystemSetting>(b =>
+        {
+            b.ToTable("SystemSettings");
+            b.HasKey(s => s.Key);
+            b.Property(s => s.Key).HasMaxLength(120).IsRequired();
+            b.Property(s => s.Value).HasColumnType("jsonb").IsRequired();
+        });
+
         // Configuración de Rutas
         builder.Entity<Ruta>(b =>
         {
@@ -136,6 +223,17 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
                 .WithMany()
                 .HasForeignKey(ee => ee.ActualizadoPorId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Configuración de Notificaciones
+        builder.Entity<Notificacion>(b =>
+        {
+            b.ToTable("Notificaciones");
+            b.HasKey(n => n.Id);
+            b.Property(n => n.Tipo).HasMaxLength(30).IsRequired();
+            b.Property(n => n.Titulo).HasMaxLength(250).IsRequired();
+            b.Property(n => n.Descripcion).HasMaxLength(1000);
+            b.HasIndex(n => new { n.CentroId, n.FechaCreacion });
         });
     }
 }

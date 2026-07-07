@@ -1,51 +1,40 @@
-// PEIA — Usuarios JS
-// Mock data, DataTable, Modal, filters
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!PEIA.requireAuth()) return;
+  PEIA.hydrateShell();
+  PEIA.bindWarehouseSelector();
 
-document.addEventListener('DOMContentLoaded', () => {
-
-  // ─── Mock Data ──────────────────────────────
-  const usuarios = [
-    { id: 1, nombre: 'Ariel Guevara',     email: 'admin@peia.com',       userName: 'admin',       rol: 'Administrador',     centros: ['Bodega Norte', 'Bodega Sur'], estado: 'Activo' },
-    { id: 2, nombre: 'Carlos Inventario', email: 'inventario@peia.com', userName: 'inventario', rol: 'OperadorInventario', centros: ['Bodega Norte'],               estado: 'Activo' },
-    { id: 3, nombre: 'Laura Logística',   email: 'logistica@peia.com', userName: 'logistica',  rol: 'Logistica',          centros: ['Bodega Sur'],                  estado: 'Activo' },
-    { id: 4, nombre: 'María Reportes',    email: 'reportes@peia.com',  userName: 'reportes',   rol: 'Reportes',           centros: ['Bodega Norte', 'Bodega Sur'], estado: 'Activo' },
-    { id: 5, nombre: 'Pedro Supervisor',  email: 'supervisor@peia.com',userName: 'supervisor', rol: 'Supervisor',         centros: ['Bodega Norte'],               estado: 'Activo' },
-    { id: 6, nombre: 'Ana García',        email: 'ana@peia.com',       userName: 'ana.garcia', rol: 'OperadorInventario', centros: ['Bodega Sur'],                  estado: 'Inactivo' },
-    { id: 7, nombre: 'Roberto Méndez',    email: 'roberto@peia.com',   userName: 'r.mendez',   rol: 'Logistica',          centros: ['Bodega Norte'],               estado: 'Activo' },
-    { id: 8, nombre: 'Sofía Torres',      email: 'sofia@peia.com',     userName: 's.torres',   rol: 'Reportes',           centros: ['Bodega Sur'],                  estado: 'Activo' },
-    { id: 9, nombre: 'Diego Ramírez',     email: 'diego@peia.com',     userName: 'd.ramirez',  rol: 'OperadorInventario', centros: ['Bodega Norte', 'Bodega Sur'], estado: 'Activo' },
-    { id: 10, nombre: 'Valentina López',  email: 'valentina@peia.com', userName: 'v.lopez',    rol: 'Supervisor',         centros: ['Bodega Sur'],                  estado: 'Inactivo' },
-  ];
+  let usuarios = [];
+  let roles = [];
+  let centros = [];
 
   const rolLabels = {
-    'Administrador': 'Administrador',
-    'OperadorInventario': 'Inventario',
-    'Logistica': 'Logística',
-    'Reportes': 'Reportes',
-    'Supervisor': 'Supervisor',
+    Administrador: 'Administrador',
+    OperadorInventario: 'Inventario',
+    Logistica: 'Logística',
+    Reportes: 'Reportes',
+    Supervisor: 'Supervisor',
   };
 
   const rolColors = {
-    'Administrador': 'status-info',
-    'OperadorInventario': 'status-active',
-    'Logistica': 'status-warning',
-    'Reportes': 'status-pending',
-    'Supervisor': 'status-critical',
+    Administrador: 'status-info',
+    OperadorInventario: 'status-active',
+    Logistica: 'status-warning',
+    Reportes: 'status-pending',
+    Supervisor: 'status-critical',
   };
 
-  // ─── DataTable ──────────────────────────────
   const table = new DataTable(document.getElementById('usersTable'), {
     columns: [
       { key: 'nombre', label: 'Nombre', render: (val, row) => `
         <div style="display:flex;align-items:center;gap:10px;">
-          <div class="avatar" style="width:30px;height:30px;font-size:11px;">${row.nombre.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+          <div class="avatar" style="width:30px;height:30px;font-size:11px;">${val.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
           <div>
             <div class="cell-primary">${val}</div>
             <div style="font-size:11.5px;color:var(--text-muted);">@${row.userName}</div>
           </div>
         </div>` },
       { key: 'email', label: 'Email' },
-      { key: 'rol', label: 'Rol', render: (val) => `<span class="status-badge ${rolColors[val] || ''}">${rolLabels[val] || val}</span>` },
+      { key: 'rol', label: 'Rol', render: (val) => `<span class="status-badge ${rolColors[val] || ''}">${rolLabels[val] || val || 'Sin rol'}</span>` },
       { key: 'centros', label: 'Centros', render: (val) => val.map(c => `<span class="tag">${c}</span>`).join(' ') },
       { key: 'estado', label: 'Estado', render: (val) => `<span class="status-badge ${val === 'Activo' ? 'status-active' : 'status-inactive'}"><span class="status-dot-sm"></span>${val}</span>` },
       { key: 'id', label: 'Acciones', sortable: false, render: (val, row) => `
@@ -60,14 +49,27 @@ document.addEventListener('DOMContentLoaded', () => {
           </button>
         </div>` },
     ],
-    data: usuarios,
+    data: [],
     pageSize: 8,
   });
 
-  // ─── Search & Filters ───────────────────────
   const searchInput = document.getElementById('searchUsers');
   const filterRol = document.getElementById('filterRol');
   const filterEstado = document.getElementById('filterEstado');
+
+  function mapUsuario(u) {
+    return {
+      id: u.id,
+      nombre: u.nombreCompleto,
+      email: u.email,
+      userName: u.userName,
+      rol: u.roles?.[0] || '',
+      roles: u.roles || [],
+      centros: (u.centros || []).map(c => c.nombre),
+      centroIds: (u.centros || []).map(c => c.id),
+      estado: u.activo ? 'Activo' : 'Inactivo',
+    };
+  }
 
   function applyFilters() {
     const term = searchInput.value.toLowerCase();
@@ -89,122 +91,106 @@ document.addEventListener('DOMContentLoaded', () => {
     table.setData(data);
   }
 
+  async function loadData() {
+    const [usuariosRaw, rolesRaw, centrosRaw] = await Promise.all([
+      PEIA.request('/api/usuarios'),
+      PEIA.request('/api/roles'),
+      PEIA.request('/api/centros')
+    ]);
+    usuarios = usuariosRaw.map(mapUsuario);
+    roles = rolesRaw;
+    centros = centrosRaw;
+    applyFilters();
+  }
+
+  function userFields(isEdit = false) {
+    return [
+      { key: 'nombre', label: 'Nombre completo', type: 'text', required: true },
+      { key: 'email', label: 'Correo electrónico', type: 'email', required: true, half: true },
+      { key: 'userName', label: 'Nombre de usuario', type: 'text', required: true, half: true },
+      { key: 'password', label: isEdit ? 'Nueva contraseña' : 'Contraseña', type: 'password', required: !isEdit, half: true },
+      { key: 'rol', label: 'Rol', type: 'select', required: true, half: true, options: roles.map(r => ({ value: r.nombre, label: rolLabels[r.nombre] || r.nombre })) },
+      { key: 'centro1', label: 'Centro 1', type: 'select', required: true, half: true, options: centros.map(c => ({ value: c.id, label: c.nombre })) },
+      { key: 'centro2', label: 'Centro 2', type: 'select', half: true, options: centros.map(c => ({ value: c.id, label: c.nombre })) },
+      { key: 'activo', label: 'Usuario activo', type: 'checkbox', value: true },
+    ];
+  }
+
+  function buildPayload(data, isEdit = false) {
+    const centroIds = [data.centro1, data.centro2].filter(Boolean);
+    return {
+      userName: data.userName,
+      email: data.email,
+      nombreCompleto: data.nombre,
+      password: data.password || '',
+      activo: !!data.activo,
+      roles: data.rol ? [data.rol] : [],
+      centroIds: [...new Set(centroIds)]
+    };
+  }
+
   searchInput.addEventListener('input', applyFilters);
   filterRol.addEventListener('change', applyFilters);
   filterEstado.addEventListener('change', applyFilters);
 
-  // ─── Nuevo Usuario Modal ────────────────────
-  const userFormFields = [
-    { key: 'nombre', label: 'Nombre completo', type: 'text', placeholder: 'Ej: Juan Pérez', required: true },
-    { key: 'email', label: 'Correo electrónico', type: 'email', placeholder: 'ejemplo@peia.com', required: true, half: true },
-    { key: 'userName', label: 'Nombre de usuario', type: 'text', placeholder: 'j.perez', required: true, half: true },
-    { key: 'password', label: 'Contraseña', type: 'password', placeholder: '••••••••', required: true, half: true },
-    { key: 'rol', label: 'Rol', type: 'select', required: true, half: true, options: [
-      { value: 'Administrador', label: 'Administrador' },
-      { value: 'OperadorInventario', label: 'Inventario' },
-      { value: 'Logistica', label: 'Logística' },
-      { value: 'Reportes', label: 'Reportes' },
-      { value: 'Supervisor', label: 'Supervisor' },
-    ]},
-    { key: 'activo', label: 'Usuario activo', type: 'checkbox', value: true },
-  ];
-
   document.getElementById('btnNuevoUsuario').addEventListener('click', () => {
     new ModalForm({
       title: 'Nuevo usuario',
-      fields: userFormFields,
-      onSave: (data) => {
-        // Mock: just add to array and refresh
-        usuarios.push({
-          id: usuarios.length + 1,
-          nombre: data.nombre,
-          email: data.email,
-          userName: data.userName,
-          rol: data.rol,
-          centros: ['Bodega Norte'],
-          estado: data.activo ? 'Activo' : 'Inactivo',
-        });
-        applyFilters();
+      fields: userFields(false),
+      onSave: async data => {
+        try {
+          await PEIA.request('/api/usuarios', { method: 'POST', body: JSON.stringify(buildPayload(data)) });
+          await loadData();
+        } catch (error) {
+          alert(error.message);
+        }
       },
     });
   });
 
-  // ─── Edit / Toggle via event delegation ─────
-  document.getElementById('usersTable').addEventListener('click', (e) => {
+  document.getElementById('usersTable').addEventListener('click', e => {
     const editBtn = e.target.closest('.btn-edit');
     const toggleBtn = e.target.closest('.btn-toggle');
 
     if (editBtn) {
-      const id = parseInt(editBtn.dataset.id);
-      const user = usuarios.find(u => u.id === id);
+      const user = usuarios.find(u => u.id === editBtn.dataset.id);
       if (!user) return;
-
-      const editFields = [
-        { key: 'nombre', label: 'Nombre completo', type: 'text', required: true },
-        { key: 'email', label: 'Correo electrónico', type: 'email', required: true, half: true },
-        { key: 'userName', label: 'Nombre de usuario', type: 'text', required: true, half: true },
-        { key: 'rol', label: 'Rol', type: 'select', required: true, options: [
-          { value: 'Administrador', label: 'Administrador' },
-          { value: 'OperadorInventario', label: 'Inventario' },
-          { value: 'Logistica', label: 'Logística' },
-          { value: 'Reportes', label: 'Reportes' },
-          { value: 'Supervisor', label: 'Supervisor' },
-        ]},
-        { key: 'activo', label: 'Usuario activo', type: 'checkbox' },
-      ];
-
       new ModalForm({
-        title: `Editar usuario — ${user.nombre}`,
-        fields: editFields,
-        initialData: { ...user, activo: user.estado === 'Activo' },
-        onSave: (data) => {
-          Object.assign(user, {
-            nombre: data.nombre,
-            email: data.email,
-            userName: data.userName,
-            rol: data.rol,
-            estado: data.activo ? 'Activo' : 'Inactivo',
-          });
-          applyFilters();
+        title: `Editar usuario - ${user.nombre}`,
+        fields: userFields(true),
+        initialData: { ...user, activo: user.estado === 'Activo', centro1: user.centroIds[0] || '', centro2: user.centroIds[1] || '' },
+        onSave: async data => {
+          try {
+            await PEIA.request(`/api/usuarios/${user.id}`, { method: 'PUT', body: JSON.stringify(buildPayload(data, true)) });
+            await loadData();
+          } catch (error) {
+            alert(error.message);
+          }
         },
       });
     }
 
     if (toggleBtn) {
-      const id = parseInt(toggleBtn.dataset.id);
-      const user = usuarios.find(u => u.id === id);
-      if (user) {
-        user.estado = user.estado === 'Activo' ? 'Inactivo' : 'Activo';
-        applyFilters();
-      }
+      const user = usuarios.find(u => u.id === toggleBtn.dataset.id);
+      if (!user) return;
+      PEIA.request(`/api/usuarios/${user.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          userName: user.userName,
+          email: user.email,
+          nombreCompleto: user.nombre,
+          password: '',
+          activo: user.estado !== 'Activo',
+          roles: user.roles,
+          centroIds: user.centroIds
+        })
+      }).then(loadData).catch(error => alert(error.message));
     }
   });
 
-  // ─── Warehouse selector ─────────────────────
-  const warehouseSelector = document.querySelector('.warehouse-selector');
-  warehouseSelector.addEventListener('click', (e) => { e.stopPropagation(); warehouseSelector.classList.toggle('open'); });
-  document.querySelectorAll('.warehouse-opt').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      document.querySelectorAll('.warehouse-opt').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('activeCentro').textContent = btn.textContent;
-      warehouseSelector.classList.remove('open');
-    });
-  });
-  document.addEventListener('click', () => warehouseSelector.classList.remove('open'));
-
-  // ─── Logout & User ─────────────────────────
-  document.getElementById('btnLogout').addEventListener('click', () => {
-    localStorage.removeItem('peia_token');
-    localStorage.removeItem('peia_user');
-    window.location.href = '/login.html';
-  });
-
-  const user = JSON.parse(localStorage.getItem('peia_user') || '{}');
-  if (user.nombreCompleto) {
-    document.getElementById('userName').textContent = user.nombreCompleto;
-    const initials = user.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    document.getElementById('userAvatar').textContent = initials;
+  try {
+    await loadData();
+  } catch (error) {
+    alert(error.message);
   }
 });
