@@ -5,6 +5,7 @@ using PEIA.Shared.Infra.Identity;
 using PEIA.Shared.Infra.Inventory;
 using PEIA.Shared.Infra.Logistics;
 using PEIA.Shared.Infra.Notifications;
+using PEIA.Shared.Infra.Automation;
 
 namespace PEIA.Shared.Infra.Data;
 
@@ -27,6 +28,7 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
     public DbSet<SLA> SLAs => Set<SLA>();
     public DbSet<EntregaEstado> EntregaEstados => Set<EntregaEstado>();
     public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
+    public DbSet<ReglaAutomatizacion> ReglasAutomatizacion => Set<ReglaAutomatizacion>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -234,6 +236,18 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
             b.Property(n => n.Titulo).HasMaxLength(250).IsRequired();
             b.Property(n => n.Descripcion).HasMaxLength(1000);
             b.HasIndex(n => new { n.CentroId, n.FechaCreacion });
+        });
+
+        // Configuración de Reglas de Automatización
+        builder.Entity<ReglaAutomatizacion>(b =>
+        {
+            b.ToTable("ReglasAutomatizacion");
+            b.HasKey(r => r.Id);
+            b.Property(r => r.Nombre).HasMaxLength(150).IsRequired();
+            b.Property(r => r.EventoOrigen).HasMaxLength(50).IsRequired();
+            b.Property(r => r.Condicion).HasMaxLength(250).IsRequired();
+            b.Property(r => r.Accion).HasMaxLength(50).IsRequired();
+            b.Property(r => r.Responsable).HasMaxLength(150).IsRequired();
         });
     }
 }

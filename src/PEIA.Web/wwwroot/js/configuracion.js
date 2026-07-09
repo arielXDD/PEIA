@@ -230,6 +230,150 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('btnRefreshSys').addEventListener('click', loadSistema);
 
+  /* ── Reglas de Automatización ───────────────────────── */
+  let reglasTableInstance = null;
+
+  async function loadReglas() {
+    const reglas = await safeLoad('/api/reglas-automatizacion');
+    const tableContainer = document.getElementById('reglasTable');
+    if (!tableContainer) return;
+
+    if (!reglas) {
+      tableContainer.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">No se pudieron cargar las reglas.</p>';
+      return;
+    }
+
+    const friendlyEventos = {
+      stock_critico: 'Stock Crítico',
+      nuevo_pedido: 'Nuevo Pedido',
+      sla_vencido: 'SLA Vencido'
+    };
+
+    const friendlyAcciones = {
+      notificar: 'Notificar en UI/SignalR',
+      email: 'Enviar Correo'
+    };
+
+    if (reglasTableInstance) {
+      reglasTableInstance.setData(reglas);
+    } else {
+      reglasTableInstance = new DataTable(tableContainer, {
+        pageSize: 5,
+        columns: [
+          { key: 'nombre', label: 'Nombre' },
+          { key: 'eventoOrigen', label: 'Evento', render: val => friendlyEventos[val] || val },
+          { key: 'condicion', label: 'Condición' },
+          { key: 'accion', label: 'Acción', render: val => friendlyAcciones[val] || val },
+          { key: 'responsable', label: 'Responsable' },
+          { key: 'activa', label: 'Estado', render: val => `<span class="status-badge ${val ? 'status-active' : 'status-inactive'}"><span class="status-dot-sm"></span>${val ? 'Activa' : 'Inactiva'}</span>` },
+          { key: 'id', label: 'Acciones', sortable: false, render: val => `
+            <div class="cell-actions">
+              <button class="btn-icon btn-edit-regla" data-id="${val}" title="Editar">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button class="btn-icon danger btn-delete-regla" data-id="${val}" title="Eliminar">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
+            </div>`
+          }
+        ],
+        data: reglas
+      });
+    }
+
+    // Enlazar eventos de editar y eliminar
+    tableContainer.querySelectorAll('.btn-edit-regla').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        try {
+          const regla = await PEIA.request(`/api/reglas-automatizacion/${id}`);
+          new ModalForm({
+            title: `Editar regla — ${regla.nombre}`,
+            fields: reglaFields(),
+            initialData: regla,
+            onSave: async data => {
+              try {
+                await PEIA.request(`/api/reglas-automatizacion/${id}`, {
+                  method: 'PUT',
+                  body: JSON.stringify({
+                    nombre: data.nombre,
+                    eventoOrigen: data.eventoOrigen,
+                    condicion: data.condicion,
+                    accion: data.accion,
+                    responsable: data.responsable,
+                    activa: data.activa !== false
+                  })
+                });
+                await loadReglas();
+              } catch (error) {
+                alert(error.message);
+              }
+            }
+          });
+        } catch (error) {
+          alert(error.message);
+        }
+      });
+    });
+
+    tableContainer.querySelectorAll('.btn-delete-regla').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        if (confirm('¿Estás seguro de que deseas eliminar esta regla de automatización?')) {
+          try {
+            await PEIA.request(`/api/reglas-automatizacion/${id}`, { method: 'DELETE' });
+            await loadReglas();
+          } catch (error) {
+            alert(error.message);
+          }
+        }
+      });
+    });
+  }
+
+  function reglaFields() {
+    return [
+      { key: 'nombre', label: 'Nombre de la regla', type: 'text', required: true },
+      { key: 'eventoOrigen', label: 'Evento de origen', type: 'select', options: [
+          { value: 'stock_critico', label: 'Stock Crítico' },
+          { value: 'nuevo_pedido', label: 'Nuevo Pedido' },
+          { value: 'sla_vencido', label: 'SLA Vencido' }
+        ], required: true, half: true },
+      { key: 'accion', label: 'Acción a ejecutar', type: 'select', options: [
+          { value: 'notificar', label: 'Notificar en UI/SignalR' },
+          { value: 'email', label: 'Enviar Correo Electrónico' }
+        ], required: true, half: true },
+      { key: 'condicion', label: 'Condición (Ej: Todos, o SKU=SKU123)', type: 'text', required: true, value: 'Todos' },
+      { key: 'responsable', label: 'Responsable asignado', type: 'text', required: true },
+      { key: 'activa', label: 'Activa', type: 'checkbox', value: true }
+    ];
+  }
+
+  document.getElementById('btnNuevaRegla')?.addEventListener('click', () => {
+    new ModalForm({
+      title: 'Nueva regla de automatización',
+      fields: reglaFields(),
+      onSave: async data => {
+        try {
+          await PEIA.request('/api/reglas-automatizacion', {
+            method: 'POST',
+            body: JSON.stringify({
+              nombre: data.nombre,
+              eventoOrigen: data.eventoOrigen,
+              condicion: data.condicion,
+              accion: data.accion,
+              responsable: data.responsable,
+              activa: data.activa !== false
+            })
+          });
+          await loadReglas();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+    });
+  });
+
   /* ── Logout ───────────────────────────────────────── */
   document.getElementById('btnLogout')?.addEventListener('click', () => {
     PEIA.logout();
@@ -242,5 +386,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadNotificacionesPrefs(),
     loadSeguridad(),
     loadSistema(),
+    loadReglas(),
   ]);
 });

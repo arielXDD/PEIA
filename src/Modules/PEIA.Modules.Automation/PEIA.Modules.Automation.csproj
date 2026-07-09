@@ -1,7 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Shared\PEIA.Shared.Kernel\PEIA.Shared.Kernel.csproj" />
+    <ProjectReference Include="..\..\Shared\PEIA.Shared.Infra\PEIA.Shared.Infra.csproj" />
+    <ProjectReference Include="..\PEIA.Modules.Inventory\PEIA.Modules.Inventory.csproj" />
+    <ProjectReference Include="..\PEIA.Modules.Logistics\PEIA.Modules.Logistics.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

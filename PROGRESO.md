@@ -147,7 +147,7 @@ ecoha esor, atrfeO
 | `[x]`  | Notificaciones en tiempo real de stock critico                                      | 06/07/2026           |
 | `[x]`  | Notificaciones de SLA vencido                                                       | 06/07/2026           |
 | `[x]`  | Notificaciones de nuevos pedidos                                                    | 06/07/2026           |
-| `[ ]`  | Reglas de automatizacion configurables por admin                                    | —                    |
+| `[x]`  | Reglas de automatizacion configurables por admin                                    | 08/07/2026           |
 | `[x]`  | Panel de notificaciones en UI, persistidas en BD y en vivo por SignalR (JMM + MJSG) | 06/07/2026           |
 | `[x]`  | Pipeline CI/CD basico (GitHub Actions)                                              | 03/07/2026           |
 | `[x]`  | Configuracion de entorno de pruebas                                                 | 06/07/2026           |
