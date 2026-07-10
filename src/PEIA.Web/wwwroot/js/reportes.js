@@ -239,53 +239,265 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('filterEstadoPed').addEventListener('change', applyPedFilter);
 
-  // ─── Export: PDF ────────────────────────────
-  function exportPDF(title, headers, rows) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text(`PEIA — ${title}`, 14, 20);
-    doc.setFontSize(10);
-    doc.setTextColor(150);
-    doc.text(`Generado: ${new Date().toLocaleString('es-MX')}`, 14, 28);
-    doc.autoTable({ head: [headers], body: rows, startY: 34, styles: { fontSize: 9, cellPadding: 3 }, headStyles: { fillColor: [29, 78, 216] } });
-    doc.save(`PEIA_${title.replace(/\s/g, '_')}.pdf`);
+  // ─── Export Modal System ────────────────────────────────────
+
+  // SVG icons
+  const SVG_PDF_FILE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+  const SVG_XLS_FILE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M4 14h16"/><path d="M9 4v16"/><path d="M14 4v16"/></svg>`;
+
+  // PDF step labels per report type
+  const pdfStepLabels = {
+    inv:  ['Recopilando datos del inventario...', 'Generando tabla de productos...', 'Finalizando formato PDF...'],
+    mov:  ['Recopilando movimientos...', 'Renderizando gráficas de tendencia...', 'Finalizando formato PDF...'],
+    ped:  ['Recopilando pedidos...', 'Procesando estados y SLA...', 'Finalizando formato PDF...'],
+  };
+  const excelStepLabels = {
+    inv:  ['Recopilando datos del inventario...', 'Construyendo hoja de cálculo...', 'Finalizando archivo XLSX...'],
+    mov:  ['Recopilando movimientos...', 'Aplicando formato de tabla...', 'Finalizando archivo XLSX...'],
+    ped:  ['Recopilando pedidos...', 'Aplicando estilos y colores...', 'Finalizando archivo XLSX...'],
+  };
+
+  // State
+  let _pendingExportFn = null;  // () => void — actual download fn
+  let _retryFn = null;          // () => void — repeat current flow from progress
+  let _cancelled = false;
+  let _progressTimer = null;
+
+  // Helpers
+  function showOverlay(id)  { document.getElementById(id).classList.add('is-visible'); }
+  function hideOverlay(id)  { document.getElementById(id).classList.remove('is-visible'); }
+  function hideAllOverlays() {
+    ['overlayPdf','overlayExcel','overlayProgress','overlaySuccess','overlayError']
+      .forEach(id => hideOverlay(id));
   }
 
-  function exportExcel(title, headers, rows) {
-    const wsData = [headers, ...rows];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, title.slice(0, 31));
-    XLSX.writeFile(wb, `PEIA_${title.replace(/\s/g, '_')}.xlsx`);
+  // Orientation selection (PDF config)
+  document.getElementById('orientVertical').addEventListener('click', () => {
+    document.getElementById('orientVertical').classList.add('selected');
+    document.getElementById('orientHorizontal').classList.remove('selected');
+  });
+  document.getElementById('orientHorizontal').addEventListener('click', () => {
+    document.getElementById('orientHorizontal').classList.add('selected');
+    document.getElementById('orientVertical').classList.remove('selected');
+  });
+
+  // Close / Cancel buttons (config modals)
+  ['closePdfConfig','cancelPdfConfig'].forEach(id =>
+    document.getElementById(id).addEventListener('click', hideAllOverlays));
+  ['closeExcelConfig','cancelExcelConfig'].forEach(id =>
+    document.getElementById(id).addEventListener('click', hideAllOverlays));
+
+  // Cancel / Close (other modals)
+  document.getElementById('cancelProgress').addEventListener('click', () => {
+    _cancelled = true;
+    clearTimeout(_progressTimer);
+    hideAllOverlays();
+  });
+  document.getElementById('closeSuccess').addEventListener('click', hideAllOverlays);
+  document.getElementById('cancelError').addEventListener('click', hideAllOverlays);
+  document.getElementById('retryExport').addEventListener('click', () => {
+    hideOverlay('overlayError');
+    if (_retryFn) _retryFn();
+  });
+
+  // Click outside to close config modals
+  ['overlayPdf','overlayExcel'].forEach(id => {
+    document.getElementById(id).addEventListener('click', e => {
+      if (e.target === document.getElementById(id)) hideAllOverlays();
+    });
+  });
+
+  // ── Progress animation ──────────────────────────────────────
+  function runProgressAnimation(stepTexts, isExcel, onComplete) {
+    _cancelled = false;
+
+    // Setup spinner colour
+    const spinner = document.getElementById('progressSpinner');
+    spinner.className = 'progress-spinner' + (isExcel ? ' excel-spinner' : '');
+
+    // Reset progress bar
+    const bar = document.getElementById('progressBarFill');
+    bar.className = 'progress-bar-fill' + (isExcel ? ' excel-fill' : '');
+    bar.style.width = '0%';
+
+    // Reset steps
+    const steps = [
+      document.getElementById('pstep1'),
+      document.getElementById('pstep2'),
+      document.getElementById('pstep3'),
+    ];
+    const activeClass = isExcel ? 'active excel-active' : 'active';
+    steps.forEach((s, i) => {
+      s.className = 'pstep';
+      s.querySelector('.pstep-icon').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg>`;
+      document.getElementById(`pstep${i+1}text`).textContent = stepTexts[i];
+    });
+
+    const DONE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+    const SPIN_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin .7s linear infinite"><circle cx="12" cy="12" r="10" stroke-dasharray="30 10"/></svg>`;
+
+    const delays = [0, 900, 1900];  // ms when each step becomes active
+    const barPcts = ['10%', '50%', '85%'];
+
+    delays.forEach((delay, i) => {
+      _progressTimer = setTimeout(() => {
+        if (_cancelled) return;
+        if (i > 0) {
+          // mark previous as done
+          steps[i-1].className = 'pstep done';
+          steps[i-1].querySelector('.pstep-icon').innerHTML = DONE_ICON;
+        }
+        steps[i].className = `pstep ${activeClass}`;
+        steps[i].querySelector('.pstep-icon').innerHTML = SPIN_ICON;
+        bar.style.width = barPcts[i];
+      }, delay);
+    });
+
+    _progressTimer = setTimeout(() => {
+      if (_cancelled) return;
+      // Mark last step done
+      steps[2].className = 'pstep done';
+      steps[2].querySelector('.pstep-icon').innerHTML = DONE_ICON;
+      bar.style.width = '100%';
+
+      setTimeout(() => {
+        if (_cancelled) return;
+        onComplete();
+      }, 350);
+    }, 3000);
   }
 
-  document.getElementById('exportInvPdf').addEventListener('click', () => {
-    exportPDF('Reporte Inventario', ['Producto', 'Categoría', 'Stock', 'Mínimo', 'Valor ($)'],
-      productos.map(r => [r.producto, r.categoria, r.stock, r.minimo, `$${r.valor.toLocaleString()}`]));
-  });
-  document.getElementById('exportInvExcel').addEventListener('click', () => {
-    exportExcel('Inventario', ['Producto', 'Categoría', 'Stock', 'Mínimo', 'Valor ($)'],
-      productos.map(r => [r.producto, r.categoria, r.stock, r.minimo, r.valor]));
-  });
+  // ── Open config modals ─────────────────────────────────────
+  function openPdfConfig(reportKey, title, headers, getRows) {
+    // Update subtitle with report name
+    document.querySelector('#emPdfTitle').textContent = `Exportar ${title} a PDF`;
+    hideAllOverlays();
+    showOverlay('overlayPdf');
 
-  document.getElementById('exportMovPdf').addEventListener('click', () => {
-    exportPDF('Reporte Movimientos', ['Fecha', 'Tipo', 'Producto', 'Cantidad', 'Referencia'],
-      movimientos.map(r => [r.fecha, r.tipo, r.producto, r.cantidad, r.referencia]));
-  });
-  document.getElementById('exportMovExcel').addEventListener('click', () => {
-    exportExcel('Movimientos', ['Fecha', 'Tipo', 'Producto', 'Cantidad', 'Referencia'],
-      movimientos.map(r => [r.fecha, r.tipo, r.producto, r.cantidad, r.referencia]));
-  });
+    // Wire confirm button
+    document.getElementById('confirmPdfConfig').onclick = () => {
+      const horizontal = document.getElementById('orientHorizontal').classList.contains('selected');
+      startExport({
+        type: 'pdf',
+        isExcel: false,
+        reportKey,
+        title,
+        fileName: `PEIA_${title.replace(/\s/g,'_')}.pdf`,
+        doExport: () => {
+          const { jsPDF } = window.jspdf;
+          const orientation = horizontal ? 'landscape' : 'portrait';
+          const doc = new jsPDF({ orientation });
+          doc.setFontSize(16);
+          doc.text(`PEIA — ${title}`, 14, 20);
+          doc.setFontSize(10);
+          doc.setTextColor(150);
+          doc.text(`Generado: ${new Date().toLocaleString('es-MX')}`, 14, 28);
+          doc.autoTable({ head: [headers], body: getRows(), startY: 34, styles: { fontSize: 9, cellPadding: 3 }, headStyles: { fillColor: [29, 78, 216] } });
+          doc.save(`PEIA_${title.replace(/\s/g,'_')}.pdf`);
+        },
+      });
+    };
+  }
 
-  document.getElementById('exportPedPdf').addEventListener('click', () => {
-    exportPDF('Reporte Pedidos', ['Pedido', 'Cliente', 'Estado', 'Fecha pedido', 'Entrega estimada', 'SLA'],
-      pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado] || r.estado, r.fecha, r.fechaEstimada, r.sla]));
-  });
-  document.getElementById('exportPedExcel').addEventListener('click', () => {
-    exportExcel('Pedidos', ['Pedido', 'Cliente', 'Estado', 'Fecha pedido', 'Entrega estimada', 'SLA'],
-      pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado] || r.estado, r.fecha, r.fechaEstimada, r.sla]));
-  });
+  function openExcelConfig(reportKey, title, headers, getRows) {
+    document.querySelector('#emExcelTitle').textContent = `Exportar ${title} a Excel`;
+    hideAllOverlays();
+    showOverlay('overlayExcel');
+
+    document.getElementById('confirmExcelConfig').onclick = () => {
+      startExport({
+        type: 'excel',
+        isExcel: true,
+        reportKey,
+        title,
+        fileName: `PEIA_${title.replace(/\s/g,'_')}.xlsx`,
+        doExport: () => {
+          const wsData = [headers, ...getRows()];
+          const ws = XLSX.utils.aoa_to_sheet(wsData);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, title.slice(0, 31));
+          XLSX.writeFile(wb, `PEIA_${title.replace(/\s/g,'_')}.xlsx`);
+        },
+      });
+    };
+  }
+
+  // ── Core export flow ───────────────────────────────────────
+  function startExport({ type, isExcel, reportKey, title, fileName, doExport }) {
+    hideAllOverlays();
+    showOverlay('overlayProgress');
+
+    const stepLabels = isExcel ? excelStepLabels[reportKey] : pdfStepLabels[reportKey];
+
+    _retryFn = () => {
+      showOverlay('overlayProgress');
+      run();
+    };
+
+    function run() {
+      runProgressAnimation(stepLabels, isExcel, () => {
+        try {
+          doExport();
+          // Show success
+          hideOverlay('overlayProgress');
+
+          // File card
+          const iconEl = document.getElementById('successFileIcon');
+          iconEl.className = `success-file-icon ${isExcel ? 'excel-icon' : 'pdf-icon'}`;
+          iconEl.innerHTML = isExcel ? SVG_XLS_FILE : SVG_PDF_FILE;
+
+          document.getElementById('successFileName').textContent = fileName;
+          document.getElementById('successFileMeta').textContent = `Generado hace un momento`;
+          document.getElementById('successDesc').textContent =
+            isExcel
+              ? `Tu hoja de cálculo está lista para descargar. Contiene el reporte de ${title}.`
+              : `Tu documento PDF está listo para descargar. Contiene el reporte de ${title}.`;
+
+          const dlBtn = document.getElementById('successDownloadBtn');
+          dlBtn.className = `success-btn-download${isExcel ? ' excel-dl' : ''}`;
+          dlBtn.onclick = () => { doExport(); hideAllOverlays(); };
+
+          showOverlay('overlaySuccess');
+        } catch (err) {
+          hideOverlay('overlayProgress');
+          showOverlay('overlayError');
+        }
+      });
+    }
+
+    run();
+  }
+
+  // ── Wire up 6 export buttons ───────────────────────────────
+  document.getElementById('exportInvPdf').addEventListener('click', () =>
+    openPdfConfig('inv', 'Reporte Inventario',
+      ['Producto','Categoría','Stock','Mínimo','Valor ($)'],
+      () => productos.map(r => [r.producto, r.categoria, r.stock, r.minimo, `$${r.valor.toLocaleString()}`])));
+
+  document.getElementById('exportInvExcel').addEventListener('click', () =>
+    openExcelConfig('inv', 'Inventario',
+      ['Producto','Categoría','Stock','Mínimo','Valor ($)'],
+      () => productos.map(r => [r.producto, r.categoria, r.stock, r.minimo, r.valor])));
+
+  document.getElementById('exportMovPdf').addEventListener('click', () =>
+    openPdfConfig('mov', 'Reporte Movimientos',
+      ['Fecha','Tipo','Producto','Cantidad','Referencia'],
+      () => movimientos.map(r => [r.fecha, r.tipo, r.producto, r.cantidad, r.referencia])));
+
+  document.getElementById('exportMovExcel').addEventListener('click', () =>
+    openExcelConfig('mov', 'Movimientos',
+      ['Fecha','Tipo','Producto','Cantidad','Referencia'],
+      () => movimientos.map(r => [r.fecha, r.tipo, r.producto, r.cantidad, r.referencia])));
+
+  document.getElementById('exportPedPdf').addEventListener('click', () =>
+    openPdfConfig('ped', 'Reporte Pedidos',
+      ['Pedido','Cliente','Estado','Fecha pedido','Entrega estimada','SLA'],
+      () => pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado]||r.estado, r.fecha, r.fechaEstimada, r.sla])));
+
+  document.getElementById('exportPedExcel').addEventListener('click', () =>
+    openExcelConfig('ped', 'Pedidos',
+      ['Pedido','Cliente','Estado','Fecha pedido','Entrega estimada','SLA'],
+      () => pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado]||r.estado, r.fecha, r.fechaEstimada, r.sla])));
 
   // ─── Reload on centro change ────────────────
   window.addEventListener('peia:centro-changed', () => {
