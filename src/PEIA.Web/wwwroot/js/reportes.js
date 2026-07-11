@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function showOverlay(id)  { document.getElementById(id).classList.add('is-visible'); }
   function hideOverlay(id)  { document.getElementById(id).classList.remove('is-visible'); }
   function hideAllOverlays() {
-    ['overlayPdf','overlayExcel','overlayProgress','overlaySuccess','overlayError']
+    ['overlayPdf','overlayExcel','overlayProgress','overlaySuccess','overlayError','overlayPrint']
       .forEach(id => hideOverlay(id));
   }
 
@@ -498,6 +498,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     openExcelConfig('ped', 'Pedidos',
       ['Pedido','Cliente','Estado','Fecha pedido','Entrega estimada','SLA'],
       () => pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado]||r.estado, r.fecha, r.fechaEstimada, r.sla])));
+
+  // ── Print Modal ────────────────────────────────────────────
+  function openPrintModal(reportTitle) {
+    // Update preview doc title
+    document.getElementById('pmDocTitle').textContent = reportTitle;
+    document.getElementById('pmDocDate').textContent =
+      new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Reset copies
+    document.getElementById('pmCopiesVal').textContent = '1';
+
+    // Reset orientation
+    document.getElementById('pmOrientPortrait').classList.add('pm-orient-active');
+    document.getElementById('pmOrientLandscape').classList.remove('pm-orient-active');
+
+    // Reset page range
+    document.getElementById('pmRangeAll').checked = true;
+    document.getElementById('pmCustomRange').disabled = true;
+
+    hideAllOverlays();
+    showOverlay('overlayPrint');
+  }
+
+  // Orientation toggle
+  document.getElementById('pmOrientPortrait').addEventListener('click', () => {
+    document.getElementById('pmOrientPortrait').classList.add('pm-orient-active');
+    document.getElementById('pmOrientLandscape').classList.remove('pm-orient-active');
+  });
+  document.getElementById('pmOrientLandscape').addEventListener('click', () => {
+    document.getElementById('pmOrientLandscape').classList.add('pm-orient-active');
+    document.getElementById('pmOrientPortrait').classList.remove('pm-orient-active');
+  });
+
+  // Custom range enable/disable
+  document.querySelectorAll('input[name="pmPageRange"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.getElementById('pmCustomRange').disabled =
+        document.getElementById('pmRangeCustom').checked ? false : true;
+    });
+  });
+
+  // Copies counter
+  let _copies = 1;
+  document.getElementById('pmCopiesPlus').addEventListener('click', () => {
+    _copies = Math.min(_copies + 1, 99);
+    document.getElementById('pmCopiesVal').textContent = _copies;
+  });
+  document.getElementById('pmCopiesMinus').addEventListener('click', () => {
+    _copies = Math.max(_copies - 1, 1);
+    document.getElementById('pmCopiesVal').textContent = _copies;
+  });
+
+  // Close / Cancel
+  ['closePrintModal', 'cancelPrintModal'].forEach(id =>
+    document.getElementById(id).addEventListener('click', hideAllOverlays));
+
+  // Click outside
+  document.getElementById('overlayPrint').addEventListener('click', e => {
+    if (e.target === document.getElementById('overlayPrint')) hideAllOverlays();
+  });
+
+  // Confirm → print
+  document.getElementById('confirmPrintModal').addEventListener('click', () => {
+    hideAllOverlays();
+    setTimeout(() => window.print(), 120);
+  });
+
+  // Wire print buttons
+  document.getElementById('printInv').addEventListener('click', () =>
+    openPrintModal('Reporte de Inventario'));
+  document.getElementById('printMov').addEventListener('click', () =>
+    openPrintModal('Reporte de Movimientos'));
+  document.getElementById('printPed').addEventListener('click', () =>
+    openPrintModal('Reporte de Pedidos'));
 
   // ─── Reload on centro change ────────────────
   window.addEventListener('peia:centro-changed', () => {

@@ -66,7 +66,7 @@ public class AutomationRulesHandler :
             if (EvaluateSlaCondition(rule.Condicion, notification))
             {
                 await TriggerRuleAsync(rule, notification.CentroId, 
-                    $"SLA Vencido para el pedido {notification.Codigo}. Límite era: {notification.TiempoLimite:g}.", 
+                    $"SLA Vencido para el pedido {notification.PedidoCodigo}. Límite era: {notification.TiempoLimite:g}.", 
                     cancellationToken);
             }
         }
