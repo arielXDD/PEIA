@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }},
       { key: 'ubicacion', label: 'Ubicación', render: val => `<span class="cell-mono">${val || '-'}</span>` },
       { key: 'precio', label: 'Precio', render: val => `$${Number(val || 0).toLocaleString('es-MX')}` },
-      { key: 'id', label: 'Acciones', sortable: false, render: val => `
+      { key: 'id', label: 'Acciones', sortable: false, render: (val, row) => row.isConsolidado ? '-' : `
         <div class="cell-actions">
           <button class="btn-icon btn-edit" data-id="${val}" title="Editar">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -60,6 +60,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function loadData() {
+    const isConsolidado = document.getElementById('switchConsolidado').checked;
+    
+    if (isConsolidado) {
+      const consolidadoRaw = await PEIA.request('/api/inventario/consolidado');
+      productos = consolidadoRaw.map(p => ({
+        id: p.productoId,
+        sku: p.sku,
+        nombre: p.nombre,
+        descripcion: '',
+        categoria: 'Consolidado',
+        categoriaId: '',
+        stock: p.cantidadTotal,
+        minimo: 0,
+        ubicacion: 'N/A',
+        precio: 0,
+        unidadMedida: p.unidadMedida,
+        activo: true,
+        isConsolidado: true
+      }));
+      categorias = [];
+      hydrateCategoriaFilter();
+      applyFilters();
+      updateKpis();
+      return;
+    }
+
     const centro = PEIA.getActiveCentro();
     if (!centro?.id) throw new Error('Selecciona un centro activo.');
     const [productosRaw, categoriasRaw] = await Promise.all([
@@ -143,6 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   searchInput.addEventListener('input', applyFilters);
   filterCat.addEventListener('change', applyFilters);
   filterStock.addEventListener('change', applyFilters);
+  document.getElementById('switchConsolidado').addEventListener('change', () => loadData().catch(error => alert(error.message)));
   window.addEventListener('peia:centro-changed', () => loadData().catch(error => alert(error.message)));
 
   document.getElementById('btnNuevoProducto').addEventListener('click', () => {
@@ -209,6 +236,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           ]},
           { key: 'cantidad', label: 'Cantidad', type: 'number', min: 1, required: true, half: true },
           { key: 'ubicacion', label: 'Ubicación', type: 'text', value: prod.ubicacion || '', half: true },
+          { key: 'lote', label: 'Lote', type: 'text', half: true },
+          { key: 'fechaCaducidad', label: 'Fecha de Caducidad', type: 'date', half: true },
           { key: 'motivo', label: 'Motivo', type: 'textarea' },
           { key: 'referencia', label: 'Referencia', type: 'text' },
         ],
@@ -223,6 +252,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tipo: data.tipo,
                 cantidad: data.cantidad,
                 ubicacion: data.ubicacion,
+                lote: data.lote || null,
+                fechaCaducidad: data.fechaCaducidad || null,
                 motivo: data.motivo,
                 referencia: data.referencia
               })

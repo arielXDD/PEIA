@@ -1,7 +1,7 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using PEIA.Shared.Infra.Identity;
+using PEIA.Modules.ERP.Handlers;
 
 namespace PEIA.Modules.ERP.Controllers;
 
@@ -10,96 +10,48 @@ namespace PEIA.Modules.ERP.Controllers;
 [Authorize(Roles = "Administrador")]
 public class RolesController : ControllerBase
 {
-    private readonly RoleManager<Rol> _roleManager;
+    private readonly IMediator _mediator;
 
-    public RolesController(RoleManager<Rol> roleManager)
+    public RolesController(IMediator mediator)
     {
-        _roleManager = roleManager;
+        _mediator = mediator;
     }
 
     [HttpGet]
-    public IActionResult GetRoles()
+    public async Task<IActionResult> GetRoles()
     {
-        var roles = _roleManager.Roles
-            .OrderBy(r => r.Name)
-            .Select(r => new RoleResponse(r.Id, r.Name ?? string.Empty))
-            .ToList();
-
+        var roles = await _mediator.Send(new GetRolesQuery());
         return Ok(roles);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetRole(Guid id)
     {
-        var role = await _roleManager.FindByIdAsync(id.ToString());
-        return role is null
-            ? NotFound(new { message = "Rol no encontrado." })
-            : Ok(new RoleResponse(role.Id, role.Name ?? string.Empty));
+        var role = await _mediator.Send(new GetRoleByIdQuery(id));
+        return role is null ? NotFound(new { message = "Rol no encontrado." }) : Ok(role);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateRole([FromBody] RoleRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Nombre))
-        {
-            return BadRequest(new { message = "El nombre del rol es obligatorio." });
-        }
-
-        var nombre = request.Nombre.Trim();
-        if (await _roleManager.RoleExistsAsync(nombre))
-        {
-            return Conflict(new { message = $"Ya existe el rol '{nombre}'." });
-        }
-
-        var role = new Rol { Id = Guid.NewGuid(), Name = nombre };
-        var result = await _roleManager.CreateAsync(role);
-        if (!result.Succeeded)
-        {
-            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
-        }
-
-        return CreatedAtAction(nameof(GetRole), new { id = role.Id }, new RoleResponse(role.Id, role.Name));
+        var result = await _mediator.Send(new CreateRoleCommand(request.Nombre));
+        if (!result.Success) return BadRequest(new { errors = result.Errors });
+        return CreatedAtAction(nameof(GetRole), new { id = result.Role!.Id }, result.Role);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateRole(Guid id, [FromBody] RoleRequest request)
     {
-        var role = await _roleManager.FindByIdAsync(id.ToString());
-        if (role is null)
-        {
-            return NotFound(new { message = "Rol no encontrado." });
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Nombre))
-        {
-            return BadRequest(new { message = "El nombre del rol es obligatorio." });
-        }
-
-        role.Name = request.Nombre.Trim();
-        var result = await _roleManager.UpdateAsync(role);
-        if (!result.Succeeded)
-        {
-            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
-        }
-
-        return Ok(new RoleResponse(role.Id, role.Name ?? string.Empty));
+        var result = await _mediator.Send(new UpdateRoleCommand(id, request.Nombre));
+        if (!result.Success) return BadRequest(new { errors = result.Errors });
+        return Ok(result.Role);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteRole(Guid id)
     {
-        var role = await _roleManager.FindByIdAsync(id.ToString());
-        if (role is null)
-        {
-            return NotFound(new { message = "Rol no encontrado." });
-        }
-
-        var result = await _roleManager.DeleteAsync(role);
-        if (!result.Succeeded)
-        {
-            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
-        }
-
+        var result = await _mediator.Send(new DeleteRoleCommand(id));
+        if (!result.Success) return BadRequest(new { errors = result.Errors });
         return NoContent();
     }
 }

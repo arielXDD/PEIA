@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PEIA.Modules.Inventory.Notifications;
 using PEIA.Shared.Infra.Data;
 using PEIA.Shared.Infra.Inventory;
+using PEIA.Modules.Inventory.Handlers;
 
 namespace PEIA.Modules.Inventory.Controllers;
 
@@ -270,6 +271,8 @@ public class InventarioController : ControllerBase
             StockNuevo = nuevo,
             Motivo = request.Motivo?.Trim(),
             Referencia = request.Referencia?.Trim(),
+            Lote = request.Lote?.Trim(),
+            FechaCaducidad = request.FechaCaducidad,
             FechaMovimiento = DateTime.UtcNow,
             ProductoId = request.ProductoId,
             CentroId = request.CentroId
@@ -289,7 +292,7 @@ public class InventarioController : ControllerBase
                 producto.StockMinimo));
         }
 
-        return Ok(new MovimientoResponse(movimiento.Id, movimiento.Tipo, movimiento.Cantidad, anterior, nuevo, movimiento.FechaMovimiento));
+        return Ok(new MovimientoResponse(movimiento.Id, movimiento.Tipo, movimiento.Cantidad, anterior, nuevo, movimiento.FechaMovimiento, movimiento.Lote, movimiento.FechaCaducidad));
     }
 
     [HttpGet("movimientos")]
@@ -327,6 +330,14 @@ public class InventarioController : ControllerBase
             .ToListAsync();
 
         return Ok(movimientos);
+    }
+
+    [HttpGet("consolidado")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> GetStockConsolidado()
+    {
+        var response = await _mediator.Send(new GetStockConsolidadoQuery());
+        return Ok(response);
     }
 
     private async Task<IActionResult?> ValidateProductoAsync(ProductoRequest request, Guid? productoId = null)
@@ -391,6 +402,8 @@ public record MovimientoRequest(
     int Cantidad,
     string? Ubicacion,
     string? Motivo,
-    string? Referencia);
+    string? Referencia,
+    string? Lote,
+    DateTime? FechaCaducidad);
 
-public record MovimientoResponse(Guid Id, string Tipo, int Cantidad, int StockAnterior, int StockNuevo, DateTime FechaMovimiento);
+public record MovimientoResponse(Guid Id, string Tipo, int Cantidad, int StockAnterior, int StockNuevo, DateTime FechaMovimiento, string? Lote, DateTime? FechaCaducidad);

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PEIA.Modules.ERP.Controllers;
+using PEIA.Modules.ERP.Handlers;
 using PEIA.Shared.Infra.Data;
 using PEIA.Shared.Infra.Identity;
 
@@ -24,11 +25,12 @@ public class ErpTests
         context.Centros.Add(new Centro { Id = Guid.NewGuid(), Nombre = "Bodega Norte", Codigo = "BN-01" });
         await context.SaveChangesAsync();
 
-        var controller = new CentrosController(context);
+        var handler = new CreateCentroCommandHandler(context);
 
-        var result = await controller.CreateCentro(new CentroRequest("Otra Bodega", "bn-01", "Calle 1"));
+        var result = await handler.Handle(new CreateCentroCommand(new CentroRequest("Otra Bodega", "bn-01", "Calle 1")), CancellationToken.None);
 
-        Assert.IsType<ConflictObjectResult>(result);
+        Assert.False(result.Success);
+        Assert.Contains("Ya existe", result.Error);
         Assert.Equal(1, await context.Centros.CountAsync());
     }
 
@@ -40,11 +42,11 @@ public class ErpTests
         context.Centros.Add(new Centro { Id = centroId, Nombre = "Bodega Norte", Codigo = "BN-01", Activo = true });
         await context.SaveChangesAsync();
 
-        var controller = new CentrosController(context);
+        var handler = new DeleteCentroCommandHandler(context);
 
-        var result = await controller.DeleteCentro(centroId);
+        var result = await handler.Handle(new DeleteCentroCommand(centroId), CancellationToken.None);
 
-        Assert.IsType<NoContentResult>(result);
+        Assert.True(result.Success);
         Assert.False((await context.Centros.FindAsync(centroId))!.Activo);
     }
 }

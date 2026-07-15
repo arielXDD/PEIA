@@ -1,8 +1,7 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PEIA.Shared.Infra.Data;
-using PEIA.Shared.Infra.Identity;
+using PEIA.Modules.ERP.Handlers;
 
 namespace PEIA.Modules.ERP.Controllers;
 
@@ -11,33 +10,24 @@ namespace PEIA.Modules.ERP.Controllers;
 [Authorize]
 public class CentrosController : ControllerBase
 {
-    private readonly PeiaDbContext _context;
+    private readonly IMediator _mediator;
 
-    public CentrosController(PeiaDbContext context)
+    public CentrosController(IMediator mediator)
     {
-        _context = context;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetCentros([FromQuery] bool incluirInactivos = false)
     {
-        var centros = await _context.Centros
-            .Where(c => incluirInactivos || c.Activo)
-            .OrderBy(c => c.Codigo)
-            .Select(c => new CentroResponse(c.Id, c.Nombre, c.Codigo, c.Direccion, c.Activo))
-            .ToListAsync();
-
+        var centros = await _mediator.Send(new GetCentrosQuery(incluirInactivos));
         return Ok(centros);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetCentro(Guid id)
     {
-        var centro = await _context.Centros
-            .Where(c => c.Id == id)
-            .Select(c => new CentroResponse(c.Id, c.Nombre, c.Codigo, c.Direccion, c.Activo))
-            .FirstOrDefaultAsync();
-
+        var centro = await _mediator.Send(new GetCentroByIdQuery(id));
         return centro is null ? NotFound(new { message = "Centro no encontrado." }) : Ok(centro);
     }
 
@@ -45,76 +35,31 @@ public class CentrosController : ControllerBase
     [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> CreateCentro([FromBody] CentroRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Nombre) || string.IsNullOrWhiteSpace(request.Codigo))
-        {
-            return BadRequest(new { message = "Nombre y código son obligatorios." });
-        }
-
-        var codigo = request.Codigo.Trim().ToUpperInvariant();
-        if (await _context.Centros.AnyAsync(c => c.Codigo == codigo))
-        {
-            return Conflict(new { message = $"Ya existe un centro con código '{codigo}'." });
-        }
-
-        var centro = new Centro
-        {
-            Id = Guid.NewGuid(),
-            Nombre = request.Nombre.Trim(),
-            Codigo = codigo,
-            Direccion = request.Direccion?.Trim() ?? string.Empty,
-            Activo = request.Activo
-        };
-
-        _context.Centros.Add(centro);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetCentro), new { id = centro.Id },
-            new CentroResponse(centro.Id, centro.Nombre, centro.Codigo, centro.Direccion, centro.Activo));
+        var result = await _mediator.Send(new CreateCentroCommand(request));
+        if (!result.Success) return BadRequest(new { message = result.Error });
+        return CreatedAtAction(nameof(GetCentro), new { id = result.Centro!.Id }, result.Centro);
     }
 
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> UpdateCentro(Guid id, [FromBody] CentroRequest request)
     {
-        var centro = await _context.Centros.FindAsync(id);
-        if (centro is null)
+        var result = await _mediator.Send(new UpdateCentroCommand(id, request));
+        if (!result.Success)
         {
-            return NotFound(new { message = "Centro no encontrado." });
+            if (result.Error == "Centro no encontrado.") return NotFound(new { message = result.Error });
+            if (result.Error!.StartsWith("Ya existe")) return Conflict(new { message = result.Error });
+            return BadRequest(new { message = result.Error });
         }
-
-        if (string.IsNullOrWhiteSpace(request.Nombre) || string.IsNullOrWhiteSpace(request.Codigo))
-        {
-            return BadRequest(new { message = "Nombre y código son obligatorios." });
-        }
-
-        var codigo = request.Codigo.Trim().ToUpperInvariant();
-        if (await _context.Centros.AnyAsync(c => c.Id != id && c.Codigo == codigo))
-        {
-            return Conflict(new { message = $"Ya existe un centro con código '{codigo}'." });
-        }
-
-        centro.Nombre = request.Nombre.Trim();
-        centro.Codigo = codigo;
-        centro.Direccion = request.Direccion?.Trim() ?? string.Empty;
-        centro.Activo = request.Activo;
-
-        await _context.SaveChangesAsync();
-        return Ok(new CentroResponse(centro.Id, centro.Nombre, centro.Codigo, centro.Direccion, centro.Activo));
+        return Ok(result.Centro);
     }
 
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> DeleteCentro(Guid id)
     {
-        var centro = await _context.Centros.FindAsync(id);
-        if (centro is null)
-        {
-            return NotFound(new { message = "Centro no encontrado." });
-        }
-
-        centro.Activo = false;
-        await _context.SaveChangesAsync();
-
+        var result = await _mediator.Send(new DeleteCentroCommand(id));
+        if (!result.Success) return NotFound(new { message = result.Error });
         return NoContent();
     }
 }

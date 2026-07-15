@@ -12,6 +12,8 @@ public class Movimiento
     public int StockNuevo { get; set; }
     public string? Motivo { get; set; }
     public string? Referencia { get; set; }
+    public string? Lote { get; set; }
+    public DateTime? FechaCaducidad { get; set; }
     public DateTime FechaMovimiento { get; set; } = DateTime.UtcNow;
 
     public Guid ProductoId { get; set; }

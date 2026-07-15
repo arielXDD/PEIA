@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PEIA.Shared.Infra.Data;
@@ -11,9 +12,11 @@ using PEIA.Shared.Infra.Data;
 namespace PEIA.Shared.Infra.Migrations
 {
     [DbContext(typeof(PeiaDbContext))]
-    partial class PeiaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260715212859_LotesYCaducidades")]
+    partial class LotesYCaducidades
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
