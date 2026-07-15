@@ -10,6 +10,9 @@ obj/
 .env
 appsettings.Development.json
 
+# Local documents
+doc/
+
 # NuGet
 *.nupkg
 packages/

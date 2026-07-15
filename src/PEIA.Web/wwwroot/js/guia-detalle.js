@@ -395,100 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ],
       checks: ['Filtros revisados', 'Formato correcto', 'Columnas validadas', 'Nombre de archivo claro', 'Destinatario autorizado', 'Archivo original conservado'],
       mistakes: ['Exportar toda la base sin necesidad', 'Enviar datos de otro centro', 'Modificar datos oficiales en Excel', 'No indicar filtros al compartir', 'Usar nombres de archivo genericos']
-    },
-    videos: {
-      label: 'Capacitacion',
-      title: 'Video Tutoriales',
-      subtitle: 'Biblioteca preparada para publicar videos de capacitacion, con imagenes temporales mientras se reciben los archivos finales.',
-      image: 'linear-gradient(90deg, rgba(29,78,216,.92), rgba(220,38,38,.48)), url("https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1500&q=80")',
-      isVideo: true,
-      summary: [
-        'Esta seccion esta pensada para que el equipo coloque videos reales cuando esten listos. Por ahora muestra tarjetas con imagenes, duracion estimada, nivel y descripcion del flujo que debe grabarse.',
-        'Cada video debe resolver una tarea concreta. Lo ideal es mantenerlos cortos, mostrar el proceso completo y cerrar con una validacion final dentro del sistema.'
-      ],
-      modules: ['Primer ingreso', 'Inventario', 'Pedidos', 'Reportes', 'Reglas', 'Exportacion', 'Errores comunes', 'Capacitacion'],
-      videos: [
-        {
-          title: 'Primer ingreso y seleccion de centro',
-          level: 'Basico',
-          duration: '4 min',
-          image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=900&q=80',
-          description: 'Recorrido desde login hasta confirmacion de usuario, centro activo y menu lateral.'
-        },
-        {
-          title: 'Alta de producto y stock minimo',
-          level: 'Inventario',
-          duration: '6 min',
-          image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80',
-          description: 'Demostracion para crear un SKU, asignar categoria, ubicacion y regla de stock bajo.'
-        },
-        {
-          title: 'Registrar entrada y salida',
-          level: 'Operacion',
-          duration: '7 min',
-          image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=900&q=80',
-          description: 'Flujo completo de movimiento con cantidad, motivo, referencia y revision del historial.'
-        },
-        {
-          title: 'Leer reportes y detectar desviaciones',
-          level: 'Supervisor',
-          duration: '8 min',
-          image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80',
-          description: 'Interpretacion de KPIs, filtros, graficas y decisiones a partir de movimientos.'
-        },
-        {
-          title: 'Exportar datos para auditoria',
-          level: 'Reportes',
-          duration: '5 min',
-          image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=80',
-          description: 'Preparacion de filtros, eleccion de PDF o Excel y recomendaciones de envio.'
-        },
-        {
-          title: 'Configurar alerta de stock bajo',
-          level: 'Administrador',
-          duration: '6 min',
-          image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
-          description: 'Ejemplo de regla con origen, condicion, responsable, accion y prueba.'
-        }
-      ],
-      procedures: [
-        {
-          title: 'Como publicar un video cuando este listo',
-          steps: [
-            'Solicita el archivo final en formato MP4 o un enlace interno autorizado.',
-            'Sustituye la imagen temporal de la tarjeta por el reproductor de video.',
-            'Mantén titulo, nivel, duracion y descripcion para que el usuario sepa que aprendera.',
-            'Prueba que el video cargue en navegadores usados por la empresa.'
-          ]
-        },
-        {
-          title: 'Estructura recomendada para grabar',
-          steps: [
-            'Inicia explicando la tarea y el modulo que se usara.',
-            'Muestra los campos obligatorios y errores comunes.',
-            'Realiza el flujo completo sin saltos importantes.',
-            'Cierra mostrando como confirmar que la accion quedo guardada.'
-          ]
-        }
-      ],
-      articles: [
-        {
-          title: 'Criterios de calidad para capacitacion',
-          body: 'Un buen tutorial debe durar entre 2 y 8 minutos, enfocarse en una sola tarea y usar datos de ejemplo. Si muestra demasiados temas a la vez, el trabajador no sabra que recordar.'
-        },
-        {
-          title: 'Proteccion de datos en grabaciones',
-          body: 'No deben verse contrasenas, datos reales de clientes, costos sensibles o informacion personal. Antes de publicar, revisa el video completo y valida que no haya informacion no autorizada.'
-        }
-      ],
-      fields: [
-        ['Titulo', 'Debe indicar la tarea exacta que se aprendera.'],
-        ['Duracion', 'Ayuda al usuario a elegir segun tiempo disponible.'],
-        ['Nivel', 'Basico, operativo, supervisor o administrador.'],
-        ['Estado', 'Pendiente, en revision o publicado.']
-      ],
-      checks: ['Video con tema unico', 'Datos sensibles ocultos', 'Duracion razonable', 'Validacion final visible', 'Enlace probado'],
-      mistakes: ['Videos demasiado largos', 'Mezclar varios procesos', 'No mostrar resultado final', 'Usar datos reales sensibles', 'Publicar sin revisar audio o imagen']
     }
   };
 
@@ -527,26 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
   `).join('');
   qs('detailChecklist').innerHTML = topic.checks.map(item => `<li>${item}</li>`).join('');
   qs('detailMistakes').innerHTML = topic.mistakes.map(item => `<li>${item}</li>`).join('');
-
-  const videoSection = qs('videoLibrary');
-  if (topic.isVideo) {
-    videoSection.hidden = false;
-    videoSection.innerHTML = topic.videos.map(video => `
-      <article class="video-card">
-        <div class="video-thumb" style="background-image: linear-gradient(180deg, rgba(15,23,42,.05), rgba(15,23,42,.62)), url('${video.image}')">
-          <span class="video-play">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          </span>
-          <span class="video-state">Espacio reservado para video</span>
-        </div>
-        <div class="video-body">
-          <div class="video-meta"><span>${video.level}</span><span>${video.duration}</span></div>
-          <h3>${video.title}</h3>
-          <p>${video.description}</p>
-        </div>
-      </article>
-    `).join('');
-  }
 
   qs('printGuideDetail').addEventListener('click', () => window.print());
 });
@@ -639,7 +525,6 @@ function renderGuideShell() {
                 <h2>Procedimientos paso a paso</h2>
                 <div id="detailProcedures"></div>
               </div>
-              <div class="manual-block" id="videoLibrary" hidden></div>
               <div class="manual-block">
                 <h2>Articulos de uso</h2>
                 <div class="manual-article-grid" id="detailArticles"></div>
