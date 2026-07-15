@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updateBadge() {
     const unread = notificaciones.filter(n => !n.leida).length;
-    const badge = document.querySelector('a[href="notificaciones.html"] .badge');
+    const badge = document.querySelector('a[href="/Notificaciones"] .badge');
     if (badge) {
       badge.textContent = unread;
       badge.style.display = unread > 0 ? '' : 'none';
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       notificaciones.forEach(n => n.leida = true);
       renderNotifications();
     } catch (error) {
-      alert(error.message);
+      PEIA.toast.error(error.message);
     }
   });
 
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const notif = notificaciones.find(n => n.id === id);
         if (notif) { notif.leida = true; renderNotifications(); }
       } catch (error) {
-        alert(error.message);
+        PEIA.toast.error(error.message);
       }
     }
 
@@ -145,12 +145,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         notificaciones = notificaciones.filter(n => n.id !== id);
         renderNotifications();
       } catch (error) {
-        alert(error.message);
+        PEIA.toast.error(error.message);
       }
     }
   });
 
-  window.addEventListener('peia:centro-changed', () => loadData().catch(error => alert(error.message)));
+  window.addEventListener('peia:centro-changed', () => loadData().catch(error => PEIA.toast.error(error.message)));
 
   async function connectLive() {
     const hub = await PEIA.connectHub().catch(() => null);
@@ -174,6 +174,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadData();
     await connectLive();
   } catch (error) {
-    alert(error.message);
+    PEIA.toast.error(error.message);
   }
 });

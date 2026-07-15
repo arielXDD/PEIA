@@ -22,3 +22,9 @@
   background: var(--blue-light);
   color: var(--blue);
 }
+
+@media (max-width: 768px) {
+  #rolesTable { overflow-x: auto; }
+  #rolesTable table { min-width: 680px; }
+  .permisos-grid { min-width: 220px; }
+}

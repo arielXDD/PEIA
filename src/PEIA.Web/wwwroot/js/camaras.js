@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnLogout').addEventListener('click', () => {
     localStorage.removeItem('peia_token');
     localStorage.removeItem('peia_user');
-    window.location.href = '/login.html';
+    window.location.href = '//Login';
   });
 
   // ─── User Info ──────────────────────────────
@@ -298,15 +298,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── Detail Action Buttons (mock) ────────────
   document.getElementById('btnCapturar').addEventListener('click', () => {
-    alert('📸 Captura de pantalla simulada');
+    PEIA.toast.info('Captura de pantalla simulada');
   });
 
   document.getElementById('btnReportar').addEventListener('click', () => {
-    alert('⚠️ Incidencia reportada correctamente');
+    PEIA.toast.success('Incidencia reportada correctamente');
   });
 
   document.getElementById('btnGrabaciones').addEventListener('click', () => {
-    alert('🎥 Listado de grabaciones (próximamente)');
+    PEIA.toast.info('Listado de grabaciones disponible proximamente');
   });
 
 });

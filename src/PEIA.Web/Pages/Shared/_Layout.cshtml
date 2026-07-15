@@ -1,0 +1,76 @@
+@{
+    var activePage = ViewData["ActivePage"]?.ToString() ?? string.Empty;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"]</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/inicio.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/toast.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="app-layout">
+        <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><rect x="2" y="8" width="10" height="10" rx="2" fill="#fff"/><rect x="16" y="2" width="10" height="10" rx="2" fill="#fff"/><rect x="10" y="16" width="10" height="10" rx="2" fill="rgba(255,255,255,.6)"/></svg>
+                </div>
+                <span>PEIA</span>
+                <button type="button" class="sidebar-close" id="sidebarClose" aria-label="Cerrar menú">×</button>
+            </div>
+            <nav class="sidebar-nav" aria-label="Navegación principal">
+                <ul>
+                    <li class="@(activePage == "Inicio" ? "active" : null)"><a asp-page="/Inicio">Inicio</a></li>
+                    <li class="@(activePage == "Inventario" ? "active" : null)"><a asp-page="/Inventario">Inventario</a></li>
+                    <li class="@(activePage == "Pedidos" ? "active" : null)"><a asp-page="/Pedidos">Pedidos</a></li>
+                    <li class="@(activePage == "Reportes" ? "active" : null)"><a asp-page="/Reportes">Reportes</a></li>
+                    <li class="@(activePage == "Roles" ? "active" : null)"><a asp-page="/Roles">Roles</a></li>
+                    <li class="@(activePage == "Camaras" ? "active" : null)"><a asp-page="/Camaras">Cámaras</a></li>
+                    <li class="@(activePage == "Prediccion" ? "active" : null)"><a asp-page="/Prediccion">Predicción</a></li>
+                    <li class="@(activePage == "Notificaciones" ? "active" : null)"><a asp-page="/Notificaciones" class="has-badge">Notificaciones <span class="badge">0</span></a></li>
+                    <li class="@(activePage == "Usuarios" ? "active" : null)"><a asp-page="/Usuarios">Usuarios</a></li>
+                    <li class="@(activePage == "Configuracion" ? "active" : null)"><a asp-page="/Configuracion">Configuración</a></li>
+                    <li class="@(activePage == "Bitacora" ? "active" : null)"><a asp-page="/Bitacora">Bitácora</a></li>
+                    <li class="@(activePage == "Guia" ? "active" : null)"><a asp-page="/Guia">Guía</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-logout" id="btnLogout" type="button">Cerrar sesión</button>
+            </div>
+        </aside>
+        <main class="main-area">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">☰</button>
+                    <div class="warehouse-selector">
+                        <span id="activeCentro">Centro activo</span>
+                        <span aria-hidden="true">⌄</span>
+                        <div class="warehouse-dropdown" id="warehouseDropdown"></div>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-menu" id="userMenu">
+                        <div class="avatar" id="userAvatar">PE</div>
+                        <span class="user-name" id="userName">Usuario PEIA</span>
+                    </div>
+                </div>
+            </header>
+            <div class="page-content">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+    <script src="~/js/api.js" asp-append-version="true"></script>
+    <script src="~/js/components/toast.js" asp-append-version="true"></script>
+    <script src="~/js/layout.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

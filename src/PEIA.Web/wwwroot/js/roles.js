@@ -62,13 +62,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           await PEIA.request('/api/roles', { method: 'POST', body: JSON.stringify({ nombre: data.nombre }) });
           await loadRoles();
         } catch (error) {
-          alert(error.message);
+          PEIA.toast.error(error.message);
         }
       },
     });
   });
 
-  document.getElementById('rolesTable').addEventListener('click', e => {
+  document.getElementById('rolesTable').addEventListener('click', async e => {
     const editBtn = e.target.closest('.btn-edit');
     const deleteBtn = e.target.closest('.btn-delete');
 
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await PEIA.request(`/api/roles/${rol.id}`, { method: 'PUT', body: JSON.stringify({ nombre: data.nombre }) });
             await loadRoles();
           } catch (error) {
-            alert(error.message);
+            PEIA.toast.error(error.message);
           }
         },
       });
@@ -95,16 +95,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (deleteBtn) {
       const rol = roles.find(r => r.id === deleteBtn.dataset.id);
-      if (!rol || !confirm(`Eliminar rol ${rol.nombre}?`)) return;
+      if (!rol || !await PEIA.toast.confirm(`¿Eliminar el rol ${rol.nombre}?`)) return;
       PEIA.request(`/api/roles/${rol.id}`, { method: 'DELETE' })
         .then(loadRoles)
-        .catch(error => alert(error.message));
+        .catch(error => PEIA.toast.error(error.message));
     }
   });
 
   try {
     await loadRoles();
   } catch (error) {
-    alert(error.message);
+    PEIA.toast.error(error.message);
   }
 });

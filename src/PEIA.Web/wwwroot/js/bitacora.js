@@ -41,7 +41,7 @@ if (warehouseSelector) {
 /* ── Logout ───────────────────────────────────────── */
 document.getElementById('btnLogout')?.addEventListener('click', () => {
   // TODO: invalidar token JWT en backend antes de redirigir
-  window.location.href = 'login.html';
+  window.location.href = '/Login';
 });
 
 /* ── Filtro de búsqueda en tabla de demostración ─── */

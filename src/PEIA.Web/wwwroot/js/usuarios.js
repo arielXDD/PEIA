@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           await PEIA.request('/api/usuarios', { method: 'POST', body: JSON.stringify(buildPayload(data)) });
           await loadData();
         } catch (error) {
-          alert(error.message);
+          PEIA.toast.error(error.message);
         }
       },
     });
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await PEIA.request(`/api/usuarios/${user.id}`, { method: 'PUT', body: JSON.stringify(buildPayload(data, true)) });
             await loadData();
           } catch (error) {
-            alert(error.message);
+            PEIA.toast.error(error.message);
           }
         },
       });
@@ -184,13 +184,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           roles: user.roles,
           centroIds: user.centroIds
         })
-      }).then(loadData).catch(error => alert(error.message));
+      }).then(loadData).catch(error => PEIA.toast.error(error.message));
     }
   });
 
   try {
     await loadData();
   } catch (error) {
-    alert(error.message);
+    PEIA.toast.error(error.message);
   }
 });

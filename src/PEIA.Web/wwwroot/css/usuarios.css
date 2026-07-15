@@ -1,2 +1,7 @@
 /* PEIA — Usuarios page-specific styles */
 /* Most styles inherited from inicio.css + components.css */
+
+@media (max-width: 768px) {
+  #usersTable { overflow-x: auto; }
+  #usersTable table { min-width: 760px; }
+}

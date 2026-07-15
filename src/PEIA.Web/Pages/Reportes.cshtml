@@ -1,0 +1,200 @@
+@page
+@model ReportesModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "PEIA — Reportes";
+    ViewData["ActivePage"] = "Reportes";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/inicio.css?v=2" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components.css?v=2" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/reportes.css?v=2" asp-append-version="true" />
+}
+<div class="page-header">
+          <h1>Reportes</h1>
+          <p>Visualización y exportación de datos operativos</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="inventario">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="vertical-align:-2px;margin-right:4px;">
+              <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+            </svg>
+            Inventario por centro
+          </button>
+          <button class="tab-btn" data-tab="movimientos">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="vertical-align:-2px;margin-right:4px;">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              <polyline points="17 6 23 6 23 12" />
+            </svg>
+            Movimientos
+          </button>
+          <button class="tab-btn" data-tab="pedidos">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="vertical-align:-2px;margin-right:4px;">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+              <rect x="9" y="3" width="6" height="4" rx="1" ry="1" />
+            </svg>
+            Pedidos
+          </button>
+        </div>
+
+        <!-- Tab: Inventario -->
+        <div class="tab-panel active" id="panel-inventario">
+          <div class="action-bar" style="margin-bottom:16px;">
+            <div class="action-bar-left">
+              <select class="filter-select" id="filterCategoriaInv">
+                <option value="">Todas las categorías</option>
+              </select>
+            </div>
+            <div class="export-group">
+              <button class="btn-export" id="exportInvPdf">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                PDF
+              </button>
+              <button class="btn-export" id="exportInvExcel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16v16H4z" />
+                  <path d="M4 9h16" />
+                  <path d="M4 14h16" />
+                  <path d="M9 4v16" />
+                </svg>
+                Excel
+              </button>
+              <button class="btn-export btn-print" id="printInv">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                Imprimir
+              </button>
+            </div>
+          </div>
+          <div class="report-chart-row">
+            <div class="chart-card" style="flex:1;">
+              <div class="chart-header">
+                <h3>Distribución de stock por categoría</h3>
+              </div>
+              <div class="chart-body" style="min-height:220px;"><canvas id="chartInvCategoria"></canvas></div>
+            </div>
+          </div>
+          <div id="tableInvReport" style="margin-top:16px;"></div>
+        </div>
+
+        <!-- Tab: Movimientos -->
+        <div class="tab-panel" id="panel-movimientos">
+          <div class="action-bar" style="margin-bottom:16px;">
+            <div class="action-bar-left">
+              <div class="date-range">
+                <label>Desde</label>
+                <input type="date" id="dateFrom" value="2026-06-25" />
+                <label>Hasta</label>
+                <input type="date" id="dateTo" value="2026-07-01" />
+              </div>
+            </div>
+            <div class="export-group">
+              <button class="btn-export" id="exportMovPdf">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                PDF
+              </button>
+              <button class="btn-export" id="exportMovExcel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16v16H4z" />
+                  <path d="M4 9h16" />
+                  <path d="M4 14h16" />
+                  <path d="M9 4v16" />
+                </svg>
+                Excel
+              </button>
+              <button class="btn-export btn-print" id="printMov">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                Imprimir
+              </button>
+            </div>
+          </div>
+          <div class="report-chart-row">
+            <div class="chart-card" style="flex:1;">
+              <div class="chart-header">
+                <h3>Entradas vs Salidas por día</h3>
+              </div>
+              <div class="chart-body" style="min-height:220px;"><canvas id="chartMovTrend"></canvas></div>
+            </div>
+          </div>
+          <div id="tableMovReport" style="margin-top:16px;"></div>
+        </div>
+
+        <!-- Tab: Pedidos -->
+        <div class="tab-panel" id="panel-pedidos">
+          <div class="action-bar" style="margin-bottom:16px;">
+            <div class="action-bar-left">
+              <select class="filter-select" id="filterEstadoPed">
+                <option value="">Todos los estados</option>
+                <option value="Creado">Creado</option>
+                <option value="Asignado">Asignado</option>
+                <option value="EnRuta">En ruta</option>
+                <option value="Entregado">Entregado</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
+            <div class="export-group">
+              <button class="btn-export" id="exportPedPdf">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                PDF
+              </button>
+              <button class="btn-export" id="exportPedExcel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16v16H4z" />
+                  <path d="M4 9h16" />
+                  <path d="M4 14h16" />
+                  <path d="M9 4v16" />
+                </svg>
+                Excel
+              </button>
+              <button class="btn-export btn-print" id="printPed">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                Imprimir
+              </button>
+            </div>
+          </div>
+          <div class="report-chart-row">
+            <div class="chart-card" style="flex:0 0 280px;">
+              <div class="chart-header">
+                <h3>Estado de pedidos</h3>
+              </div>
+              <div class="chart-body chart-body-donut" style="min-height:200px;"><canvas id="chartPedEstados"></canvas>
+              </div>
+            </div>
+          </div>
+          <div id="tablePedReport" style="margin-top:16px;"></div>
+        </div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@@4.4.4/dist/chart.umd.min.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@@0.18.5/dist/xlsx.full.min.js" asp-append-version="true"></script>
+    <script src="~/js/components/data-table.js?v=2" asp-append-version="true"></script>
+    <script src="~/js/api.js?v=2" asp-append-version="true"></script>
+    <script src="~/js/reportes.js?v=2" asp-append-version="true"></script>
+}

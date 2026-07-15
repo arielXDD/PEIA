@@ -1,0 +1,51 @@
+@page
+@model UsuariosModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "PEIA — Gestión de Usuarios";
+    ViewData["ActivePage"] = "Usuarios";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/usuarios.css" asp-append-version="true" />
+}
+<div class="page-header">
+          <h1>Gestión de Usuarios</h1>
+          <p>Administra los usuarios del sistema y sus permisos</p>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+          <div class="action-bar-left">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchUsers" placeholder="Buscar por nombre, email o rol..." />
+            </div>
+            <select class="filter-select" id="filterRol">
+              <option value="">Todos los roles</option>
+              <option value="Administrador">Administrador</option>
+              <option value="OperadorInventario">Inventario</option>
+              <option value="Logistica">Logística</option>
+              <option value="Reportes">Reportes</option>
+              <option value="Supervisor">Supervisor</option>
+            </select>
+            <select class="filter-select" id="filterEstado">
+              <option value="">Todos los estados</option>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+          <div class="action-bar-right">
+            <button class="btn btn-primary" id="btnNuevoUsuario">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nuevo usuario
+            </button>
+          </div>
+        </div>
+
+        <!-- DataTable container -->
+        <div id="usersTable"></div>
+@section Scripts {
+    <script src="~/js/components/data-table.js" asp-append-version="true"></script>
+    <script src="~/js/components/modal-form.js" asp-append-version="true"></script>
+    <script src="~/js/usuarios.js" asp-append-version="true"></script>
+}

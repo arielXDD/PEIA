@@ -1,0 +1,64 @@
+.peia-toast-container {
+  position: fixed;
+  z-index: 3000;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  gap: .75rem;
+  width: min(390px, calc(100vw - 2rem));
+}
+
+.peia-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .9rem 1rem;
+  border: 1px solid #dbe3ef;
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, .16);
+  color: #1f2937;
+  animation: peia-toast-in .2s ease-out;
+}
+
+.peia-toast--success { border-left-color: #16a34a; }
+.peia-toast--error { border-left-color: #dc2626; }
+.peia-toast--info { border-left-color: #2563eb; }
+.peia-toast__message { flex: 1; line-height: 1.4; }
+.peia-toast__close { border: 0; background: transparent; color: #64748b; cursor: pointer; font-size: 1.25rem; line-height: 1; }
+.peia-toast--leaving { animation: peia-toast-out .18s ease-in forwards; }
+
+.peia-confirm-overlay {
+  position: fixed;
+  z-index: 3100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, .52);
+}
+
+.peia-confirm {
+  width: min(430px, 100%);
+  padding: 1.5rem;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, .28);
+}
+
+.peia-confirm h2 { margin: 0 0 .65rem; color: #0f172a; font-size: 1.15rem; }
+.peia-confirm p { margin: 0; color: #475569; line-height: 1.5; }
+.peia-confirm__actions { display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.5rem; }
+.peia-confirm__actions button { padding: .65rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.peia-confirm__cancel { border: 1px solid #cbd5e1; background: #fff; color: #334155; }
+.peia-confirm__accept { border: 1px solid #1d4ed8; background: #1d4ed8; color: #fff; }
+
+@keyframes peia-toast-in { from { opacity: 0; transform: translateY(-8px); } }
+@keyframes peia-toast-out { to { opacity: 0; transform: translateX(12px); } }
+
+@media (max-width: 600px) {
+  .peia-toast-container { top: .75rem; right: .75rem; width: calc(100vw - 1.5rem); }
+  .peia-confirm__actions { flex-direction: column-reverse; }
+  .peia-confirm__actions button { width: 100%; }
+}

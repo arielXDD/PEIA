@@ -169,8 +169,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   searchInput.addEventListener('input', applyFilters);
   filterCat.addEventListener('change', applyFilters);
   filterStock.addEventListener('change', applyFilters);
-  document.getElementById('switchConsolidado').addEventListener('change', () => loadData().catch(error => alert(error.message)));
-  window.addEventListener('peia:centro-changed', () => loadData().catch(error => alert(error.message)));
+  document.getElementById('switchConsolidado').addEventListener('change', () => loadData().catch(error => PEIA.toast.error(error.message)));
+  window.addEventListener('peia:centro-changed', () => loadData().catch(error => PEIA.toast.error(error.message)));
 
   document.getElementById('btnNuevoProducto').addEventListener('click', () => {
     new ModalForm({
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
           await loadData();
         } catch (error) {
-          alert(error.message);
+          PEIA.toast.error(error.message);
         }
       },
     });
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await PEIA.request(`/api/inventario/productos/${prod.id}`, { method: 'PUT', body: JSON.stringify(buildProductPayload(data)) });
             await loadData();
           } catch (error) {
-            alert(error.message);
+            PEIA.toast.error(error.message);
           }
         },
       });
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             await loadData();
           } catch (error) {
-            alert(error.message);
+            PEIA.toast.error(error.message);
           }
         },
       });
@@ -270,6 +270,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await loadData();
   } catch (error) {
-    alert(error.message);
+    PEIA.toast.error(error.message);
   }
 });

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Redirigir al login si no está autenticado
   if (!token) {
-    window.location.href = '/login.html';
+    window.location.href = '//Login';
     return;
   }
 
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (response.status === 401) {
       localStorage.clear();
-      window.location.href = '/login.html';
+      window.location.href = '//Login';
       return null;
     }
 
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ]);
       await loadPedidos(); // Requiere rutas y transportistas para mostrar nombres correctos
     } catch (err) {
-      alert(`Error al cargar datos: ${err.message}`);
+      PEIA.toast.error(`Error al cargar datos: ${err.message}`);
     }
   }
 
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeModal('modalNewPedido');
       loadPedidos();
     } catch (err) {
-      alert(`Error al registrar el pedido: ${err.message}`);
+      PEIA.toast.error(`Error al registrar el pedido: ${err.message}`);
     }
   });
 
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeModal('modalNewRuta');
       loadRutas();
     } catch (err) {
-      alert(`Error al crear la ruta: ${err.message}`);
+      PEIA.toast.error(`Error al crear la ruta: ${err.message}`);
     }
   });
 
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeModal('modalAssignPedido');
       loadPedidos();
     } catch (err) {
-      alert(`Error al asignar pedido: ${err.message}`);
+      PEIA.toast.error(`Error al asignar pedido: ${err.message}`);
     }
   });
 
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeModal('modalUpdateEstado');
       loadPedidos();
     } catch (err) {
-      alert(`Error al actualizar estado: ${err.message}`);
+      PEIA.toast.error(`Error al actualizar estado: ${err.message}`);
     }
   });
 
@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       openModal('modalTrackDetail');
     } catch (err) {
-      alert(`Error al cargar seguimiento: ${err.message}`);
+      PEIA.toast.error(`Error al cargar seguimiento: ${err.message}`);
     }
   }
 
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ══════════════════════════════════
   document.getElementById('btnLogout').addEventListener('click', () => {
     localStorage.clear();
-    window.location.href = '/login.html';
+    window.location.href = '//Login';
   });
 
   // Ejecución inicial de carga

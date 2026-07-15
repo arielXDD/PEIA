@@ -1,0 +1,370 @@
+@page
+@model PedidosModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "PEIA — Pedidos y Logística";
+    ViewData["ActivePage"] = "Pedidos";
+}
+@section Styles {
+    <style>
+    /* Estilos Adicionales Específicos para Modals, Formularios y Timeline de Pedidos */
+    .btn-primary {
+      background-color: #3b82f6;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s;
+    }
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .btn-secondary:hover {
+      background-color: #e5e7eb;
+    }
+    .btn-action-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-assign {
+      background-color: rgba(59,130,246,0.1);
+      color: #2563eb;
+    }
+    .btn-assign:hover {
+      background-color: #3b82f6;
+      color: #fff;
+    }
+    .btn-track {
+      background-color: rgba(124,58,237,0.1);
+      color: #7c3aed;
+    }
+    .btn-track:hover {
+      background-color: #7c3aed;
+      color: #fff;
+    }
+    .btn-status {
+      background-color: rgba(34,197,94,0.1);
+      color: #16a34a;
+    }
+    .btn-status:hover {
+      background-color: #22c55e;
+      color: #fff;
+    }
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-start;
+    }
+    .actions-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      width: 90%;
+      max-width: 500px;
+      padding: 24px;
+      transform: translateY(-20px);
+      transition: transform 0.2s ease-in-out;
+    }
+    .modal-overlay.open .modal-box {
+      transform: translateY(0);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+    }
+    .btn-close-modal {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #9ca3af;
+    }
+    .btn-close-modal:hover {
+      color: #374151;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4b5563;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #111827;
+      transition: border-color 0.15s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* Timeline Styles */
+    .timeline {
+      position: relative;
+      padding-left: 24px;
+      margin-top: 20px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 5px;
+      bottom: 5px;
+      width: 2px;
+      background-color: #e5e7eb;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -21px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #3b82f6;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+    .timeline-item.pending::before {
+      background-color: #f59e0b;
+      box-shadow: 0 0 0 2px #f59e0b;
+    }
+    .timeline-item.delivered::before {
+      background-color: #10b981;
+      box-shadow: 0 0 0 2px #10b981;
+    }
+    .timeline-item.canceled::before {
+      background-color: #ef4444;
+      box-shadow: 0 0 0 2px #ef4444;
+    }
+    .timeline-time {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 2px;
+    }
+    .timeline-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .timeline-desc {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    
+    /* SLA Progress indicator */
+    .sla-progress-box {
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .sla-status-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .sla-status-Cumplido { background-color: #d1fae5; color: #065f46; }
+    .sla-status-EnRiesgo { background-color: #fef3c7; color: #92400e; }
+    .sla-status-Incumplido { background-color: #fee2e2; color: #991b1b; }
+    .sla-status-Cancelado { background-color: #f3f4f6; color: #374151; }
+  </style>
+}
+<div class="page-header">
+          <h1>Logística y Distribución</h1>
+          <p>Gestión de envíos, asignación de rutas, control de SLAs y rastreo de entregas en tiempo real.</p>
+        </div>
+
+        <!-- KPI Cards -->
+        <section class="kpi-grid" aria-label="Indicadores de logística">
+          <div class="kpi-card">
+            <div class="kpi-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Pedidos Totales</p>
+              <p class="kpi-value" id="kpi-total">0</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Pendientes / Creados</p>
+              <p class="kpi-value" id="kpi-pendientes">0</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon teal">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Asignados</p>
+              <p class="kpi-value" id="kpi-asignados">0</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2" ry="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">En Ruta</p>
+              <p class="kpi-value" id="kpi-enruta">0</p>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Entregados</p>
+              <p class="kpi-value" id="kpi-entregados">0</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Actions Panel -->
+        <div class="actions-header">
+          <button class="btn-primary" id="btnOpenNewPedido">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo Pedido
+          </button>
+          <button class="btn-secondary" id="btnOpenNewRuta">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 15 9 18 3 15"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+            Crear Ruta
+          </button>
+        </div>
+
+        <!-- Main Content Grid -->
+        <section class="tables-grid" style="grid-template-columns: 2fr 1fr; gap: 24px;">
+          
+          <!-- Lista de Pedidos -->
+          <div class="table-card">
+            <div class="table-header">
+              <h3>Pedidos del Almacén</h3>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table" id="tablePedidos">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Cliente</th>
+                    <th>Ruta</th>
+                    <th>Transportista</th>
+                    <th>SLA Estado</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyPedidos">
+                  <!-- Se llena dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Lista de Rutas -->
+          <div class="table-card">
+            <div class="table-header">
+              <h3>Rutas Activas</h3>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table" id="tableRutas">
+                <thead>
+                  <tr>
+                    <th>Ruta</th>
+                    <th>Trayecto</th>
+                    <th>Distancia</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyRutas">
+                  <!-- Se llena dinámicamente -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+@section Scripts {
+    <script src="~/js/pedidos.js" asp-append-version="true"></script>
+}

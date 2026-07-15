@@ -1,0 +1,39 @@
+@page
+@model NotificacionesModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "PEIA — Notificaciones";
+    ViewData["ActivePage"] = "Notificaciones";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/notificaciones.css" asp-append-version="true" />
+}
+<div class="page-header">
+          <h1>Notificaciones</h1>
+          <p>Centro de alertas y notificaciones del sistema</p>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+          <div class="action-bar-left">
+            <button class="tab-btn active" data-filter="todas">Todas</button>
+            <button class="tab-btn" data-filter="no-leidas">No leídas</button>
+            <button class="tab-btn" data-filter="stock">Stock</button>
+            <button class="tab-btn" data-filter="sla">SLA</button>
+            <button class="tab-btn" data-filter="pedido">Pedidos</button>
+            <button class="tab-btn" data-filter="camara">Cámaras</button>
+          </div>
+          <div class="action-bar-right">
+            <button class="btn btn-secondary" id="btnMarkAll">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Marcar todas como leídas
+            </button>
+          </div>
+        </div>
+
+        <!-- Notifications list -->
+        <div class="notif-list" id="notifList"></div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@@8.0.7/dist/browser/signalr.min.js" asp-append-version="true"></script>
+    <script src="~/js/notificaciones.js" asp-append-version="true"></script>
+}

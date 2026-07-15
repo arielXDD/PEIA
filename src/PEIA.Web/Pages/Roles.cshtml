@@ -1,0 +1,36 @@
+@page
+@model RolesModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "PEIA — Gestión de Roles";
+    ViewData["ActivePage"] = "Roles";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/roles.css" asp-append-version="true" />
+}
+<div class="page-header">
+          <h1>Gestión de Roles</h1>
+          <p>Administra los roles del sistema y sus permisos asociados</p>
+        </div>
+
+        <div class="action-bar">
+          <div class="action-bar-left">
+            <div class="search-box">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchRoles" placeholder="Buscar rol..." />
+            </div>
+          </div>
+          <div class="action-bar-right">
+            <button class="btn btn-primary" id="btnNuevoRol">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nuevo rol
+            </button>
+          </div>
+        </div>
+
+        <div id="rolesTable"></div>
+@section Scripts {
+    <script src="~/js/components/data-table.js" asp-append-version="true"></script>
+    <script src="~/js/components/modal-form.js" asp-append-version="true"></script>
+    <script src="~/js/roles.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,26 @@
+@page "/Guia/{topic}"
+@model GuiaDetalleModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PEIA â€” GuÃ­a de usuario</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/inicio.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/guia.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/toast.css" asp-append-version="true" />
+</head>
+<body data-guide-topic="@Model.Topic">
+    <div id="guideDetailRoot"></div>
+    <script src="~/js/api.js" asp-append-version="true"></script>
+    <script src="~/js/components/toast.js" asp-append-version="true"></script>
+    <script src="~/js/guia-detalle.js" asp-append-version="true"></script>
+</body>
+</html>

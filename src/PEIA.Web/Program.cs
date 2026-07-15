@@ -74,6 +74,7 @@ builder.Services.AddAuthentication(options =>
 
 // Para API o Web
 builder.Services.AddControllers();
+builder.Services.AddRazorPages();
 builder.Services.AddMemoryCache();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -137,18 +138,15 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Servir archivos estáticos (wwwroot)
-app.UseDefaultFiles(new DefaultFilesOptions
-{
-    DefaultFileNames = new List<string> { "login.html" }
-});
 app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapRazorPages();
 app.MapHub<PeiaHub>("/hubs/peia");
 
-app.MapGet("/", () => Results.Redirect("/login.html"));
+app.MapGet("/", () => Results.Redirect("/Login"));
 
 app.Run();

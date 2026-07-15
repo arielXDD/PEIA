@@ -21,3 +21,9 @@
 .stock-bar-fill.green  { background: var(--green);  }
 .stock-bar-fill.orange { background: var(--orange); }
 .stock-bar-fill.red    { background: var(--red);    }
+
+@media (max-width: 768px) {
+  #productsTable { overflow-x: auto; }
+  #productsTable table { min-width: 760px; }
+  .stock-bar { width: 56px; }
+}

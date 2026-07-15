@@ -212,12 +212,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   document.getElementById('periodoSelect').addEventListener('change', (e) => {
-    renderPrincipal(e.target.value).catch(err => alert(err.message));
+    renderPrincipal(e.target.value).catch(err => PEIA.toast.error(err.message));
   });
 
   try {
     await loadAll();
   } catch (error) {
-    alert(error.message);
+    PEIA.toast.error(error.message);
   }
 });

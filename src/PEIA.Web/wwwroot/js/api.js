@@ -27,7 +27,7 @@ window.PEIA = (() => {
 
   function requireAuth() {
     if (!getToken()) {
-      window.location.href = '/login.html';
+      window.location.href = '//Login';
       return false;
     }
     return true;
@@ -47,7 +47,7 @@ window.PEIA = (() => {
     const response = await fetch(path, { ...options, headers });
     if (response.status === 401) {
       clearSession();
-      window.location.href = '/login.html';
+      window.location.href = '//Login';
       throw new Error('Sesión expirada.');
     }
 
@@ -66,7 +66,7 @@ window.PEIA = (() => {
 
   function logout() {
     clearSession();
-    window.location.href = '/login.html';
+    window.location.href = '//Login';
   }
 
   let hubConnection = null;

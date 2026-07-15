@@ -57,9 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     try {
       await PEIA.request('/api/configuracion/empresa', { method: 'PUT', body: JSON.stringify(payload) });
-      alert('Datos de la empresa guardados.');
+      PEIA.toast.success('Datos de la empresa guardados.');
     } catch (error) {
-      alert(error.message);
+      PEIA.toast.error(error.message);
     }
   });
 
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               });
               await loadCentros();
             } catch (error) {
-              alert(error.message);
+              PEIA.toast.error(error.message);
             }
           },
         });
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
           await loadCentros();
         } catch (error) {
-          alert(error.message);
+          PEIA.toast.error(error.message);
         }
       },
     });
@@ -153,9 +153,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     try {
       await PEIA.request('/api/configuracion/preferencias', { method: 'PUT', body: JSON.stringify(payload) });
-      alert('Preferencias guardadas.');
+      PEIA.toast.success('Preferencias guardadas.');
     } catch (error) {
-      alert(error.message);
+      PEIA.toast.error(error.message);
     }
   });
 
@@ -180,9 +180,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     try {
       await PEIA.request('/api/configuracion/notificaciones', { method: 'PUT', body: JSON.stringify(payload) });
-      alert('Preferencias de notificaciones guardadas.');
+      PEIA.toast.success('Preferencias de notificaciones guardadas.');
     } catch (error) {
-      alert(error.message);
+      PEIA.toast.error(error.message);
     }
   });
 
@@ -203,9 +203,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     try {
       await PEIA.request('/api/configuracion/seguridad', { method: 'PUT', body: JSON.stringify(payload) });
-      alert('Política de contraseñas guardada.');
+      PEIA.toast.success('Política de contraseñas guardada.');
     } catch (error) {
-      alert(error.message);
+      PEIA.toast.error(error.message);
     }
   });
 
@@ -306,12 +306,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 await loadReglas();
               } catch (error) {
-                alert(error.message);
+                PEIA.toast.error(error.message);
               }
             }
           });
         } catch (error) {
-          alert(error.message);
+          PEIA.toast.error(error.message);
         }
       });
     });
@@ -319,12 +319,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     tableContainer.querySelectorAll('.btn-delete-regla').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
-        if (confirm('¿Estás seguro de que deseas eliminar esta regla de automatización?')) {
+        if (await PEIA.toast.confirm('¿Estás seguro de que deseas eliminar esta regla de automatización?')) {
           try {
             await PEIA.request(`/api/reglas-automatizacion/${id}`, { method: 'DELETE' });
             await loadReglas();
           } catch (error) {
-            alert(error.message);
+            PEIA.toast.error(error.message);
           }
         }
       });
@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
           await loadReglas();
         } catch (error) {
-          alert(error.message);
+          PEIA.toast.error(error.message);
         }
       }
     });

@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
   PEIA.bindWarehouseSelector();
 
   const popularArticles = [
-    { href: 'guia-exportacion.html', title: 'Como exportar un reporte en PDF', text: 'Personaliza columnas, filtros y rango de fechas antes de generar el archivo.', time: 'Lectura: 3 min' },
-    { href: 'guia-reportes.html', title: 'Entendiendo la tasa de rotacion', text: 'Compara entradas y salidas para detectar productos con alta demanda.', time: 'Lectura: 5 min' },
-    { href: 'guia-reglas.html', title: 'Configurar alertas de stock bajo', text: 'Define umbrales por categoria y asigna responsables de seguimiento.', time: 'Lectura: 4 min' },
-    { href: 'guia-introduccion.html', title: 'Gestion de permisos de usuarios', text: 'Diferencias entre roles Administrador, Operador, Reportes y Supervisor.', time: 'Lectura: 6 min' },
-    { href: 'guia-inventario.html', title: 'Registrar salida de mercancia', text: 'Evita stock negativo y documenta motivo, referencia y ubicacion.', time: 'Lectura: 4 min' }
+    { href: '/Guia/exportacion', title: 'Como exportar un reporte en PDF', text: 'Personaliza columnas, filtros y rango de fechas antes de generar el archivo.', time: 'Lectura: 3 min' },
+    { href: '/Guia/reportes', title: 'Entendiendo la tasa de rotacion', text: 'Compara entradas y salidas para detectar productos con alta demanda.', time: 'Lectura: 5 min' },
+    { href: '/Guia/reglas', title: 'Configurar alertas de stock bajo', text: 'Define umbrales por categoria y asigna responsables de seguimiento.', time: 'Lectura: 4 min' },
+    { href: '/Guia/intro', title: 'Gestion de permisos de usuarios', text: 'Diferencias entre roles Administrador, Operador, Reportes y Supervisor.', time: 'Lectura: 6 min' },
+    { href: '/Guia/inventario', title: 'Registrar salida de mercancia', text: 'Evita stock negativo y documenta motivo, referencia y ubicacion.', time: 'Lectura: 4 min' }
   ];
 
   const searchInput = document.getElementById('guideSearch');
@@ -62,13 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.guide-task-grid button').forEach(button => {
     button.addEventListener('click', () => {
       const routes = {
-        intro: 'guia-introduccion.html',
-        inventario: 'guia-inventario.html',
-        reportes: 'guia-reportes.html',
-        reglas: 'guia-reglas.html',
-        exportacion: 'guia-exportacion.html'
+        intro: '/Guia/intro',
+        inventario: '/Guia/inventario',
+        reportes: '/Guia/reportes',
+        reglas: '/Guia/reglas',
+        exportacion: '/Guia/exportacion'
       };
-      window.location.href = routes[button.dataset.topic] || 'guia.html';
+      window.location.href = routes[button.dataset.topic] || '/Guia';
     });
   });
 

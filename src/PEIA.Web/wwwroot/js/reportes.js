@@ -178,8 +178,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  document.getElementById('dateFrom').addEventListener('change', () => loadMovimientos().catch(err => alert(err.message)));
-  document.getElementById('dateTo').addEventListener('change', () => loadMovimientos().catch(err => alert(err.message)));
+  document.getElementById('dateFrom').addEventListener('change', () => loadMovimientos().catch(err => PEIA.toast.error(err.message)));
+  document.getElementById('dateTo').addEventListener('change', () => loadMovimientos().catch(err => PEIA.toast.error(err.message)));
 
   // ─── Tab 3: Pedidos ─────────────────────────
   async function loadPedidos() {
@@ -575,14 +575,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ─── Reload on centro change ────────────────
   window.addEventListener('peia:centro-changed', () => {
-    loadInventario().catch(err => alert(err.message));
-    loadMovimientos().catch(err => alert(err.message));
-    loadPedidos().catch(err => alert(err.message));
+    loadInventario().catch(err => PEIA.toast.error(err.message));
+    loadMovimientos().catch(err => PEIA.toast.error(err.message));
+    loadPedidos().catch(err => PEIA.toast.error(err.message));
   });
 
   try {
     await Promise.all([loadInventario(), loadMovimientos(), loadPedidos()]);
   } catch (error) {
-    alert(error.message);
+    PEIA.toast.error(error.message);
   }
 });

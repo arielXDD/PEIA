@@ -1,0 +1,146 @@
+@page
+@model PrediccionModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "PEIA — Predicción de demanda";
+    ViewData["ActivePage"] = "Prediccion";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/prediccion.css" asp-append-version="true" />
+}
+<div class="page-header">
+          <h1>Predicción de demanda</h1>
+          <p>Pronóstico de inventario basado en datos históricos y modelo ML.NET.</p>
+        </div>
+
+        <!-- KPI Cards -->
+        <section class="kpi-grid" aria-label="Métricas de predicción">
+          <div class="kpi-card">
+            <div class="kpi-icon purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Demanda estimada (próx. 7d)</p>
+              <p class="kpi-value" id="kpi-demanda">4,280</p>
+              <p class="kpi-trend up">▲ 12.4% <span>vs período anterior</span></p>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Precisión del modelo</p>
+              <p class="kpi-value" id="kpi-precision">94.7%</p>
+              <p class="kpi-trend up">▲ 2.1% <span>último mes</span></p>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Productos con alerta</p>
+              <p class="kpi-value" id="kpi-alertas">12</p>
+              <p class="kpi-trend down">▼ 3 <span>vs ayer</span></p>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">Categorías analizadas</p>
+              <p class="kpi-value">6</p>
+              <p class="kpi-trend up">▲ 2 <span>nuevas</span></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Charts -->
+        <section class="pred-grid">
+
+          <!-- Chart 1: Histórico + Predicción principal -->
+          <div class="chart-card wide">
+            <div class="chart-header">
+              <h3>Demanda histórica vs predicción</h3>
+              <select class="chart-period" id="periodoSelect">
+                <option value="7">Próximos 7 días</option>
+                <option value="14" selected>Próximos 14 días</option>
+                <option value="30">Próximo mes</option>
+              </select>
+            </div>
+            <div class="chart-body">
+              <canvas id="chartPrincipal"></canvas>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"><i class="dot blue"></i>Histórico</span>
+              <span class="legend-item"><i class="dot purple"></i>Predicción</span>
+              <span class="legend-item"><i class="dot gray"></i>Intervalo de confianza</span>
+            </div>
+          </div>
+
+          <!-- Chart 2: Por categoría -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Predicción por categoría</h3>
+              <span class="chart-subtitle">Próximos 14 días</span>
+            </div>
+            <div class="chart-body">
+              <canvas id="chartCategorias"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Top productos recomendados -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>Top productos a reabastecer</h3>
+              <span class="chart-subtitle">Según predicción</span>
+            </div>
+            <div class="chart-body chart-body-bar">
+              <canvas id="chartReabastecer"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 4: Tendencia semanal -->
+          <div class="chart-card donut-card">
+            <div class="chart-header">
+              <h3>Tendencia semanal</h3>
+              <span class="chart-subtitle">Variación estimada</span>
+            </div>
+            <div class="chart-body chart-body-donut">
+              <canvas id="chartTendencia"></canvas>
+            </div>
+            <div class="donut-legend" id="donutLegendPred"></div>
+          </div>
+
+        </section>
+
+        <!-- Table: Productos con predicción -->
+        <section class="pred-table-section">
+          <div class="table-card">
+            <div class="table-header">
+              <h3>Detalle de predicción por producto</h3>
+              <a href="#" class="link-ver">Exportar</a>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table" id="tablePrediccion">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Stock actual</th>
+                    <th>Demanda estimada</th>
+                    <th>Recomendado</th>
+                    <th>Confianza</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyPrediccion"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@@4.4.4/dist/chart.umd.min.js" asp-append-version="true"></script>
+    <script src="~/js/prediccion.js" asp-append-version="true"></script>
+}
