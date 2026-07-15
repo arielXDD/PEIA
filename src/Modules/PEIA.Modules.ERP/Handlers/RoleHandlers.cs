@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using PEIA.Modules.ERP.Controllers;
 using PEIA.Shared.Infra.Identity;
 using Microsoft.Extensions.Caching.Memory;
-using PEIA.Modules.ERP.Controllers;
-using PEIA.Shared.Infra.Identity;
 
 namespace PEIA.Modules.ERP.Handlers;
 

@@ -52,6 +52,8 @@ public class InventoryTests
             4,
             null,
             "Venta",
+            null,
+            null,
             null));
 
         Assert.IsType<BadRequestObjectResult>(result);
@@ -90,7 +92,9 @@ public class InventoryTests
             3,
             "A-01",
             "Pedido",
-            "PED-1"));
+            "PED-1",
+            null,
+            null));
 
         Assert.IsType<OkObjectResult>(result);
         Assert.Equal(9, (await context.Stocks.FirstAsync()).Cantidad);

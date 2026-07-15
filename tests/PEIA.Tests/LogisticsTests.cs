@@ -32,7 +32,7 @@ public class LogisticsTests
     {
         var store = new Mock<IUserStore<Usuario>>();
         return new Mock<UserManager<Usuario>>(
-            store.Object, null, null, null, null, null, null, null, null);
+            store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
     }
 
     [Fact]

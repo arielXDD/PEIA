@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using PEIA.Modules.ERP.Controllers;
 using PEIA.Shared.Infra.Data;
 using Microsoft.Extensions.Caching.Memory;
-using PEIA.Modules.ERP.Controllers;
-using PEIA.Shared.Infra.Data;
 using PEIA.Shared.Infra.Identity;
 
 namespace PEIA.Modules.ERP.Handlers;
