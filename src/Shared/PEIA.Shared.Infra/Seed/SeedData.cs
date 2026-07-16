@@ -98,6 +98,23 @@ public static class SeedData
                 targetUser = existingUser;
             }
 
+            // Reparar usuarios creados previamente sin el rol esperado.
+            if (!await userManager.IsInRoleAsync(targetUser, u.Rol))
+            {
+                var roleResult = await userManager.AddToRoleAsync(targetUser, u.Rol);
+                if (roleResult.Succeeded)
+                {
+                    logger.LogInformation("Rol {Rol} asignado al usuario existente: {User}", u.Rol, u.Username);
+                }
+                else
+                {
+                    logger.LogError("Error al asignar el rol {Rol} a {User}: {Errors}",
+                        u.Rol,
+                        u.Username,
+                        string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                }
+            }
+
             // Ensure user has centers assigned
             var hasCenters = await db.UsuarioCentros.AnyAsync(uc => uc.UsuarioId == targetUser.Id);
             if (!hasCenters)
