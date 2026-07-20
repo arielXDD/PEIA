@@ -1,78 +1,73 @@
-/**
- * PEIA — bitacora.js
- * Shell frontend del módulo de Bitácora / Auditoría.
- *
- * TODO (Backend pendiente):
- *  - GET  /api/bitacora                        → listado paginado con filtros:
- *      ?modulo=&nivel=&usuario=&desde=&hasta=&page=&pageSize=
- *  - GET  /api/bitacora/resumen                → KPIs del día
- *      { eventosHoy, erroresHoy, usuariosActivos, eventosMes }
- *  - GET  /api/bitacora/export?formato=csv     → descarga CSV del resultado filtrado
- *
- * La tabla actual muestra filas de demostración hardcodeadas en el HTML.
- * Al implementar el backend, reemplazar #tbodyBitacora con datos reales.
- */
-
 'use strict';
 
-/* ── Warehouse selector ───────────────────────────── */
-const warehouseSelector = document.querySelector('.warehouse-selector');
-const warehouseDropdown = document.getElementById('warehouseDropdown');
-const activeCentroEl    = document.getElementById('activeCentro');
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!PEIA.requireAuth()) return;
+  PEIA.hydrateShell();
+  PEIA.bindWarehouseSelector();
 
-if (warehouseSelector) {
-  warehouseSelector.addEventListener('click', e => {
-    e.stopPropagation();
-    warehouseDropdown?.classList.toggle('open');
-  });
+  const elements = {
+    body: document.getElementById('tbodyBitacora'), info: document.getElementById('bitacoraInfo'),
+    previous: document.getElementById('btnPrevBit'), next: document.getElementById('btnNextBit'),
+    search: document.getElementById('searchBitacora'), module: document.getElementById('filterModulo'),
+    level: document.getElementById('filterNivel'), from: document.getElementById('fechaDesde'), to: document.getElementById('fechaHasta'),
+    export: document.getElementById('btnExportCSV')
+  };
+  let page = 1;
+  const pageSize = 10;
 
-  document.querySelectorAll('.warehouse-opt').forEach(opt => {
-    opt.addEventListener('click', () => {
-      document.querySelectorAll('.warehouse-opt').forEach(o => o.classList.remove('active'));
-      opt.classList.add('active');
-      if (activeCentroEl) activeCentroEl.textContent = opt.textContent;
-      warehouseDropdown?.classList.remove('open');
-    });
-  });
+  const escape = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
+  const initials = name => name.split(' ').map(part => part[0]).join('').slice(0, 2).toUpperCase();
+  const moduleClass = value => ({ 'Inventario': 'inventario', 'Pedidos': 'pedidos', 'Notificaciones': 'reportes' }[value] || 'config');
+  const formatDate = value => new Intl.DateTimeFormat('es-MX', { dateStyle: 'short', timeStyle: 'medium' }).format(new Date(value));
 
-  document.addEventListener('click', () => warehouseDropdown?.classList.remove('open'));
-}
+  function filters() {
+    const params = new URLSearchParams({ page, pageSize });
+    const values = { modulo: elements.module.value, nivel: elements.level.value, query: elements.search.value.trim(), desde: elements.from.value, hasta: elements.to.value };
+    Object.entries(values).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return params;
+  }
 
-/* ── Logout ───────────────────────────────────────── */
-document.getElementById('btnLogout')?.addEventListener('click', () => {
-  // TODO: invalidar token JWT en backend antes de redirigir
-  window.location.href = '/Login';
-});
+  function render(items) {
+    if (!items.length) {
+      elements.body.innerHTML = '<tr><td colspan="8" class="empty-cell">No hay eventos con los filtros seleccionados.</td></tr>';
+      return;
+    }
+    elements.body.innerHTML = items.map(item => `<tr>
+      <td class="cell-mono">${formatDate(item.fecha)}</td><td><div class="user-cell"><div class="avatar-sm">${escape(initials(item.usuario))}</div><span>${escape(item.usuario)}</span></div></td>
+      <td><span class="module-badge module-${moduleClass(item.modulo)}">${escape(item.modulo)}</span></td><td class="cell-primary">${escape(item.accion)}</td>
+      <td class="cell-detail" title="${escape(item.detalle)}">${escape(item.detalle)}</td><td>${escape(item.centro)}</td>
+      <td><span class="level-badge level-${item.nivel.toLowerCase()}">${escape(item.nivel)}</span></td><td class="cell-mono small">—</td></tr>`).join('');
+  }
 
-/* ── Filtro de búsqueda en tabla de demostración ─── */
-const searchInput = document.getElementById('searchBitacora');
-const filterModulo = document.getElementById('filterModulo');
-const filterNivel  = document.getElementById('filterNivel');
+  async function load() {
+    try {
+      const result = await PEIA.request(`/api/bitacora?${filters()}`);
+      render(result.items);
+      const first = result.total ? ((result.page - 1) * result.pageSize) + 1 : 0;
+      elements.info.textContent = `Mostrando ${first}-${Math.min(result.page * result.pageSize, result.total)} de ${result.total} eventos`;
+      elements.previous.disabled = result.page <= 1;
+      elements.next.disabled = result.page * result.pageSize >= result.total;
+      elements.export.disabled = result.total === 0;
+    } catch (error) {
+      elements.body.innerHTML = '<tr><td colspan="8" class="empty-cell">No se pudo cargar la bitácora.</td></tr>';
+      PEIA.toast.error(error.message);
+    }
+  }
 
-function applyFilters() {
-  // TODO: cuando exista el backend, enviar los filtros al API en lugar de filtrar el DOM
-  const query  = searchInput?.value.toLowerCase() ?? '';
-  const modulo = filterModulo?.value ?? '';
-  const nivel  = filterNivel?.value ?? '';
+  try {
+    const summary = await PEIA.request('/api/bitacora/resumen');
+    document.getElementById('kpi-eventos-hoy').textContent = summary.eventosHoy;
+    document.getElementById('kpi-errores-hoy').textContent = summary.erroresHoy;
+    document.getElementById('kpi-usuarios-activos').textContent = summary.usuariosActivos;
+    document.getElementById('kpi-eventos-mes').textContent = summary.eventosMes;
+    document.querySelectorAll('.pending-kpi').forEach(element => element.classList.remove('pending-kpi'));
+  } catch { PEIA.toast.error('No se pudo cargar el resumen de bitácora.'); }
 
-  document.querySelectorAll('#tbodyBitacora tr').forEach(row => {
-    const text     = row.textContent.toLowerCase();
-    const rowMod   = row.querySelector('.module-badge')?.textContent ?? '';
-    const rowLevel = row.querySelector('.level-badge')?.textContent ?? '';
-
-    const matchQuery  = !query  || text.includes(query);
-    const matchModulo = !modulo || rowMod.includes(modulo);
-    const matchNivel  = !nivel  || rowLevel.includes(nivel);
-
-    row.style.display = (matchQuery && matchModulo && matchNivel) ? '' : 'none';
-  });
-}
-
-searchInput?.addEventListener('input', applyFilters);
-filterModulo?.addEventListener('change', applyFilters);
-filterNivel?.addEventListener('change', applyFilters);
-
-/* ── Botones deshabilitados: tooltip informativo ──── */
-document.querySelectorAll('[disabled]').forEach(btn => {
-  btn.title = 'Pendiente: implementar endpoint de backend';
+  let searchTimer;
+  elements.search.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { page = 1; load(); }, 250); });
+  [elements.module, elements.level, elements.from, elements.to].forEach(element => element.addEventListener('change', () => { page = 1; load(); }));
+  elements.previous.addEventListener('click', () => { page--; load(); });
+  elements.next.addEventListener('click', () => { page++; load(); });
+  elements.export.addEventListener('click', () => { window.location.assign(`/api/bitacora/export?${filters()}`); });
+  await load();
 });

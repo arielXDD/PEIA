@@ -192,6 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!seg) return;
     document.getElementById('pwdMinLen').value = String(seg.passwordMinLength || 8);
     document.getElementById('chk-pwdComplex').checked = !!(seg.requireUppercase || seg.requireDigit);
+    document.getElementById('chk-2fa').checked = !!seg.requireTwoFactor;
   }
 
   document.getElementById('btnGuardarSeg').addEventListener('click', async () => {
@@ -200,6 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       passwordMinLength: Number(document.getElementById('pwdMinLen').value),
       requireUppercase: complex,
       requireDigit: complex,
+      requireTwoFactor: document.getElementById('chk-2fa').checked,
     };
     try {
       await PEIA.request('/api/configuracion/seguridad', { method: 'PUT', body: JSON.stringify(payload) });
@@ -207,6 +209,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       PEIA.toast.error(error.message);
     }
+  });
+
+  /* ── Integraciones ──────────────────────────────────────────────── */
+  let integraciones = [];
+
+  function renderIntegraciones() {
+    document.querySelectorAll('.btn-configurar-integracion').forEach(button => {
+      const integration = integraciones.find(item => item.id === button.dataset.integracion);
+      if (!integration) return;
+      const item = button.closest('.integration-item');
+      const badge = item?.querySelector('.status-badge');
+      if (badge) {
+        badge.className = `status-badge ${integration.enabled ? 'status-active' : 'status-inactive'}`;
+        badge.innerHTML = `<span class="status-dot-sm"></span>${integration.enabled ? 'Activa' : 'No configurado'}`;
+      }
+      button.textContent = integration.enabled ? 'Editar' : 'Configurar';
+    });
+  }
+
+  async function loadIntegraciones() {
+    integraciones = await safeLoad('/api/configuracion/integraciones') || [];
+    renderIntegraciones();
+  }
+
+  document.querySelectorAll('.btn-configurar-integracion').forEach(button => {
+    button.addEventListener('click', () => {
+      const integration = integraciones.find(item => item.id === button.dataset.integracion);
+      if (!integration) return;
+      new ModalForm({
+        title: `Configurar ${integration.nombre}`,
+        fields: [
+          { key: 'enabled', label: 'Activar integración', type: 'checkbox', value: integration.enabled },
+          { key: 'endpoint', label: 'URL o servidor', type: 'text', placeholder: 'https://servicio.example.com o smtp.example.com', value: integration.endpoint || '' }
+        ],
+        initialData: integration,
+        onSave: async data => {
+          try {
+            await PEIA.request(`/api/configuracion/integraciones/${integration.id}`, {
+              method: 'PUT',
+              body: JSON.stringify({ enabled: data.enabled === true, endpoint: data.endpoint || null })
+            });
+            await loadIntegraciones();
+            PEIA.toast.success('Integración actualizada.');
+          } catch (error) {
+            PEIA.toast.error(error.message);
+          }
+        }
+      });
+    });
   });
 
   /* ── Sistema ──────────────────────────────────────── */
@@ -385,6 +436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadPreferencias(),
     loadNotificacionesPrefs(),
     loadSeguridad(),
+    loadIntegraciones(),
     loadSistema(),
     loadReglas(),
   ]);

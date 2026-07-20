@@ -1,312 +1,77 @@
-// PEIA — Cámaras JS
-// Mock data + interactividad
+'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!PEIA.requireAuth()) return;
+  PEIA.hydrateShell();
+  PEIA.bindWarehouseSelector();
 
-  // ─── Mock Camera Data ────────────────────────
-  let refreshIntervals = {};
-  let modalInterval = null;
-
-  const camaras = [
-    {
-      id: 1,
-      nombre: 'Cámara 1',
-      zona: 'Zona A',
-      zonaDesc: 'Plaza Principal de Bernal, Qro',
-      ip: 'webcamsdemexico.net',
-      online: true,
-      activa: true,
-      ultimaRevision: 'En vivo',
-      playing: true,
-      feedUrl: 'https://webcamsdemexico.net/bernal1/live.jpg',
-      feedLabel: 'Bernal, Querétaro — En vivo',
-    },
-    {
-      id: 2,
-      nombre: 'Cámara 2',
-      zona: 'Zona B',
-      zonaDesc: 'Plaza Principal de Tequisquiapan, Qro',
-      ip: 'webcamsdemexico.net',
-      online: true,
-      activa: true,
-      ultimaRevision: 'En vivo',
-      playing: true,
-      feedUrl: 'https://webcamsdemexico.net/tequisquiapan1/live.jpg',
-      feedLabel: 'Tequisquiapan, Querétaro — En vivo',
-    },
-    {
-      id: 3,
-      nombre: 'Cámara 3',
-      zona: 'Entrada',
-      zonaDesc: 'Centro de San Joaquín, Qro',
-      ip: 'webcamsdemexico.net',
-      online: true,
-      activa: true,
-      ultimaRevision: 'En vivo',
-      playing: true,
-      feedUrl: 'https://webcamsdemexico.net/sanjoaquin1/live.jpg',
-      feedLabel: 'San Joaquín, Querétaro — En vivo',
-    },
-    {
-      id: 4,
-      nombre: 'Cámara 4',
-      zona: 'Despacho',
-      zonaDesc: 'Centro de Amealco, Qro',
-      ip: 'webcamsdemexico.net',
-      online: true,
-      activa: true,
-      ultimaRevision: 'En vivo',
-      playing: true,
-      feedUrl: 'https://webcamsdemexico.net/amealco1/live.jpg',
-      feedLabel: 'Amealco, Querétaro — En vivo',
-    },
-  ];
-
-  let selectedId = null;
-
-  // ─── Render Camera Cards ─────────────────────
   const grid = document.getElementById('camarasGrid');
+  let cameras = [];
+  let selectedId = null;
+  let refreshTimer = null;
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 
-  function renderCamaras() {
-    grid.innerHTML = '';
-    camaras.forEach(cam => {
-      const card = document.createElement('div');
-      card.className = 'camara-card' + (cam.id === selectedId ? ' selected' : '');
-      card.dataset.id = cam.id;
-
-      const badgeClass = cam.online ? '' : 'offline';
-      const badgeText = cam.online ? 'En vivo' : 'Desconectada';
-
-      let feedHtml;
-      if (cam.feedUrl) {
-        const ts = Date.now();
-        feedHtml = `
-          <img class="camara-feed-img" src="${cam.feedUrl}?t=${ts}" alt="${cam.nombre}" loading="lazy" />
-          <span class="camara-feed-label">${cam.feedLabel || 'Feed en vivo'}</span>`;
-      }
-
-      card.innerHTML = `
-        <div class="camara-feed" data-feed-id="${cam.id}">
-          ${feedHtml}
-          <div class="camara-tag">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            ${cam.nombre} — ${cam.zona}
-          </div>
-          <div class="camara-badge ${badgeClass}">${badgeText}</div>
-        </div>
-        <div class="camara-controls">
-          <button class="ctrl-btn play-btn ${cam.playing ? 'playing' : ''}" data-id="${cam.id}" title="Reproducir / Pausar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              ${cam.playing
-                ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
-                : '<polygon points="5 3 19 12 5 21 5 3"/>'}
-            </svg>
-          </button>
-          <button class="ctrl-btn" title="Micrófono">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-          </button>
-          <span class="ctrl-spacer"></span>
-          <span class="camara-name">${cam.nombre}</span>
-          <button class="ctrl-btn fullscreen-btn" data-id="${cam.id}" title="Pantalla completa">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-          </button>
-        </div>
-      `;
-
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.ctrl-btn')) return;
-        selectCamera(cam.id);
-      });
-
-      grid.appendChild(card);
-    });
-
-    // Play button events
-    document.querySelectorAll('.play-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = parseInt(btn.dataset.id);
-        togglePlay(id);
-      });
-    });
-
-    // Fullscreen button events
-    document.querySelectorAll('.fullscreen-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = parseInt(btn.dataset.id);
-        openFullscreen(id);
-      });
-    });
-
-    // Double-click on card -> fullscreen
-    document.querySelectorAll('.camara-card').forEach(card => {
-      card.addEventListener('dblclick', (e) => {
-        if (e.target.closest('.ctrl-btn')) return;
-        const id = parseInt(card.dataset.id);
-        openFullscreen(id);
-      });
-    });
-
-    // Start feed refresh for cameras with feedUrl
-    startFeedRefresh();
-
-    if (selectedId) scrollToSelected();
+  function simulatedFrame(camera) {
+    const now = new Date().toLocaleTimeString('es-MX');
+    const seed = (Date.now() / 1000 + camera.id * 17) % 100;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#132238"/><stop offset="1" stop-color="#25466a"/></linearGradient></defs><rect width="800" height="450" fill="url(#g)"/><path d="M0 355L190 240l132 85 155-165 323 205v85H0z" fill="#0b1728"/><rect x="70" y="185" width="145" height="150" rx="4" fill="#344c62"/><rect x="92" y="208" width="42" height="42" fill="#e7bd65" opacity=".8"/><rect x="149" y="208" width="42" height="42" fill="#e7bd65" opacity=".65"/><path d="M480 318c35-55 72-55 108 0" stroke="#87a5b7" stroke-width="17" fill="none"/><circle cx="${250 + seed}" cy="330" r="18" fill="#d3974a"/><text x="28" y="42" fill="#eff6ff" font-family="monospace" font-size="20">${escape(camera.nombre).toUpperCase()} · SIMULACIÓN LOCAL</text><text x="28" y="416" fill="#bed5e5" font-family="monospace" font-size="18">${now} · CANAL ${camera.id.toString().padStart(2, '0')}</text></svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   }
 
-  // ─── Feed Refresh (live image polling) ──────
-  function startFeedRefresh() {
-    stopFeedRefresh();
-    camaras.forEach(cam => {
-      if (!cam.feedUrl) return;
-      if (!cam.playing) return;
-      const id = cam.id;
-      const interval = setInterval(() => {
-        const img = grid.querySelector(`.camara-feed[data-feed-id="${id}"] .camara-feed-img`);
-        if (img) {
-          img.src = `${cam.feedUrl}?t=${Date.now()}`;
-        }
-      }, 2000);
-      refreshIntervals[id] = interval;
-    });
+  function feedMarkup(camera) {
+    if (camera.simulated) return `<img class="camara-feed-img" src="${simulatedFrame(camera)}" alt="Simulación de ${escape(camera.nombre)}">`;
+    if (camera.streamType === 'video' && camera.streamUrl) return `<video class="camara-feed-img" src="${escape(camera.streamUrl)}" autoplay muted playsinline></video>`;
+    if (camera.snapshotUrl) return `<img class="camara-feed-img" src="${escape(camera.snapshotUrl)}?t=${Date.now()}" alt="${escape(camera.nombre)}">`;
+    return '<div class="camara-feed-bg">Sin fuente configurada</div>';
   }
 
-  function stopFeedRefresh() {
-    Object.values(refreshIntervals).forEach(clearInterval);
-    refreshIntervals = {};
+  function render() {
+    grid.innerHTML = cameras.map(camera => `<article class="camara-card ${camera.id === selectedId ? 'selected' : ''}" data-id="${camera.id}"><div class="camara-feed">${feedMarkup(camera)}<div class="camara-tag">${escape(camera.nombre)} — ${escape(camera.zona)}</div><div class="camara-badge ${camera.online ? '' : 'offline'}">${camera.online ? 'En vivo' : 'Sin conexión'}</div></div><div class="camara-controls"><button class="ctrl-btn fullscreen-btn" data-id="${camera.id}" title="Pantalla completa">⛶</button><span class="ctrl-spacer"></span><span class="camara-name">${camera.simulated ? 'Simulación local' : escape(camera.host)}</span></div></article>`).join('');
+    grid.querySelectorAll('.camara-card').forEach(card => card.addEventListener('click', () => selectCamera(Number(card.dataset.id))));
+    grid.querySelectorAll('.fullscreen-btn').forEach(button => button.addEventListener('click', event => { event.stopPropagation(); grid.querySelector(`.camara-card[data-id="${button.dataset.id}"]`)?.requestFullscreen?.(); }));
+    grid.querySelectorAll('img.camara-feed-img').forEach(image => image.addEventListener('error', () => { const camera = cameras.find(item => item.id === Number(image.closest('.camara-card').dataset.id)); if (camera) { camera.online = false; render(); } }, { once: true }));
   }
 
-  // ─── Select Camera ───────────────────────────
   function selectCamera(id) {
     selectedId = id;
-    renderCamaras();
-
-    const cam = camaras.find(c => c.id === id);
-    if (!cam) return;
-
-    const empty = document.getElementById('detailEmpty');
-    const content = document.getElementById('detailContent');
-
-    empty.style.display = 'none';
-    content.style.display = 'block';
-
-    document.getElementById('detailTitle').textContent = `${cam.nombre} — ${cam.zona}`;
-    document.getElementById('detailNombre').textContent = cam.nombre;
-    document.getElementById('detailZona').textContent = `${cam.zona} (${cam.zonaDesc})`;
-    document.getElementById('detailIp').innerHTML = `
-      ${cam.ip}
-      <span class="badge-status ${cam.online ? 'badge-online' : 'badge-offline'}">${cam.online ? 'En línea' : 'Desconectada'}</span>
-    `;
-    document.getElementById('detailRevision').textContent = cam.ultimaRevision;
-    document.getElementById('detailEstado').innerHTML = `
-      <span class="badge-status ${cam.activa ? 'badge-active' : 'badge-offline'}">${cam.activa ? 'Activa' : 'Inactiva'}</span>
-    `;
+    const camera = cameras.find(item => item.id === id);
+    if (!camera) return;
+    document.getElementById('detailEmpty').style.display = 'none';
+    document.getElementById('detailContent').style.display = 'block';
+    document.getElementById('detailTitle').textContent = `${camera.nombre} — ${camera.zona}`;
+    document.getElementById('detailNombre').textContent = camera.nombre;
+    document.getElementById('detailZona').textContent = `${camera.zona} (${camera.zonaDesc})`;
+    document.getElementById('detailIp').textContent = camera.host;
+    document.getElementById('detailRevision').textContent = camera.ultimaRevision;
+    document.getElementById('detailEstado').textContent = camera.simulated ? 'Simulación activa' : camera.online ? 'Conectada' : 'Sin conexión';
+    render();
   }
 
-  // ─── Toggle Play ────────────────────────────
-  function togglePlay(id) {
-    const cam = camaras.find(c => c.id === id);
-    if (!cam) return;
-    cam.playing = !cam.playing;
-    renderCamaras();
-    if (selectedId === id) selectCamera(id);
+  async function loadCameras() {
+    try {
+      cameras = await PEIA.request('/api/camaras');
+      render();
+      if (cameras.length) selectCamera(selectedId || cameras[0].id);
+    } catch (error) { PEIA.toast.error(`No se pudieron cargar las cámaras: ${error.message}`); }
   }
 
-  function scrollToSelected() {
-    const card = grid.querySelector('.camara-card.selected');
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  // ─── Fullscreen Modal ────────────────────────
-  function openFullscreen(id) {
-    const cam = camaras.find(c => c.id === id);
-    if (!cam || !cam.feedUrl) return;
-
-    const overlay = document.getElementById('modalOverlay');
-    const img = document.getElementById('modalImg');
-    const title = document.getElementById('modalTitle');
-    const label = document.getElementById('modalLabel');
-
-    title.textContent = `${cam.nombre} — ${cam.zona}`;
-    label.textContent = cam.feedLabel || 'Feed en vivo';
-    img.src = `${cam.feedUrl}?t=${Date.now()}`;
-    img.alt = `${cam.nombre} — ${cam.zona}`;
-
-    overlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-
-    if (modalInterval) clearInterval(modalInterval);
-    modalInterval = setInterval(() => {
-      img.src = `${cam.feedUrl}?t=${Date.now()}`;
-    }, 2000);
-  }
-
-  function closeFullscreen() {
-    document.getElementById('modalOverlay').style.display = 'none';
-    document.body.style.overflow = '';
-    if (modalInterval) {
-      clearInterval(modalInterval);
-      modalInterval = null;
-    }
-  }
-
-  // ─── Modal Event Listeners ───────────────────
-  document.getElementById('modalClose').addEventListener('click', closeFullscreen);
-  document.getElementById('modalOverlay').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeFullscreen();
+  document.getElementById('btnCapturar')?.addEventListener('click', async () => {
+    const camera = cameras.find(item => item.id === selectedId);
+    if (!camera) return;
+    const frame = camera.simulated ? simulatedFrame(camera) : camera.snapshotUrl;
+    if (!frame) return PEIA.toast.error('La cámara no expone una URL de captura. Configura SnapshotUrl.');
+    const link = document.createElement('a'); link.href = frame; link.target = '_blank'; link.rel = 'noopener'; link.click();
+    await PEIA.request(`/api/camaras/${camera.id}/capturar`, { method: 'POST' }).catch(() => null);
   });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeFullscreen();
+  document.getElementById('btnReportar')?.addEventListener('click', async () => {
+    if (!selectedId) return;
+    const description = window.prompt('Describe la incidencia detectada:');
+    if (!description?.trim()) return;
+    try { await PEIA.request(`/api/camaras/${selectedId}/reportar-incidencia`, { method: 'POST', body: JSON.stringify({ descripcion: description.trim() }) }); PEIA.toast.success('Incidencia registrada.'); } catch (error) { PEIA.toast.error(error.message); }
   });
+  document.getElementById('btnGrabaciones')?.addEventListener('click', () => PEIA.toast.info('Las grabaciones se consultan desde el NVR o gateway configurado para la cámara.'));
 
-  // ─── Initial render ──────────────────────────
-  renderCamaras();
-
-  // ─── Warehouse Selector ──────────────────────
-  const warehouseSelector = document.querySelector('.warehouse-selector');
-  warehouseSelector.addEventListener('click', (e) => {
-    e.stopPropagation();
-    warehouseSelector.classList.toggle('open');
-  });
-
-  document.querySelectorAll('.warehouse-opt').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      document.querySelectorAll('.warehouse-opt').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('activeCentro').textContent = btn.textContent;
-      warehouseSelector.classList.remove('open');
-    });
-  });
-
-  document.addEventListener('click', () => warehouseSelector.classList.remove('open'));
-
-  // ─── Logout ──────────────────────────────────
-  document.getElementById('btnLogout').addEventListener('click', () => {
-    localStorage.removeItem('peia_token');
-    localStorage.removeItem('peia_user');
-    window.location.href = '//Login';
-  });
-
-  // ─── User Info ──────────────────────────────
-  const user = JSON.parse(localStorage.getItem('peia_user') || '{}');
-  if (user.nombreCompleto) {
-    document.getElementById('userName').textContent = user.nombreCompleto;
-    const initials = user.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    document.getElementById('userAvatar').textContent = initials;
-  }
-
-  // ─── Detail Action Buttons (mock) ────────────
-  document.getElementById('btnCapturar').addEventListener('click', () => {
-    PEIA.toast.info('Captura de pantalla simulada');
-  });
-
-  document.getElementById('btnReportar').addEventListener('click', () => {
-    PEIA.toast.success('Incidencia reportada correctamente');
-  });
-
-  document.getElementById('btnGrabaciones').addEventListener('click', () => {
-    PEIA.toast.info('Listado de grabaciones disponible proximamente');
-  });
-
+  await loadCameras();
+  refreshTimer = window.setInterval(() => { cameras.filter(item => item.simulated || item.snapshotUrl).forEach(camera => { const image = grid.querySelector(`.camara-card[data-id="${camera.id}"] img`); if (image) image.src = camera.simulated ? simulatedFrame(camera) : `${camera.snapshotUrl}?t=${Date.now()}`; }); }, 2500);
+  window.addEventListener('beforeunload', () => clearInterval(refreshTimer));
 });

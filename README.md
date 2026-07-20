@@ -38,6 +38,30 @@ Si prefieres hacerlo manualmente, puedes crear una base de datos vacía en Postg
 Abre tu navegador y entra a:
 👉 **[https://localhost:5001](https://localhost:5001)**
 
+### Cámaras reales
+
+La vista de cámaras funciona con simulación local cuando `CameraMonitoring:Cameras` está vacío. Para cámaras reales, el navegador no puede reproducir una URL RTSP directamente: usa un NVR o gateway que exponga una captura JPEG o un video compatible con navegador (por ejemplo, HLS/WebRTC convertido por MediaMTX, go2rtc o el NVR).
+
+Agrega las fuentes en `src/PEIA.Web/appsettings.Development.json`:
+
+```json
+"CameraMonitoring": {
+  "Cameras": [
+    {
+      "Nombre": "Acceso principal",
+      "Zona": "Entrada",
+      "ZonaDesc": "Puerta de acceso",
+      "Host": "nvr-almacen.local",
+      "SnapshotUrl": "https://nvr-almacen.local/api/cameras/entrada/snapshot.jpg",
+      "StreamUrl": "https://nvr-almacen.local/cameras/entrada/video.mp4",
+      "StreamType": "video"
+    }
+  ]
+}
+```
+
+Para una fuente JPEG actualizada, usa `"StreamType": "snapshot"` y proporciona solo `SnapshotUrl`. Mantén las credenciales en el gateway/NVR, no en esta configuración ni en el navegador.
+
 ### Usuarios de Prueba (Contraseña para todos: `Peia2025!`)
 - **Admin**: `admin` (`admin@peia.com`)
 - **Inventario**: `inventario` (`inventario@peia.com`)

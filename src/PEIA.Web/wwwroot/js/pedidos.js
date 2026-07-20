@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Botones para abrir modals de creación
   document.getElementById('btnOpenNewPedido')?.addEventListener('click', () => {
     document.getElementById('formNewPedido')?.reset();
+    const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    document.getElementById('pedFechaSla').value = deadline.toISOString().slice(0, 16);
     openModal('modalNewPedido');
   });
 
@@ -194,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(data)
       });
       closeModal('modalNewPedido');
+      PEIA.toast.success('Pedido registrado correctamente.');
       loadPedidos();
     } catch (err) {
       PEIA.toast.error(`Error al registrar el pedido: ${err.message}`);
@@ -216,7 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(data)
       });
       closeModal('modalNewRuta');
-      loadRutas();
+      PEIA.toast.success('Ruta creada correctamente.');
+      await loadRutas();
     } catch (err) {
       PEIA.toast.error(`Error al crear la ruta: ${err.message}`);
     }

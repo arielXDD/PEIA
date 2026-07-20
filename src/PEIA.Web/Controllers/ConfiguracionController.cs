@@ -38,7 +38,15 @@ public class ConfiguracionController : ControllerBase
     private static readonly SeguridadConfig DefaultSeguridad = new(
         8,
         true,
-        true);
+        true,
+        false);
+
+    private static readonly IReadOnlyList<IntegracionConfig> DefaultIntegraciones =
+    [
+        new("erp", "ERP externo", false, null),
+        new("smtp", "Correo (SMTP)", false, null),
+        new("mensajeria", "SMS / Notificaciones push", false, null)
+    ];
 
     public ConfiguracionController(PeiaDbContext context)
     {
@@ -90,6 +98,22 @@ public class ConfiguracionController : ControllerBase
         return Ok(request);
     }
 
+    [HttpGet("integraciones")]
+    public async Task<IActionResult> GetIntegraciones() => Ok(await GetSettingAsync("integraciones", DefaultIntegraciones));
+
+    [HttpPut("integraciones/{id}")]
+    public async Task<IActionResult> UpdateIntegracion(string id, [FromBody] UpdateIntegracionRequest request)
+    {
+        var integrations = (await GetSettingAsync("integraciones", DefaultIntegraciones)).ToList();
+        var index = integrations.FindIndex(item => item.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+        if (index < 0) return NotFound(new { message = "La integración solicitada no existe." });
+        if (request.Enabled && string.IsNullOrWhiteSpace(request.Endpoint)) return BadRequest(new { message = "Indica una URL o servidor para activar la integración." });
+
+        integrations[index] = integrations[index] with { Enabled = request.Enabled, Endpoint = request.Endpoint?.Trim() };
+        await SetSettingAsync("integraciones", integrations);
+        return Ok(integrations[index]);
+    }
+
     private async Task<T> GetSettingAsync<T>(string key, T defaultValue)
     {
         var setting = await _context.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Key == key);
@@ -127,4 +151,6 @@ public class ConfiguracionController : ControllerBase
 public record EmpresaConfig(string Nombre, string? Rfc, string? Telefono, string? Direccion, string? Email);
 public record PreferenciasConfig(string Timezone, string DateFormat, string Currency, int PageSize);
 public record NotificacionesConfig(bool Stock, bool Sla, bool Pedido, bool Camara, bool Email);
-public record SeguridadConfig(int PasswordMinLength, bool RequireUppercase, bool RequireDigit);
+public record SeguridadConfig(int PasswordMinLength, bool RequireUppercase, bool RequireDigit, bool RequireTwoFactor);
+public record IntegracionConfig(string Id, string Nombre, bool Enabled, string? Endpoint);
+public record UpdateIntegracionRequest(bool Enabled, string? Endpoint);

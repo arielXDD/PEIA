@@ -95,3 +95,19 @@
 .action-bar {
   margin-bottom: 14px;
 }
+
+.empty-cell { padding: 32px !important; text-align: center; color: var(--text-muted); }
+
+@media (max-width: 760px) {
+  .action-bar-left { width: 100%; flex-wrap: wrap; }
+  .action-bar .search-box { width: 100%; }
+  .action-bar .filter-select { flex: 1 1 130px; }
+  .date-range { width: 100%; flex-wrap: wrap; }
+  .action-bar-right { width: 100%; }
+  .btn-export { width: 100%; justify-content: center; }
+  .kpi-mini-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 420px) {
+  .kpi-mini-grid { grid-template-columns: 1fr; }
+}
