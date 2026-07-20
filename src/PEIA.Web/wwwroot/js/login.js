@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         const data = await response.json();
         PEIA.setSession(data.token, data.user);
-        window.location.href = '//Inicio';
+        window.location.href = '/Inicio';
       } else {
         const err = await response.json().catch(() => ({}));
         showError(err.message || 'Usuario o contraseña incorrectos.');

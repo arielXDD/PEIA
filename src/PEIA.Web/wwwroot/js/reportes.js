@@ -6,9 +6,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   PEIA.hydrateShell();
   PEIA.bindWarehouseSelector();
 
-  Chart.defaults.font.family = "'Inter', sans-serif";
-  Chart.defaults.font.size = 11;
-  Chart.defaults.color = '#9ca3af';
+  const chartsAvailable = typeof Chart !== 'undefined';
+  if (chartsAvailable) {
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#9ca3af';
+  }
 
   let productos = [];
   let movimientos = [];
@@ -20,6 +23,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   let invTable = null;
   let movTable = null;
   let pedTable = null;
+
+  const today = new Date();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+  document.getElementById('dateFrom').value = thirtyDaysAgo.toISOString().slice(0, 10);
+  document.getElementById('dateTo').value = today.toISOString().slice(0, 10);
 
   const estadoPill = {
     Creado: 'status-pending',
@@ -72,21 +81,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       categoriasUnicas.map(c => `<option value="${c}">${c}</option>`).join('');
     filter.value = current;
 
-    if (chartInvCategoria) chartInvCategoria.destroy();
     const catColors = ['#3b82f6', '#22c55e', '#f59e0b', '#7c3aed', '#0891b2', '#ef4444'];
     const categorias = resumen.categorias || [];
-    chartInvCategoria = new Chart(document.getElementById('chartInvCategoria'), {
-      type: 'bar',
-      data: {
-        labels: categorias.map(c => c.nombre),
-        datasets: [{ data: categorias.map(c => c.cantidad), backgroundColor: catColors.slice(0, categorias.length), borderRadius: 6, barThickness: 32 }],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' }, border: { display: false } } },
-      },
-    });
+    if (chartsAvailable) {
+      if (chartInvCategoria) chartInvCategoria.destroy();
+      chartInvCategoria = new Chart(document.getElementById('chartInvCategoria'), {
+        type: 'bar',
+        data: {
+          labels: categorias.map(c => c.nombre),
+          datasets: [{ data: categorias.map(c => c.cantidad), backgroundColor: catColors.slice(0, categorias.length), borderRadius: 6, barThickness: 32 }],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' }, border: { display: false } } },
+        },
+      });
+    }
 
     if (!invTable) {
       invTable = new DataTable(document.getElementById('tableInvReport'), {
@@ -144,22 +155,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     const dias = Object.keys(porDia).sort((a, b) => new Date(a.split('/').reverse().join('-')) - new Date(b.split('/').reverse().join('-')));
 
-    if (chartMovTrend) chartMovTrend.destroy();
-    chartMovTrend = new Chart(document.getElementById('chartMovTrend'), {
-      type: 'line',
-      data: {
-        labels: dias,
-        datasets: [
-          { label: 'Entradas', data: dias.map(d => porDia[d].entradas), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.08)', tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: '#3b82f6', borderWidth: 2 },
-          { label: 'Salidas', data: dias.map(d => porDia[d].salidas), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.06)', tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: '#ef4444', borderWidth: 2 },
-        ],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } } },
-        scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' }, border: { display: false } } },
-      },
-    });
+    if (chartsAvailable) {
+      if (chartMovTrend) chartMovTrend.destroy();
+      chartMovTrend = new Chart(document.getElementById('chartMovTrend'), {
+        type: 'line',
+        data: {
+          labels: dias,
+          datasets: [
+            { label: 'Entradas', data: dias.map(d => porDia[d].entradas), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,.08)', tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: '#3b82f6', borderWidth: 2 },
+            { label: 'Salidas', data: dias.map(d => porDia[d].salidas), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.06)', tension: .35, fill: true, pointRadius: 4, pointBackgroundColor: '#ef4444', borderWidth: 2 },
+          ],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } } },
+          scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' }, border: { display: false } } },
+        },
+      });
+    }
 
     if (!movTable) {
       movTable = new DataTable(document.getElementById('tableMovReport'), {
@@ -201,16 +214,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }));
 
     const estados = resumen.estados || {};
-    if (chartPedEstados) chartPedEstados.destroy();
     const labels = Object.keys(estados).filter(k => estados[k] > 0);
-    chartPedEstados = new Chart(document.getElementById('chartPedEstados'), {
-      type: 'doughnut',
-      data: {
-        labels: labels.map(l => estadoLabel[l] || l),
-        datasets: [{ data: labels.map(l => estados[l]), backgroundColor: labels.map(l => donutColors[l] || '#9ca3af'), borderWidth: 0, hoverOffset: 6 }],
-      },
-      options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10 } } } },
-    });
+    if (chartsAvailable) {
+      if (chartPedEstados) chartPedEstados.destroy();
+      chartPedEstados = new Chart(document.getElementById('chartPedEstados'), {
+        type: 'doughnut',
+        data: {
+          labels: labels.map(l => estadoLabel[l] || l),
+          datasets: [{ data: labels.map(l => estados[l]), backgroundColor: labels.map(l => donutColors[l] || '#9ca3af'), borderWidth: 0, hoverOffset: 6 }],
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10 } } } },
+      });
+    }
 
     if (!pedTable) {
       pedTable = new DataTable(document.getElementById('tablePedReport'), {
@@ -264,45 +279,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   let _progressTimer = null;
 
   // Helpers
-  function showOverlay(id)  { document.getElementById(id).classList.add('is-visible'); }
-  function hideOverlay(id)  { document.getElementById(id).classList.remove('is-visible'); }
+  function showOverlay(id)  { document.getElementById(id)?.classList.add('is-visible'); }
+  function hideOverlay(id)  { document.getElementById(id)?.classList.remove('is-visible'); }
   function hideAllOverlays() {
     ['overlayPdf','overlayExcel','overlayProgress','overlaySuccess','overlayError','overlayPrint']
       .forEach(id => hideOverlay(id));
   }
 
   // Orientation selection (PDF config)
-  document.getElementById('orientVertical').addEventListener('click', () => {
+  document.getElementById('orientVertical')?.addEventListener('click', () => {
     document.getElementById('orientVertical').classList.add('selected');
     document.getElementById('orientHorizontal').classList.remove('selected');
   });
-  document.getElementById('orientHorizontal').addEventListener('click', () => {
+  document.getElementById('orientHorizontal')?.addEventListener('click', () => {
     document.getElementById('orientHorizontal').classList.add('selected');
     document.getElementById('orientVertical').classList.remove('selected');
   });
 
   // Close / Cancel buttons (config modals)
   ['closePdfConfig','cancelPdfConfig'].forEach(id =>
-    document.getElementById(id).addEventListener('click', hideAllOverlays));
+    document.getElementById(id)?.addEventListener('click', hideAllOverlays));
   ['closeExcelConfig','cancelExcelConfig'].forEach(id =>
-    document.getElementById(id).addEventListener('click', hideAllOverlays));
+    document.getElementById(id)?.addEventListener('click', hideAllOverlays));
 
   // Cancel / Close (other modals)
-  document.getElementById('cancelProgress').addEventListener('click', () => {
+  document.getElementById('cancelProgress')?.addEventListener('click', () => {
     _cancelled = true;
     clearTimeout(_progressTimer);
     hideAllOverlays();
   });
-  document.getElementById('closeSuccess').addEventListener('click', hideAllOverlays);
-  document.getElementById('cancelError').addEventListener('click', hideAllOverlays);
-  document.getElementById('retryExport').addEventListener('click', () => {
+  document.getElementById('closeSuccess')?.addEventListener('click', hideAllOverlays);
+  document.getElementById('cancelError')?.addEventListener('click', hideAllOverlays);
+  document.getElementById('retryExport')?.addEventListener('click', () => {
     hideOverlay('overlayError');
     if (_retryFn) _retryFn();
   });
 
   // Click outside to close config modals
   ['overlayPdf','overlayExcel'].forEach(id => {
-    document.getElementById(id).addEventListener('click', e => {
+    document.getElementById(id)?.addEventListener('click', e => {
       if (e.target === document.getElementById(id)) hideAllOverlays();
     });
   });
@@ -369,6 +384,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ── Open config modals ─────────────────────────────────────
   function openPdfConfig(reportKey, title, headers, getRows) {
+    if (!document.getElementById('overlayPdf')) {
+      exportCsv(title, headers, getRows());
+      return;
+    }
     // Update subtitle with report name
     document.querySelector('#emPdfTitle').textContent = `Exportar ${title} a PDF`;
     hideAllOverlays();
@@ -400,6 +419,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function openExcelConfig(reportKey, title, headers, getRows) {
+    if (!document.getElementById('overlayExcel')) {
+      exportCsv(title, headers, getRows());
+      return;
+    }
     document.querySelector('#emExcelTitle').textContent = `Exportar ${title} a Excel`;
     hideAllOverlays();
     showOverlay('overlayExcel');
@@ -420,6 +443,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
       });
     };
+  }
+
+  function exportCsv(title, headers, rows) {
+    const csvRows = [headers, ...rows].map(row =>
+      row.map(value => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')
+    );
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `PEIA_${title.replace(/\s/g, '_')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   // ── Core export flow ───────────────────────────────────────
@@ -501,6 +537,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ── Print Modal ────────────────────────────────────────────
   function openPrintModal(reportTitle) {
+    if (!document.getElementById('overlayPrint')) {
+      window.print();
+      return;
+    }
+
     // Update preview doc title
     document.getElementById('pmDocTitle').textContent = reportTitle;
     document.getElementById('pmDocDate').textContent =
@@ -522,11 +563,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Orientation toggle
-  document.getElementById('pmOrientPortrait').addEventListener('click', () => {
+  document.getElementById('pmOrientPortrait')?.addEventListener('click', () => {
     document.getElementById('pmOrientPortrait').classList.add('pm-orient-active');
     document.getElementById('pmOrientLandscape').classList.remove('pm-orient-active');
   });
-  document.getElementById('pmOrientLandscape').addEventListener('click', () => {
+  document.getElementById('pmOrientLandscape')?.addEventListener('click', () => {
     document.getElementById('pmOrientLandscape').classList.add('pm-orient-active');
     document.getElementById('pmOrientPortrait').classList.remove('pm-orient-active');
   });
@@ -541,26 +582,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Copies counter
   let _copies = 1;
-  document.getElementById('pmCopiesPlus').addEventListener('click', () => {
+  document.getElementById('pmCopiesPlus')?.addEventListener('click', () => {
     _copies = Math.min(_copies + 1, 99);
     document.getElementById('pmCopiesVal').textContent = _copies;
   });
-  document.getElementById('pmCopiesMinus').addEventListener('click', () => {
+  document.getElementById('pmCopiesMinus')?.addEventListener('click', () => {
     _copies = Math.max(_copies - 1, 1);
     document.getElementById('pmCopiesVal').textContent = _copies;
   });
 
   // Close / Cancel
   ['closePrintModal', 'cancelPrintModal'].forEach(id =>
-    document.getElementById(id).addEventListener('click', hideAllOverlays));
+    document.getElementById(id)?.addEventListener('click', hideAllOverlays));
 
   // Click outside
-  document.getElementById('overlayPrint').addEventListener('click', e => {
+  document.getElementById('overlayPrint')?.addEventListener('click', e => {
     if (e.target === document.getElementById('overlayPrint')) hideAllOverlays();
   });
 
   // Confirm → print
-  document.getElementById('confirmPrintModal').addEventListener('click', () => {
+  document.getElementById('confirmPrintModal')?.addEventListener('click', () => {
     hideAllOverlays();
     setTimeout(() => window.print(), 120);
   });
