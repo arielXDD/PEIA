@@ -1,85 +1,24 @@
 // PEIA — Lógica del Módulo de Pedidos, Rutas y SLAs
 
 document.addEventListener('DOMContentLoaded', () => {
-  const token = localStorage.getItem('peia_token');
-  const user = JSON.parse(localStorage.getItem('peia_user') || '{}');
-
-  // Redirigir al login si no está autenticado
-  if (!token) {
-    window.location.href = '//Login';
-    return;
-  }
+  if (!PEIA.requireAuth()) return;
 
   // Elementos globales de datos
-  let activeCentroId = '';
   let rutasCache = [];
   let transportistasCache = [];
 
-  // Configurar Cabecera y Nombre de Usuario
-  if (user.nombreCompleto) {
-    document.getElementById('userName').textContent = user.nombreCompleto;
-    const initials = user.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    document.getElementById('userAvatar').textContent = initials;
-  }
-
-  // ══════════════════════════════════
-  // GESTIÓN DE CENTROS (BODEGAS)
-  // ══════════════════════════════════
-  const activeCentroEl = document.getElementById('activeCentro');
-  const dropdownCentroEl = document.getElementById('warehouseDropdown');
-
-  function initCentros() {
-    dropdownCentroEl.innerHTML = '';
-    if (user.centros && user.centros.length > 0) {
-      user.centros.forEach((centro, index) => {
-        const btn = document.createElement('button');
-        btn.className = `warehouse-opt ${index === 0 ? 'active' : ''}`;
-        btn.textContent = centro.nombre;
-        btn.setAttribute('data-id', centro.id);
-        dropdownCentroEl.appendChild(btn);
-
-        if (index === 0) {
-          activeCentroId = centro.id;
-          activeCentroEl.textContent = centro.nombre;
-        }
-      });
-    } else {
-      activeCentroEl.textContent = "Sin centros asignados";
-    }
-  }
-
-  initCentros();
-
-  // Selector de bodega toggle
-  const warehouseSelector = document.querySelector('.warehouse-selector');
-  warehouseSelector.addEventListener('click', (e) => {
-    e.stopPropagation();
-    warehouseSelector.classList.toggle('open');
-  });
-
-  document.addEventListener('click', () => warehouseSelector.classList.remove('open'));
-
-  // Cambiar bodega activa
-  dropdownCentroEl.addEventListener('click', (e) => {
-    if (e.target.classList.contains('warehouse-opt')) {
-      document.querySelectorAll('.warehouse-opt').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      activeCentroEl.textContent = e.target.textContent;
-      activeCentroId = e.target.getAttribute('data-id');
-      warehouseSelector.classList.remove('open');
-      loadAllData(); // Recargar datos del nuevo almacén
-    }
-  });
+  PEIA.hydrateShell();
+  PEIA.bindWarehouseSelector();
 
   // ══════════════════════════════════
   // MODALS CONTROL
   // ══════════════════════════════════
   function openModal(id) {
-    document.getElementById(id).classList.add('open');
+    document.getElementById(id)?.classList.add('open');
   }
 
   function closeModal(id) {
-    document.getElementById(id).classList.remove('open');
+    document.getElementById(id)?.classList.remove('open');
   }
 
   // Escuchar botones de cierre
@@ -90,13 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Botones para abrir modals de creación
-  document.getElementById('btnOpenNewPedido').addEventListener('click', () => {
-    document.getElementById('formNewPedido').reset();
+  document.getElementById('btnOpenNewPedido')?.addEventListener('click', () => {
+    document.getElementById('formNewPedido')?.reset();
     openModal('modalNewPedido');
   });
 
-  document.getElementById('btnOpenNewRuta').addEventListener('click', () => {
-    document.getElementById('formNewRuta').reset();
+  document.getElementById('btnOpenNewRuta')?.addEventListener('click', () => {
+    document.getElementById('formNewRuta')?.reset();
     openModal('modalNewRuta');
   });
 
@@ -104,26 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ENLACES API / FETCH DATA
   // ══════════════════════════════════
   async function apiFetch(url, options = {}) {
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      ...options.headers
-    };
-    const response = await fetch(url, { ...options, headers });
-    
-    if (response.status === 401) {
-      localStorage.clear();
-      window.location.href = '//Login';
-      return null;
-    }
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({ message: 'Error desconocido' }));
-      throw new Error(err.message || 'Error en la petición');
-    }
-
-    if (response.status === 204) return null;
-    return response.json();
+    return PEIA.request(url, options);
   }
 
   // Carga inicial
@@ -149,7 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadPedidos() {
-    const pedidos = await apiFetch(`/api/pedidos?centroId=${activeCentroId}`) || [];
+    const centro = PEIA.getActiveCentro();
+    if (!centro?.id) throw new Error('Selecciona un centro activo.');
+
+    const pedidos = await apiFetch(`/api/pedidos?centroId=${centro.id}`) || [];
     renderPedidos(pedidos);
     calculateKPIs(pedidos);
   }
@@ -255,14 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // ══════════════════════════════════
 
   // 1. Submit: Nuevo Pedido
-  document.getElementById('formNewPedido').addEventListener('submit', async (e) => {
+  document.getElementById('formNewPedido')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = {
       codigo: document.getElementById('pedCodigo').value.trim(),
       cliente: document.getElementById('pedCliente').value.trim(),
       direccionEntrega: document.getElementById('pedDireccion').value.trim(),
       fechaEstimadaEntrega: new Date(document.getElementById('pedFechaSla').value).toISOString(),
-      centroId: activeCentroId
+      centroId: PEIA.getActiveCentro()?.id
     };
 
     try {
@@ -278,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 2. Submit: Crear Ruta
-  document.getElementById('formNewRuta').addEventListener('submit', async (e) => {
+  document.getElementById('formNewRuta')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = {
       nombre: document.getElementById('rutaNombre').value.trim(),
@@ -301,17 +224,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 3. Inicializar y Submit: Asignación de Pedido
   function initAssignModal(pedidoId) {
-    document.getElementById('assignPedidoId').value = pedidoId;
+    const assignPedidoId = document.getElementById('assignPedidoId');
+    const rSelect = document.getElementById('assignRuta');
+    const dSelect = document.getElementById('assignDriver');
+    if (!assignPedidoId || !rSelect || !dSelect) {
+      PEIA.toast.info('Formulario de asignación no disponible en esta vista.');
+      return;
+    }
+
+    assignPedidoId.value = pedidoId;
 
     // Poblar rutas
-    const rSelect = document.getElementById('assignRuta');
     rSelect.innerHTML = '<option value="">Seleccione una ruta...</option>';
     rutasCache.forEach(r => {
       rSelect.innerHTML += `<option value="${r.id}">${r.nombre} (${r.origen} - ${r.destino})</option>`;
     });
 
     // Poblar transportistas
-    const dSelect = document.getElementById('assignDriver');
     dSelect.innerHTML = '<option value="">Seleccione un transportista...</option>';
     transportistasCache.forEach(d => {
       dSelect.innerHTML += `<option value="${d.id}">${d.nombreCompleto} (${d.email})</option>`;
@@ -320,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openModal('modalAssignPedido');
   }
 
-  document.getElementById('formAssignPedido').addEventListener('submit', async (e) => {
+  document.getElementById('formAssignPedido')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const pedidoId = document.getElementById('assignPedidoId').value;
     const data = {
@@ -342,11 +271,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Inicializar y Submit: Actualizar Estado
   function initStatusModal(pedidoId, estadoActual) {
-    document.getElementById('updatePedidoId').value = pedidoId;
-    document.getElementById('formUpdateEstado').reset();
+    const updatePedidoId = document.getElementById('updatePedidoId');
+    const form = document.getElementById('formUpdateEstado');
+    const select = document.getElementById('updateEstadoSelect');
+    if (!updatePedidoId || !form || !select) {
+      PEIA.toast.info('Formulario de actualización no disponible en esta vista.');
+      return;
+    }
+
+    updatePedidoId.value = pedidoId;
+    form.reset();
 
     // Establecer opciones lógicas de estado
-    const select = document.getElementById('updateEstadoSelect');
     select.innerHTML = '';
     
     if (estadoActual === 'Asignado') {
@@ -360,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openModal('modalUpdateEstado');
   }
 
-  document.getElementById('formUpdateEstado').addEventListener('submit', async (e) => {
+  document.getElementById('formUpdateEstado')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const pedidoId = document.getElementById('updatePedidoId').value;
     const lat = document.getElementById('updateLat').value;
@@ -392,17 +328,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!p) return;
 
       // Código y SLA
-      document.getElementById('trackPedidoCode').textContent = `Rastreo del Pedido: ${p.codigo}`;
-      
+      const trackPedidoCode = document.getElementById('trackPedidoCode');
       const badge = document.getElementById('trackSlaBadge');
+      const trackSlaDetail = document.getElementById('trackSlaDetail');
+      const timeline = document.getElementById('trackTimeline');
+      if (!trackPedidoCode || !badge || !trackSlaDetail || !timeline) {
+        PEIA.toast.info(`Pedido ${p.codigo}: ${p.cliente} (${p.estado})`);
+        return;
+      }
+
+      trackPedidoCode.textContent = `Rastreo del Pedido: ${p.codigo}`;
+      
       badge.textContent = p.sla?.estadoSLA || 'EnRiesgo';
       badge.className = `sla-status-badge sla-status-${p.sla?.estadoSLA || 'EnRiesgo'}`;
       
       const limitDate = new Date(p.sla?.tiempoLimite).toLocaleString();
-      document.getElementById('trackSlaDetail').textContent = `Fecha límite de SLA: ${limitDate}`;
+      trackSlaDetail.textContent = `Fecha límite de SLA: ${limitDate}`;
 
       // Línea de tiempo
-      const timeline = document.getElementById('trackTimeline');
       timeline.innerHTML = '';
 
       if (!p.estadosRastreo || p.estadosRastreo.length === 0) {
@@ -441,9 +384,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ══════════════════════════════════
   // CIERRE DE SESIÓN
   // ══════════════════════════════════
-  document.getElementById('btnLogout').addEventListener('click', () => {
-    localStorage.clear();
-    window.location.href = '//Login';
+  window.addEventListener('peia:centro-changed', () => {
+    loadAllData();
   });
 
   // Ejecución inicial de carga

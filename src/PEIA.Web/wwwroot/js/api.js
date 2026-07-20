@@ -14,8 +14,12 @@ window.PEIA = (() => {
   function setSession(token, user) {
     localStorage.setItem(tokenKey, token);
     localStorage.setItem(userKey, JSON.stringify(user));
-    if (user?.centros?.length && !localStorage.getItem(activeCentroKey)) {
-      localStorage.setItem(activeCentroKey, JSON.stringify(user.centros[0]));
+    if (user?.centros?.length) {
+      const storedCentro = JSON.parse(localStorage.getItem(activeCentroKey) || 'null');
+      const hasValidCentro = storedCentro?.id && user.centros.some(c => c.id === storedCentro.id);
+      if (!hasValidCentro) {
+        localStorage.setItem(activeCentroKey, JSON.stringify(user.centros[0]));
+      }
     }
   }
 
@@ -27,7 +31,7 @@ window.PEIA = (() => {
 
   function requireAuth() {
     if (!getToken()) {
-      window.location.href = '//Login';
+      window.location.href = '/Login';
       return false;
     }
     return true;
@@ -47,7 +51,7 @@ window.PEIA = (() => {
     const response = await fetch(path, { ...options, headers });
     if (response.status === 401) {
       clearSession();
-      window.location.href = '//Login';
+      window.location.href = '/Login';
       throw new Error('Sesión expirada.');
     }
 
@@ -66,7 +70,7 @@ window.PEIA = (() => {
 
   function logout() {
     clearSession();
-    window.location.href = '//Login';
+    window.location.href = '/Login';
   }
 
   let hubConnection = null;
@@ -114,9 +118,16 @@ window.PEIA = (() => {
 
   function getActiveCentro() {
     const stored = localStorage.getItem(activeCentroKey);
-    if (stored) return JSON.parse(stored);
     const user = getUser();
-    return user?.centros?.[0] || null;
+    if (stored) {
+      const centro = JSON.parse(stored);
+      const isValid = centro?.id && (user?.centros || []).some(c => c.id === centro.id);
+      if (isValid) return centro;
+    }
+
+    const fallback = user?.centros?.[0] || null;
+    if (fallback) localStorage.setItem(activeCentroKey, JSON.stringify(fallback));
+    return fallback;
   }
 
   async function setActiveCentro(centro) {
@@ -134,11 +145,14 @@ window.PEIA = (() => {
     const selector = document.querySelector('.warehouse-selector');
     const dropdown = document.getElementById('warehouseDropdown');
     if (!selector || !dropdown) return;
+    if (selector.dataset.peiaBound === 'true') return;
+    selector.dataset.peiaBound = 'true';
 
     const user = getUser();
+    const active = getActiveCentro();
     if (Array.isArray(user.centros) && user.centros.length) {
       dropdown.innerHTML = user.centros.map((c, i) =>
-        `<button class="warehouse-opt ${i === 0 ? 'active' : ''}" data-centro-id="${c.id}">${c.nombre}</button>`
+        `<button class="warehouse-opt ${active?.id === c.id || (!active?.id && i === 0) ? 'active' : ''}" data-centro-id="${c.id}">${c.nombre}</button>`
       ).join('');
     }
 
