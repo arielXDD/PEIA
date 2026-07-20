@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── Open config modals ─────────────────────────────────────
   function openPdfConfig(reportKey, title, headers, getRows) {
     if (!document.getElementById('overlayPdf')) {
-      exportCsv(title, headers, getRows());
+      exportPdf(title, headers, getRows(), false);
       return;
     }
     // Update subtitle with report name
@@ -456,6 +456,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     link.download = `PEIA_${title.replace(/\s/g, '_')}.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  function exportPdf(title, headers, rows, horizontal) {
+    if (!window.jspdf?.jsPDF) {
+      PEIA.toast.error('No se pudo cargar el generador PDF. Revisa tu conexión e inténtalo de nuevo.');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: horizontal ? 'landscape' : 'portrait' });
+    doc.setFontSize(16);
+    doc.text(`PEIA - ${title}`, 14, 20);
+    doc.setFontSize(10);
+    doc.setTextColor(110);
+    doc.text(`Generado: ${new Date().toLocaleString('es-MX')}`, 14, 28);
+
+    if (typeof doc.autoTable === 'function') {
+      doc.autoTable({ head: [headers], body: rows, startY: 34, styles: { fontSize: 9, cellPadding: 3 }, headStyles: { fillColor: [29, 78, 216] } });
+    } else {
+      doc.setTextColor(30);
+      rows.slice(0, 35).forEach((row, index) => doc.text(row.join(' | '), 14, 38 + (index * 6), { maxWidth: 180 }));
+    }
+
+    doc.save(`PEIA_${title.replace(/\s/g, '_')}.pdf`);
   }
 
   // ── Core export flow ───────────────────────────────────────
@@ -536,9 +560,66 @@ document.addEventListener('DOMContentLoaded', async () => {
       () => pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado]||r.estado, r.fecha, r.fechaEstimada, r.sla])));
 
   // ── Print Modal ────────────────────────────────────────────
+  function getPrintReport(reportTitle) {
+    if (reportTitle.includes('Inventario')) {
+      return {
+        chart: chartInvCategoria,
+        headers: ['Producto', 'Categoría', 'Stock', 'Mínimo', 'Valor'],
+        rows: productos.map(item => [item.producto, item.categoria, item.stock, item.minimo, `$${item.valor.toLocaleString('es-MX')}`]),
+        summary: [`${productos.length} productos`, `${productos.reduce((sum, item) => sum + item.stock, 0).toLocaleString('es-MX')} unidades`]
+      };
+    }
+    if (reportTitle.includes('Movimientos')) {
+      return {
+        chart: chartMovTrend,
+        headers: ['Fecha', 'Tipo', 'Producto', 'Cantidad', 'Referencia'],
+        rows: movimientos.map(item => [item.fecha, item.tipo, item.producto, item.cantidad, item.referencia]),
+        summary: [`${movimientos.length} movimientos`, `${document.getElementById('dateFrom').value || 'Inicio'} — ${document.getElementById('dateTo').value || 'Hoy'}`]
+      };
+    }
+    return {
+      chart: chartPedEstados,
+      headers: ['Pedido', 'Cliente', 'Estado', 'Fecha pedido', 'Entrega estimada', 'SLA'],
+      rows: pedidos.map(item => [item.pedido, item.cliente, estadoLabel[item.estado] || item.estado, item.fecha, item.fechaEstimada, item.sla]),
+      summary: [`${pedidos.length} pedidos`, `${pedidos.filter(item => item.estado === 'Entregado').length} entregados`]
+    };
+  }
+
+  function printExecutiveReport(reportTitle) {
+    const report = getPrintReport(reportTitle);
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      PEIA.toast.error('El navegador bloqueó la ventana de impresión. Permite ventanas emergentes e inténtalo de nuevo.');
+      return;
+    }
+
+    const chart = report.chart?.toBase64Image?.() || '';
+    const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+    const rows = report.rows.map(row => `<tr>${row.map(value => `<td>${escape(value)}</td>`).join('')}</tr>`).join('');
+    const tableHeaders = report.headers.map(header => `<th>${escape(header)}</th>`).join('');
+    const generatedAt = new Intl.DateTimeFormat('es-MX', { dateStyle: 'long', timeStyle: 'short' }).format(new Date());
+
+    printWindow.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${escape(reportTitle)}</title><style>
+      @page { size: A4 landscape; margin: 12mm; }
+      * { box-sizing: border-box; } body { color:#172033; font-family: Georgia, 'Times New Roman', serif; margin:0; font-size:10pt; }
+      .masthead { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #15233f; padding-bottom:12px; margin-bottom:16px; }
+      .brand { font:700 22pt/1.1 Georgia,serif; color:#15233f; letter-spacing:-.04em; } .eyebrow { color:#5d6b82; font:700 8pt/1.2 Arial,sans-serif; letter-spacing:.14em; text-transform:uppercase; margin-bottom:5px; }
+      h1 { margin:0; font-size:20pt; letter-spacing:-.025em; } .meta { text-align:right; color:#5d6b82; font:9pt/1.45 Arial,sans-serif; }
+      .overview { margin:18px 0; } .summary { display:flex; gap:10px; flex-wrap:wrap; } .metric { border-left:3px solid #2457a6; background:#f4f6f9; padding:10px 14px; min-width:150px; font:700 11pt Arial,sans-serif; color:#1f3558; }
+      .chart { width:100%; border:1px solid #d7dce5; padding:16px 20px 12px; margin:0 0 20px; background:#fff; page-break-inside:avoid; } .chart img { display:block; width:100%; height:320px; object-fit:contain; }
+      .section-title { margin:0 0 8px; padding-top:8px; border-top:1px solid #ccd3df; color:#1d3154; font:700 11pt Arial,sans-serif; text-transform:uppercase; letter-spacing:.08em; }
+      table { width:100%; border-collapse:collapse; font:8.5pt/1.35 Arial,sans-serif; } th { background:#15233f; color:#fff; text-align:left; padding:8px; font-size:8pt; letter-spacing:.03em; text-transform:uppercase; } td { border-bottom:1px solid #dde2ea; padding:7px 8px; vertical-align:top; } tr:nth-child(even) td { background:#f7f9fb; }
+      .footer { margin-top:12px; padding-top:8px; border-top:1px solid #ccd3df; display:flex; justify-content:space-between; color:#62708a; font:8pt Arial,sans-serif; }
+    </style></head><body><header class="masthead"><div><div class="eyebrow">PEIA · Informe operativo</div><div class="brand">PEIA</div><h1>${escape(reportTitle)}</h1></div><div class="meta">Centro: ${escape(PEIA.getActiveCentro()?.nombre || 'No seleccionado')}<br>Emitido: ${escape(generatedAt)}</div></header><main>${chart ? `<figure class="chart"><img src="${chart}" alt="Gráfica del reporte"></figure>` : ''}<section class="overview"><div class="eyebrow">Resumen ejecutivo</div><div class="summary">${report.summary.map(item => `<div class="metric">${escape(item)}</div>`).join('')}</div></section><h2 class="section-title">Detalle operativo</h2><table><thead><tr>${tableHeaders}</tr></thead><tbody>${rows || `<tr><td colspan="${report.headers.length}">No hay registros para mostrar.</td></tr>`}</tbody></table></main><footer class="footer"><span>Documento generado por PEIA</span><span>Uso interno</span></footer></body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onafterprint = () => printWindow.close();
+    printWindow.setTimeout(() => { printWindow.print(); }, 250);
+  }
+
   function openPrintModal(reportTitle) {
     if (!document.getElementById('overlayPrint')) {
-      window.print();
+      printExecutiveReport(reportTitle);
       return;
     }
 
