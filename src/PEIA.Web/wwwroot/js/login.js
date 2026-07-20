@@ -13,13 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const errorText  = document.getElementById('loginErrorText');
 
   // ─── Toggle contraseña visible/oculto ──────────
-  const eyeIconVisible = `
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  `;
+  const eyeIconVisible = `<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/>`;
   const eyeIconHidden = `
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+    <path d="M3 3l18 18M10.6 6.1c.5-.1.9-.1 1.4-.1 6.5 0 10 6 10 6a16 16 0 0 1-3 3.6M6.2 6.2C3.4 8.1 2 12 2 12s3.5 6 10 6c1.5 0 2.8-.3 3.9-.7"/>
     <line x1="1" y1="1" x2="23" y2="23"/>
   `;
 
@@ -51,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         const data = await response.json();
         PEIA.setSession(data.token, data.user);
-        window.location.href = '//Inicio';
+        window.location.href = '/Inicio';
       } else {
         const err = await response.json().catch(() => ({}));
         showError(err.message || 'Usuario o contraseña incorrectos.');
@@ -66,16 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── Helpers ───────────────────────────────────
   function setLoading(loading) {
     btnLogin.disabled = loading;
-    btnText.style.display   = loading ? 'none' : 'inline';
-    btnSpinner.style.display = loading ? 'inline-flex' : 'none';
+    btnText.hidden = loading;
+    btnSpinner.hidden = !loading;
+    document.querySelector('.button-arrow').hidden = loading;
   }
 
   function showError(msg) {
     errorText.textContent = msg;
-    errorBox.style.display = 'flex';
+    errorBox.hidden = false;
   }
 
   function hideError() {
-    errorBox.style.display = 'none';
+    errorBox.hidden = true;
   }
 });
