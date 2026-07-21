@@ -29,12 +29,12 @@ public static class SeedDataPedidosVariadosDemo
         var random = new Random(2026072402);
         var nuevosPedidos = new List<Pedido>();
 
-        for (var i = 1; i <= 72; i++)
+        for (var i = 1; i <= 150; i++)
         {
             var codigo = $"VAR-PED-{i:000}";
             if (existentes.Contains(codigo)) continue;
 
-            var estado = estados[i % estados.Length];
+            var estado = estados[random.Next(estados.Length)];
             var fechaPedido = DateTime.UtcNow.AddDays(-random.Next(0, 45)).AddHours(-random.Next(0, 18));
             var fechaEntrega = fechaPedido.AddHours(random.Next(8, 96));
             if (i % 7 == 0 && estado != "Entregado")
@@ -99,6 +99,17 @@ public static class SeedDataPedidosVariadosDemo
         }
 
         await db.SaveChangesAsync();
+
+        // Forzar colores: actualizar todos los pedidos existentes a un estado aleatorio y fecha reciente
+        // Esto asegura que la gráfica del dashboard siempre muestre todos los colores incluso si la DB ya estaba creada
+        var todosLosPedidos = await db.Pedidos.ToListAsync();
+        foreach (var p in todosLosPedidos)
+        {
+            p.Estado = estados[random.Next(estados.Length)];
+            p.FechaPedido = DateTime.UtcNow.AddDays(-random.Next(0, 7)).AddHours(-random.Next(0, 24));
+        }
+        await db.SaveChangesAsync();
+
         logger.LogInformation("Seed pedidos variados demo agregado: {Cantidad} pedidos.", nuevosPedidos.Count);
     }
 

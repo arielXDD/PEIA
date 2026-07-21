@@ -211,6 +211,96 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderTabla();
   }
 
+  // ─── EXPORTACIONES ────────────────────────────────────────────────────────
+  function exportXlsx(title, headers, rows) {
+    if (typeof XLSX === 'undefined') {
+      PEIA.toast.error('No se pudo cargar la librería de Excel. Revisa tu conexión e inténtalo de nuevo.');
+      return;
+    }
+    const wsData = [headers, ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, title.slice(0, 31));
+    XLSX.writeFile(wb, `PEIA_${title.replace(/\s/g, '_')}.xlsx`);
+  }
+
+  function exportPdf(title, headers, rows, horizontal) {
+    if (!window.jspdf?.jsPDF) {
+      PEIA.toast.error('No se pudo cargar el generador PDF. Revisa tu conexión e inténtalo de nuevo.');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: horizontal ? 'landscape' : 'portrait' });
+    doc.setFontSize(16);
+    doc.text(`PEIA - ${title}`, 14, 20);
+    doc.setFontSize(10);
+    doc.setTextColor(110);
+    doc.text(`Generado: ${new Date().toLocaleString('es-MX')}`, 14, 28);
+
+    if (typeof doc.autoTable === 'function') {
+      doc.autoTable({ head: [headers], body: rows, startY: 34, styles: { fontSize: 9, cellPadding: 3 }, headStyles: { fillColor: [29, 78, 216] } });
+    } else {
+      doc.setTextColor(30);
+      rows.slice(0, 35).forEach((row, index) => doc.text(row.join(' | '), 14, 38 + (index * 6), { maxWidth: 180 }));
+    }
+
+    doc.save(`PEIA_${title.replace(/\s/g, '_')}.pdf`);
+  }
+
+  function printExecutiveReport(reportTitle) {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      PEIA.toast.error('El navegador bloqueó la ventana de impresión. Permite ventanas emergentes e inténtalo de nuevo.');
+      return;
+    }
+
+    const chartBase64 = chartPrincipal?.toBase64Image?.() || '';
+    const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+    
+    const headers = ['Producto', 'Categoría', 'Stock actual', 'Demanda', 'Recomendado', 'Confianza'];
+    const rows = productosPred.map(p => [p.nombre, p.cat, p.stock, p.estimado, p.recomendado > 0 ? `+${p.recomendado}` : 'Suficiente', `${p.confianza}%`]);
+    
+    const tableRowsHtml = rows.map(row => `<tr>${row.map(value => `<td>${escape(value)}</td>`).join('')}</tr>`).join('');
+    const tableHeadersHtml = headers.map(header => `<th>${escape(header)}</th>`).join('');
+    const generatedAt = new Intl.DateTimeFormat('es-MX', { dateStyle: 'long', timeStyle: 'short' }).format(new Date());
+
+    printWindow.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${escape(reportTitle)}</title><style>
+      @page { size: A4 portrait; margin: 12mm; }
+      * { box-sizing: border-box; } body { color:#172033; font-family: Georgia, 'Times New Roman', serif; margin:0; font-size:10pt; }
+      .masthead { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #15233f; padding-bottom:12px; margin-bottom:16px; }
+      .brand { font:700 22pt/1.1 Georgia,serif; color:#15233f; letter-spacing:-.04em; } .eyebrow { color:#5d6b82; font:700 8pt/1.2 Arial,sans-serif; letter-spacing:.14em; text-transform:uppercase; margin-bottom:5px; }
+      h1 { margin:0; font-size:20pt; letter-spacing:-.025em; } .meta { text-align:right; color:#5d6b82; font:9pt/1.45 Arial,sans-serif; }
+      .chart { width:100%; border:1px solid #d7dce5; padding:16px 20px 12px; margin:0 0 20px; background:#fff; page-break-inside:avoid; } .chart img { display:block; width:100%; max-height:280px; object-fit:contain; }
+      .section-title { margin:0 0 8px; padding-top:8px; border-top:1px solid #ccd3df; color:#1d3154; font:700 11pt Arial,sans-serif; text-transform:uppercase; letter-spacing:.08em; }
+      table { width:100%; border-collapse:collapse; font:8.5pt/1.35 Arial,sans-serif; } th { background:#15233f; color:#fff; text-align:left; padding:8px; font-size:8pt; letter-spacing:.03em; text-transform:uppercase; } td { border-bottom:1px solid #dde2ea; padding:7px 8px; vertical-align:top; } tr:nth-child(even) td { background:#f7f9fb; }
+      .footer { margin-top:12px; padding-top:8px; border-top:1px solid #ccd3df; display:flex; justify-content:space-between; color:#62708a; font:8pt Arial,sans-serif; }
+    </style></head><body><header class="masthead"><div><div class="eyebrow">PEIA · Informe operativo</div><div class="brand">PEIA</div><h1>${escape(reportTitle)}</h1></div><div class="meta">Centro: ${escape(PEIA.getActiveCentro()?.nombre || 'No seleccionado')}<br>Emitido: ${escape(generatedAt)}</div></header><main>${chartBase64 ? `<figure class="chart"><img src="${chartBase64}" alt="Gráfica del reporte"></figure>` : ''}<h2 class="section-title">Detalle de predicción</h2><table><thead><tr>${tableHeadersHtml}</tr></thead><tbody>${tableRowsHtml || `<tr><td colspan="${headers.length}">No hay registros para mostrar.</td></tr>`}</tbody></table></main><footer class="footer"><span>Documento generado por PEIA</span><span>Uso interno</span></footer></body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onafterprint = () => printWindow.close();
+    printWindow.setTimeout(() => { printWindow.print(); }, 250);
+  }
+
+  document.getElementById('exportPredPdf')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const headers = ['Producto', 'Categoría', 'Stock actual', 'Demanda estimada', 'Recomendado', 'Confianza (%)'];
+    const rows = productosPred.map(p => [p.nombre, p.cat, p.stock, p.estimado, p.recomendado > 0 ? `+${p.recomendado}` : 'Suficiente', p.confianza]);
+    exportPdf('Reporte Prediccion', headers, rows, false);
+  });
+
+  document.getElementById('exportPredExcel')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const headers = ['Producto', 'Categoría', 'Stock actual', 'Demanda estimada', 'Recomendado', 'Confianza (%)'];
+    const rows = productosPred.map(p => [p.nombre, p.cat, p.stock, p.estimado, p.recomendado > 0 ? `+${p.recomendado}` : 'Suficiente', p.confianza]);
+    exportXlsx('Reporte Prediccion', headers, rows);
+  });
+
+  document.getElementById('printPred')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    printExecutiveReport('Reporte de Predicción');
+  });
+
   document.getElementById('periodoSelect').addEventListener('change', (e) => {
     renderPrincipal(e.target.value).catch(err => PEIA.toast.error(err.message));
   });

@@ -627,6 +627,7 @@ public static class SeedData
         await SeedDataProductosDemo.EnsureAsync(db, logger);
         await SeedDataNotificacionesDemo.EnsureAsync(db, logger);
         await SeedDataReglasDemo.EnsureAsync(db, logger);
+        await SeedDataPedidosVariadosDemo.EnsureAsync(db, userManager, logger);
         logger.LogInformation("Datos demo complementarios verificados.");
     }
 }

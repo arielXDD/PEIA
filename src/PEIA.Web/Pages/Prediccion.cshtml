@@ -6,6 +6,7 @@
     ViewData["ActivePage"] = "Prediccion";
 }
 @section Styles {
+    <link rel="stylesheet" href="~/css/reportes.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/prediccion.css" asp-append-version="true" />
 }
 <div class="page-header">
@@ -119,9 +120,34 @@
         <!-- Table: Productos con predicción -->
         <section class="pred-table-section">
           <div class="table-card">
-            <div class="table-header">
-              <h3>Detalle de predicción por producto</h3>
-              <a href="#" class="link-ver">Exportar</a>
+            <div class="table-header" style="align-items: center; display: flex; justify-content: space-between;">
+              <h3 style="margin: 0;">Detalle de predicción por producto</h3>
+              <div class="export-group" style="display: flex; gap: 8px;">
+                <button class="btn-export" id="exportPredPdf" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                  PDF
+                </button>
+                <button class="btn-export" id="exportPredExcel" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16v16H4z" />
+                    <path d="M4 9h16" />
+                    <path d="M4 14h16" />
+                    <path d="M9 4v16" />
+                  </svg>
+                  Excel
+                </button>
+                <button class="btn-export btn-print" id="printPred" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: #2563eb; border: 1px solid #2563eb; border-radius: 6px; font-size: 13px; font-weight: 500; color: #fff; cursor: pointer;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9" />
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                    <rect x="6" y="14" width="12" height="8" />
+                  </svg>
+                  Imprimir
+                </button>
+              </div>
             </div>
             <div class="table-scroll">
               <table class="data-table" id="tablePrediccion">
@@ -141,6 +167,9 @@
           </div>
         </section>
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@@4.4.4/dist/chart.umd.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" asp-append-version="true"></script>
     <script src="~/js/prediccion.js" asp-append-version="true"></script>
 }
