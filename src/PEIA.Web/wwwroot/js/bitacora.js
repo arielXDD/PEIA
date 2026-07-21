@@ -68,6 +68,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   [elements.module, elements.level, elements.from, elements.to].forEach(element => element.addEventListener('change', () => { page = 1; load(); }));
   elements.previous.addEventListener('click', () => { page--; load(); });
   elements.next.addEventListener('click', () => { page++; load(); });
-  elements.export.addEventListener('click', () => { window.location.assign(`/api/bitacora/export?${filters()}`); });
+  elements.export.addEventListener('click', async () => {
+    try {
+      const originalText = elements.export.innerHTML;
+      elements.export.innerHTML = '<span class="spinner"></span> Exportando...';
+      elements.export.disabled = true;
+
+      const csvContent = await PEIA.request(`/api/bitacora/export?${filters()}`);
+      
+      // Añadir BOM (Byte Order Mark) para que Excel interprete correctamente los acentos (UTF-8)
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `bitacora-${new Date().toISOString().split('T')[0].replace(/-/g, '')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      elements.export.innerHTML = originalText;
+      elements.export.disabled = false;
+    } catch (e) {
+      elements.export.innerHTML = 'Exportar Excel';
+      elements.export.disabled = false;
+      PEIA.toast.error('Error al exportar: ' + e.message);
+    }
+  });
   await load();
 });

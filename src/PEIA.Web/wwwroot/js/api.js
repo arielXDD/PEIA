@@ -168,9 +168,9 @@ window.PEIA = (() => {
         dropdown.querySelectorAll('.warehouse-opt').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const centro = (getUser().centros || []).find(c => c.id === btn.dataset.centroId) || { id: btn.dataset.centroId, nombre: btn.textContent };
-        await setActiveCentro(centro);
         selector.classList.remove('open');
         dropdown.classList.remove('open');
+        await setActiveCentro(centro);
         window.dispatchEvent(new CustomEvent('peia:centro-changed', { detail: centro }));
       });
     });

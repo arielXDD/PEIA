@@ -443,6 +443,7 @@ function renderGuideShell() {
 
   root.innerHTML = `
     <div class="app-layout">
+      <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
           <div class="brand-icon">
@@ -453,6 +454,7 @@ function renderGuideShell() {
             </svg>
           </div>
           <span>PEIA</span>
+          <button type="button" class="sidebar-close" id="sidebarClose" aria-label="Cerrar menú">&times;</button>
         </div>
         <nav class="sidebar-nav">
           <ul>
@@ -479,16 +481,12 @@ function renderGuideShell() {
       </aside>
       <main class="main-area">
         <header class="topbar">
-          <div class="topbar-left">
-            <div class="warehouse-selector">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              <span id="activeCentro">Bodega Norte</span>
-              <svg class="chevron-sm" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-              <div class="warehouse-dropdown" id="warehouseDropdown">
-                <button class="warehouse-opt active" data-id="norte">Bodega Norte</button>
-                <button class="warehouse-opt" data-id="sur">Bodega Sur</button>
-              </div>
-            </div>
+          <div class="topbar-left" style="display: flex; align-items: center; gap: 8px;">
+            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">☰</button>
+            <a href="/Guia" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #1d3154; text-decoration: none; padding: 6px 10px; border-radius: 6px; transition: background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+              Volver a Guía
+            </a>
           </div>
           <div class="topbar-right">
             <button class="topbar-btn notif-btn" aria-label="Notificaciones">
@@ -555,4 +553,21 @@ function renderGuideShell() {
       </main>
     </div>
   `;
+
+  // Inicializar toggle del menú lateral para móviles
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('menuToggle');
+  const close = document.getElementById('sidebarClose');
+  const backdrop = document.getElementById('sidebarBackdrop');
+
+  const setSidebar = open => {
+    sidebar?.classList.toggle('open', open);
+    document.body.classList.toggle('sidebar-open', open);
+    toggle?.setAttribute('aria-expanded', String(open));
+  };
+
+  toggle?.addEventListener('click', () => setSidebar(!sidebar?.classList.contains('open')));
+  close?.addEventListener('click', () => setSidebar(false));
+  backdrop?.addEventListener('click', () => setSidebar(false));
+  sidebar?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setSidebar(false)));
 }

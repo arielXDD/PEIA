@@ -195,12 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
       centroId: PEIA.getActiveCentro()?.id
     };
 
+    closeModal('modalNewPedido');
     try {
       await apiFetch('/api/pedidos', {
         method: 'POST',
         body: JSON.stringify(data)
       });
-      closeModal('modalNewPedido');
       PEIA.toast.success('Pedido registrado correctamente.');
       loadPedidos();
     } catch (err) {
@@ -218,12 +218,12 @@ document.addEventListener('DOMContentLoaded', () => {
       distanciaKm: parseFloat(document.getElementById('rutaDistancia').value)
     };
 
+    closeModal('modalNewRuta');
     try {
       await apiFetch('/api/rutas', {
         method: 'POST',
         body: JSON.stringify(data)
       });
-      closeModal('modalNewRuta');
       PEIA.toast.success('Ruta creada correctamente.');
       await loadRutas();
     } catch (err) {
@@ -266,12 +266,13 @@ document.addEventListener('DOMContentLoaded', () => {
       transportistaId: document.getElementById('assignDriver').value
     };
 
+    closeModal('modalAssignPedido');
     try {
       await apiFetch(`/api/pedidos/${pedidoId}/asignar`, {
         method: 'PUT',
         body: JSON.stringify(data)
       });
-      closeModal('modalAssignPedido');
+      PEIA.toast.success('Pedido asignado correctamente.');
       loadPedidos();
     } catch (err) {
       PEIA.toast.error(`Error al asignar pedido: ${err.message}`);
@@ -318,12 +319,13 @@ document.addEventListener('DOMContentLoaded', () => {
       longitud: lon ? parseFloat(lon) : null
     };
 
+    closeModal('modalUpdateEstado');
     try {
       await apiFetch(`/api/pedidos/${pedidoId}/estado`, {
         method: 'PUT',
         body: JSON.stringify(data)
       });
-      closeModal('modalUpdateEstado');
+      PEIA.toast.success('Estado actualizado correctamente.');
       loadPedidos();
     } catch (err) {
       PEIA.toast.error(`Error al actualizar estado: ${err.message}`);

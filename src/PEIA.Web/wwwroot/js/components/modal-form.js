@@ -24,7 +24,7 @@ class ModalForm {
   open() {
     // Create overlay
     this.overlay = document.createElement('div');
-    this.overlay.className = 'modal-overlay';
+    this.overlay.className = 'modal-overlay open';
     this.overlay.addEventListener('click', (e) => {
       if (e.target === this.overlay) this.close();
     });

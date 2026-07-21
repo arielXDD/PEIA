@@ -334,18 +334,23 @@
   cursor: not-allowed;
 }
 
+
 /* ─── Modal Component ─────────────────────── */
 .modal-overlay {
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, .5);
   backdrop-filter: blur(4px);
-  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: modalOverlayIn .2s ease;
   padding: 24px;
+}
+
+.modal-overlay.open {
+  display: flex;
+  animation: modalOverlayIn .2s ease;
 }
 
 @keyframes modalOverlayIn {
