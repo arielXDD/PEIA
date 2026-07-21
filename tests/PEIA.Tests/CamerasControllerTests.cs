@@ -30,7 +30,7 @@ public class CamerasControllerTests(CustomWebApplicationFactory factory)
 
         var camara = await response.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(1, camara.GetProperty("id").GetInt32());
-        Assert.Equal("Cámara 1", camara.GetProperty("nombre").GetString());
+        Assert.Equal("Acceso principal", camara.GetProperty("nombre").GetString());
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class CamerasControllerTests(CustomWebApplicationFactory factory)
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var result = await response.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal("Captura realizada con éxito.", result.GetProperty("message").GetString());
+        Assert.Equal("Captura solicitada correctamente.", result.GetProperty("message").GetString());
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class CamerasControllerTests(CustomWebApplicationFactory factory)
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var result = await response.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal("Incidencia reportada correctamente.", result.GetProperty("message").GetString());
+        Assert.Equal("Incidencia registrada.", result.GetProperty("message").GetString());
     }
 
     [Fact]
