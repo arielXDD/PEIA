@@ -38,8 +38,7 @@ public class ConfiguracionTests
     {
         using var context = GetContext();
         var controller = new ConfiguracionController(context);
-
-        var result = await controller.UpdateSeguridad(new SeguridadConfig(4, true, true));
+        var result = await controller.UpdateSeguridad(new SeguridadConfig(4, true, true, false));
 
         Assert.IsType<BadRequestObjectResult>(result);
         Assert.False(await context.SystemSettings.AnyAsync(s => s.Key == "seguridad"));

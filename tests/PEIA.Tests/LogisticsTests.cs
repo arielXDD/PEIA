@@ -120,13 +120,14 @@ public class LogisticsTests
         Assert.IsType<OkObjectResult>(result);
 
         var dbPedido = await context.Pedidos.FindAsync(pedidoId);
+        Assert.NotNull(dbPedido);
         Assert.Equal("Asignado", dbPedido.Estado);
         Assert.Equal(rutaId, dbPedido.RutaId);
         Assert.Equal(transportistaId, dbPedido.TransportistaId);
 
         // Verificar hito de rastreo
         var tracking = await context.EntregaEstados.Where(e => e.PedidoId == pedidoId).ToListAsync();
-        Assert.Contains(tracking, e => e.Estado == "Asignado" && e.Descripcion.Contains("Juan Chofer"));
+        Assert.Contains(tracking, e => e.Estado == "Asignado" && e.Descripcion != null && e.Descripcion.Contains("Juan Chofer"));
     }
 
     [Fact]
@@ -164,6 +165,7 @@ public class LogisticsTests
         // Assert
         Assert.IsType<OkObjectResult>(result);
         var dbSla = await context.SLAs.FirstOrDefaultAsync(s => s.PedidoId == pedidoId);
+        Assert.NotNull(dbSla);
         Assert.Equal("Cumplido", dbSla.EstadoSLA);
         Assert.NotNull(dbSla.FechaResolucion);
     }
@@ -204,6 +206,7 @@ public class LogisticsTests
         // Assert
         Assert.IsType<OkObjectResult>(result);
         var dbSla = await context.SLAs.FirstOrDefaultAsync(s => s.PedidoId == pedidoId);
+        Assert.NotNull(dbSla);
         Assert.Equal("Incumplido", dbSla.EstadoSLA);
     }
 }

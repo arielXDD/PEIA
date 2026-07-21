@@ -72,7 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadPedidos() {
     const centro = PEIA.getActiveCentro();
-    if (!centro?.id) throw new Error('Selecciona un centro activo.');
+    if (!centro?.id) {
+      PEIA.toast.info('Selecciona un almacén para ver los pedidos.');
+      renderPedidos([]);
+      calculateKPIs([]);
+      return;
+    }
 
     const pedidos = await apiFetch(`/api/pedidos?centroId=${centro.id}`) || [];
     renderPedidos(pedidos);
