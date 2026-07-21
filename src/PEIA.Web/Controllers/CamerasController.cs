@@ -52,15 +52,16 @@ public class CamerasController : ControllerBase
     {
         Id = id, Nombre = camera.Nombre, Zona = camera.Zona, ZonaDesc = camera.ZonaDesc ?? string.Empty,
         Host = camera.Host ?? "Configurada", Online = true, Activa = true, UltimaRevision = "Conectada",
-        SnapshotUrl = camera.SnapshotUrl, StreamUrl = camera.StreamUrl, StreamType = camera.StreamType ?? "snapshot", Simulated = false
+        SnapshotUrl = camera.SnapshotUrl, StreamUrl = camera.StreamUrl, StreamType = camera.StreamType ?? "snapshot", Simulated = false,
+        EmbedUrl = camera.EmbedUrl
     };
 
     private static List<CameraDto> DemoCameras() =>
     [
-        new() { Id = 1, Nombre = "Acceso principal", Zona = "Entrada", ZonaDesc = "Acceso a instalaciones", Host = "Simulador local", Online = true, Activa = true, UltimaRevision = "En vivo", StreamType = "simulated", Simulated = true },
-        new() { Id = 2, Nombre = "Almacén A", Zona = "Bodega", ZonaDesc = "Pasillo central", Host = "Simulador local", Online = true, Activa = true, UltimaRevision = "En vivo", StreamType = "simulated", Simulated = true },
-        new() { Id = 3, Nombre = "Andén de carga", Zona = "Despacho", ZonaDesc = "Área de embarques", Host = "Simulador local", Online = true, Activa = true, UltimaRevision = "En vivo", StreamType = "simulated", Simulated = true },
-        new() { Id = 4, Nombre = "Perímetro norte", Zona = "Exterior", ZonaDesc = "Patio de maniobras", Host = "Simulador local", Online = true, Activa = true, UltimaRevision = "En vivo", StreamType = "simulated", Simulated = true }
+        new() { Id = 1, Nombre = "Zócalo de la Ciudad de México", Zona = "Centro Histórico", ZonaDesc = "Plaza principal de CDMX", Host = "webcamsdemexico.com", Online = true, Activa = true, UltimaRevision = "En vivo", StreamType = "embed", EmbedUrl = "https://www.youtube.com/embed/QM0UE9Vk3pE?autoplay=1", SnapshotUrl = "https://webcamsdemexico.net/mexicodf1/live.jpg?live=1" },
+        new() { Id = 2, Nombre = "Monumento a la Revolución", Zona = "Centro", ZonaDesc = "Vista panorámica del monumento", Host = "webcamsdemexico.com", Online = true, Activa = true, UltimaRevision = "En vivo", StreamType = "embed", EmbedUrl = "https://www.youtube.com/embed/1Q74cLFObEk?autoplay=1", SnapshotUrl = "https://webcamsdemexico.net/mexicodf7/live.jpg?live=1" },
+        new() { Id = 3, Nombre = "Palacio de Bellas Artes", Zona = "Centro Histórico", ZonaDesc = "Vista del palacio", Host = "webcamsdemexico.com", Online = true, Activa = true, UltimaRevision = "En vivo", StreamType = "embed", EmbedUrl = "https://www.youtube.com/embed/1BQx_vxj7bk?autoplay=1", SnapshotUrl = "https://webcamsdemexico.net/mexicodf13/live.jpg?live=1" },
+        new() { Id = 4, Nombre = "Paseo de la Reforma", Zona = "Reforma", ZonaDesc = "Desde Hotel B Urban Xaman", Host = "webcamsdemexico.com", Online = true, Activa = true, UltimaRevision = "En vivo", StreamType = "embed", EmbedUrl = "https://www.youtube.com/embed/0Z3ZLD9JNLs?autoplay=1", SnapshotUrl = "https://webcamsdemexico.net/mexicodf20/live.jpg?live=1" }
     ];
 }
 
@@ -73,6 +74,7 @@ public class CameraConfiguration
     public string? SnapshotUrl { get; set; }
     public string? StreamUrl { get; set; }
     public string? StreamType { get; set; }
+    public string? EmbedUrl { get; set; }
 }
 
 public class CameraDto
@@ -89,6 +91,7 @@ public class CameraDto
     public string? StreamUrl { get; set; }
     public string StreamType { get; set; } = "snapshot";
     public bool Simulated { get; set; }
+    public string? EmbedUrl { get; set; }
 }
 
 public class ReportarIncidenciaRequest { public string Descripcion { get; set; } = string.Empty; }

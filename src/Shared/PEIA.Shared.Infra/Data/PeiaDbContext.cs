@@ -6,6 +6,7 @@ using PEIA.Shared.Infra.Inventory;
 using PEIA.Shared.Infra.Logistics;
 using PEIA.Shared.Infra.Notifications;
 using PEIA.Shared.Infra.Automation;
+using PEIA.Shared.Infra.Cameras;
 
 namespace PEIA.Shared.Infra.Data;
 
@@ -29,6 +30,7 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
     public DbSet<EntregaEstado> EntregaEstados => Set<EntregaEstado>();
     public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
     public DbSet<ReglaAutomatizacion> ReglasAutomatizacion => Set<ReglaAutomatizacion>();
+    public DbSet<Captura> Capturas => Set<Captura>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -248,6 +250,18 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
             b.Property(r => r.Condicion).HasMaxLength(250).IsRequired();
             b.Property(r => r.Accion).HasMaxLength(50).IsRequired();
             b.Property(r => r.Responsable).HasMaxLength(150).IsRequired();
+        });
+
+        // Configuración de Capturas de Cámaras
+        builder.Entity<Captura>(b =>
+        {
+            b.ToTable("Capturas");
+            b.HasKey(c => c.Id);
+            b.Property(c => c.NombreCamara).HasMaxLength(200).IsRequired();
+            b.Property(c => c.Zona).HasMaxLength(100).IsRequired();
+            b.Property(c => c.ImagenUrl).HasMaxLength(2000);
+            b.Property(c => c.Descripcion).HasMaxLength(500);
+            b.HasIndex(c => c.FechaCaptura);
         });
     }
 }
