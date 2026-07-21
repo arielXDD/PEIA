@@ -12,6 +12,7 @@ appsettings.Development.json
 
 # Local documents
 doc/
+src/Shared/PEIA.Shared.Infra/Seed.zip
 
 # NuGet
 *.nupkg

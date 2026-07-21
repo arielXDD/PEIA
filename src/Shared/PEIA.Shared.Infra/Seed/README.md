@@ -1,15 +1,53 @@
-# PEIA - Seed de Base de Datos (Datos de Prueba)
+# PEIA - Seed de Base de Datos
 
-Si estás ejecutando el proyecto por primera vez, el sistema está configurado para poblar (seed) automáticamente la base de datos con datos de prueba, lo que te permitirá ver cómo funcionan las métricas, las gráficas (con todos sus colores y variaciones), y las notificaciones en tiempo real en los tableros.
+Esta carpeta contiene datos iniciales y datos demo para probar PEIA sin capturar todo manualmente.
 
-## ¿Cómo ejecutar el Seed?
+## Base normal
 
-¡Es automático! Al ejecutar el proyecto web principal (`PEIA.Web`) en el entorno de Desarrollo, el sistema leerá los archivos de esta carpeta (`Seed`) e insertará los registros necesarios:
+La base local normal del proyecto debe apuntar a `peiadb`:
 
-1. Asegúrate de tener configurada correctamente tu conexión a la base de datos en `appsettings.Development.json`.
-2. Ejecuta el proyecto desde Visual Studio (o usando `dotnet run` en el proyecto `PEIA.Web`).
-3. La aplicación ejecutará los métodos de la clase `SeedData.cs` que a su vez llama a los otros archivos (como `SeedDataPedidosVariadosDemo.cs`).
-4. Ingresa a la aplicación (con los usuarios demo generados, como `admin@peia.com`) y podrás ver los datos en las gráficas inmediatamente.
+```json
+"DefaultConnection": "Host=localhost;Database=peiadb;Username=postgres;Password=4523"
+```
 
-### Nota sobre los Pedidos y Gráficas
-Recientemente se incrementó el número de pedidos y se volvió aleatorio su estado (Creado, Asignado, En Ruta, Entregado, Cancelado) para asegurar que en la gráfica de **"Estado de pedidos"** (Donut Chart) se muestren todos los colores adecuadamente en lugar de concentrarse en uno solo.
+Al iniciar `PEIA.Web`, la clase `SeedData.cs` se ejecuta automaticamente y verifica:
+
+1. Roles base del sistema.
+2. Centros base.
+3. Usuarios iniciales.
+4. Categorias, productos, stocks, movimientos, pedidos, notificaciones y reglas base.
+
+Comando:
+
+```powershell
+dotnet run --project src\PEIA.Web --launch-profile http
+```
+
+## Base demo
+
+Para probar datos mas cargados sin alterar la base original, usa `peiadb_demo` temporalmente en `src/PEIA.Web/appsettings.Development.json`:
+
+```json
+"DefaultConnection": "Host=localhost;Database=peiadb_demo;Username=postgres;Password=4523"
+```
+
+Cuando termines de probar, regresa la conexion a `peiadb`.
+
+## Seeds separados
+
+Los archivos `SeedData*Demo.cs` estan separados para que el equipo pueda activarlos de forma controlada cuando necesite mas datos de prueba:
+
+- `SeedDataProductosDemo.cs`
+- `SeedDataProductosVariadosDemo.cs`
+- `SeedDataPedidosVariadosDemo.cs`
+- `SeedDataNotificacionesDemo.cs`
+- `SeedDataNotificacionesVariadasDemo.cs`
+- `SeedDataReglasDemo.cs`
+- `SeedDataReglasVariadasDemo.cs`
+- `SeedDataConfiguracionVariadaDemo.cs`
+
+Estos archivos no deben asumirse como datos obligatorios de produccion. Son apoyo para demos, pruebas de rendimiento visual y validacion de reportes.
+
+## Archivo local Seed.zip
+
+`Seed.zip` es un archivo local de apoyo y no debe subirse al repositorio. Esta ignorado en `.gitignore`.
