@@ -262,40 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── Initial render ──────────────────────────
   renderCamaras();
 
-  // ─── Warehouse Selector ──────────────────────
-  const warehouseSelector = document.querySelector('.warehouse-selector');
-  warehouseSelector.addEventListener('click', (e) => {
-    e.stopPropagation();
-    warehouseSelector.classList.toggle('open');
-  });
-
-  document.querySelectorAll('.warehouse-opt').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      document.querySelectorAll('.warehouse-opt').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('activeCentro').textContent = btn.textContent;
-      warehouseSelector.classList.remove('open');
-    });
-  });
-
-  document.addEventListener('click', () => warehouseSelector.classList.remove('open'));
-
-  // ─── Logout ──────────────────────────────────
-  document.getElementById('btnLogout').addEventListener('click', () => {
-    localStorage.removeItem('peia_token');
-    localStorage.removeItem('peia_user');
-    window.location.href = '//Login';
-  });
-
-  // ─── User Info ──────────────────────────────
-  const user = JSON.parse(localStorage.getItem('peia_user') || '{}');
-  if (user.nombreCompleto) {
-    document.getElementById('userName').textContent = user.nombreCompleto;
-    const initials = user.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-    document.getElementById('userAvatar').textContent = initials;
-  }
-
   // ─── Detail Action Buttons (mock) ────────────
   document.getElementById('btnCapturar').addEventListener('click', () => {
     PEIA.toast.info('Captura de pantalla simulada');

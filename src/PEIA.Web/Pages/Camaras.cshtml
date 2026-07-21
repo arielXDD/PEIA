@@ -74,6 +74,22 @@
           </aside>
 
         </div>
+
+        <div class="modal-overlay" id="modalOverlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 id="modalTitle">Cámara en vivo</h3>
+              <button class="modal-close" id="modalClose" type="button" aria-label="Cerrar">×</button>
+            </div>
+            <div class="modal-body">
+              <img class="modal-img" id="modalImg" src="" alt="" />
+            </div>
+            <div class="modal-footer">
+              <span id="modalLabel">Feed en vivo</span>
+              <span class="modal-hint">Presiona Esc para cerrar</span>
+            </div>
+          </div>
+        </div>
 @section Scripts {
     <script src="~/js/camaras.js" asp-append-version="true"></script>
 }
