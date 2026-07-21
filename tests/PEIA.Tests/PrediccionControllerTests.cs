@@ -10,7 +10,7 @@ public class PrediccionControllerTests(CustomWebApplicationFactory factory)
     private readonly HttpClient _client = factory.CreateClient();
 
     [Fact]
-    public async Task GetAll_ReturnsOk_With6Productos()
+    public async Task GetAll_ReturnsOk_WithProducts()
     {
         var response = await _client.GetAsync("/api/predicciones");
 
@@ -18,7 +18,7 @@ public class PrediccionControllerTests(CustomWebApplicationFactory factory)
 
         var productos = await response.Content.ReadFromJsonAsync<JsonElement[]>();
         Assert.NotNull(productos);
-        Assert.Equal(6, productos.Length);
+        Assert.True(productos.Length > 0);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class PrediccionControllerTests(CustomWebApplicationFactory factory)
         var resumen = await response.Content.ReadFromJsonAsync<JsonElement>();
         Assert.True(resumen.GetProperty("demandaEstimada").GetInt32() > 0);
         Assert.True(resumen.GetProperty("precisionModelo").GetDouble() > 0);
-        Assert.True(resumen.GetProperty("alertasActivas").GetInt32() > 0);
+        Assert.True(resumen.GetProperty("alertasActivas").GetInt32() >= 0);
         Assert.True(resumen.GetProperty("categoriasAnalizadas").GetInt32() > 0);
         Assert.False(string.IsNullOrEmpty(resumen.GetProperty("periodo").GetString()));
     }

@@ -30,7 +30,7 @@ public class CamerasControllerTests(CustomWebApplicationFactory factory)
 
         var camara = await response.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(1, camara.GetProperty("id").GetInt32());
-        Assert.Equal("Acceso principal", camara.GetProperty("nombre").GetString());
+        Assert.Equal("Zócalo de la Ciudad de México", camara.GetProperty("nombre").GetString());
     }
 
     [Fact]
