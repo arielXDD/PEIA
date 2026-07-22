@@ -213,6 +213,121 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function detectBrowser(userAgent) {
+    if (!userAgent) return 'Navegador';
+    if (userAgent.includes('Edg/')) return 'Microsoft Edge';
+    if (userAgent.includes('Firefox/')) return 'Firefox';
+    if (userAgent.includes('Chrome/')) return 'Chrome';
+    if (userAgent.includes('Safari/')) return 'Safari';
+    return 'Navegador';
+  }
+
+  function detectOs(userAgent) {
+    if (!userAgent) return 'Dispositivo';
+    if (userAgent.includes('Windows')) return 'Windows';
+    if (userAgent.includes('Mac OS')) return 'macOS';
+    if (userAgent.includes('Android')) return 'Android';
+    if (userAgent.includes('iPhone') || userAgent.includes('iPad')) return 'iOS';
+    if (userAgent.includes('Linux')) return 'Linux';
+    return 'Dispositivo';
+  }
+
+  function formatDateTime(value) {
+    if (!value) return 'Sin fecha';
+    return new Intl.DateTimeFormat('es-MX', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(new Date(value));
+  }
+
+  function renderSesiones(sesiones) {
+    const list = document.getElementById('sessionsList');
+    const closeOthersButton = document.getElementById('btnCerrarSesiones');
+    if (!list) return;
+
+    if (!sesiones?.length) {
+      list.innerHTML = `
+        <div class="session-item">
+          <div class="session-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="session-info">
+            <span class="session-device">No hay sesiones registradas</span>
+            <span class="session-meta">Vuelve a iniciar sesión para registrar este dispositivo.</span>
+          </div>
+        </div>`;
+      if (closeOthersButton) closeOthersButton.disabled = true;
+      return;
+    }
+
+    const otrasSesiones = sesiones.filter(s => !s.actual).length;
+    if (closeOthersButton) closeOthersButton.disabled = otrasSesiones === 0;
+
+    list.innerHTML = sesiones.map(session => {
+      const browser = detectBrowser(session.userAgent);
+      const os = detectOs(session.userAgent);
+      const ip = session.ipAddress ? `IP ${escapeHtml(session.ipAddress)}` : 'IP no disponible';
+      const currentLabel = session.actual ? ' — <span class="session-current">Sesión actual</span>' : '';
+      const closeButton = session.actual
+        ? ''
+        : `<button class="btn btn-secondary btn-sm btn-cerrar-sesion" data-id="${escapeHtml(session.id)}">Cerrar</button>`;
+
+      return `
+        <div class="session-item">
+          <div class="session-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="session-info">
+            <span class="session-device">${escapeHtml(os)} · ${escapeHtml(browser)}</span>
+            <span class="session-meta">${ip}${currentLabel} · Inició ${formatDateTime(session.fechaInicio)} · Expira ${formatDateTime(session.fechaExpiracion)}</span>
+          </div>
+          <span class="status-badge status-active"><span class="status-dot-sm"></span>Activa</span>
+          ${closeButton}
+        </div>`;
+    }).join('');
+  }
+
+  async function loadSesiones() {
+    const sesiones = await safeLoad('/api/auth/sesiones');
+    renderSesiones(sesiones || []);
+  }
+
+  document.getElementById('sessionsList')?.addEventListener('click', async event => {
+    const button = event.target.closest('.btn-cerrar-sesion');
+    if (!button) return;
+
+    if (!(await PEIA.toast.confirm('¿Cerrar esta sesión activa?'))) return;
+
+    try {
+      await PEIA.request(`/api/auth/sesiones/${button.dataset.id}`, { method: 'DELETE' });
+      await loadSesiones();
+      PEIA.toast.success('Sesión cerrada.');
+    } catch (error) {
+      PEIA.toast.error(error.message);
+    }
+  });
+
+  document.getElementById('btnCerrarSesiones')?.addEventListener('click', async () => {
+    if (!(await PEIA.toast.confirm('¿Cerrar todas las demás sesiones de tu cuenta?'))) return;
+
+    try {
+      const result = await PEIA.request('/api/auth/sesiones', { method: 'DELETE' });
+      await loadSesiones();
+      PEIA.toast.success(`Sesiones cerradas: ${result.closed ?? 0}.`);
+    } catch (error) {
+      PEIA.toast.error(error.message);
+    }
+  });
+
   /* ── Integraciones ──────────────────────────────────────────────── */
   let integraciones = [];
 
@@ -438,6 +553,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadPreferencias(),
     loadNotificacionesPrefs(),
     loadSeguridad(),
+    loadSesiones(),
     loadIntegraciones(),
     loadSistema(),
     loadReglas(),

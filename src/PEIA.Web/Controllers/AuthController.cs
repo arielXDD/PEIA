@@ -3,6 +3,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -89,10 +90,11 @@ public class AuthController : ControllerBase
 
         // Generar token JWT
         var token = await GenerateJwtTokenAsync(user, roles);
+        await RegisterSessionAsync(user.Id, token.JwtId, token.ExpiresAt);
 
         return Ok(new
         {
-            token,
+            token = token.Value,
             user = new
             {
                 id = user.Id,
@@ -171,15 +173,99 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Contraseña restablecida correctamente. Ya puedes iniciar sesión." });
     }
 
-    private async Task<string> GenerateJwtTokenAsync(Usuario user, IList<string> roles)
+    [Authorize]
+    [HttpGet("sesiones")]
+    public async Task<IActionResult> GetSesiones()
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var currentJwtId = User.FindFirstValue(JwtRegisteredClaimNames.Jti);
+        var now = DateTime.UtcNow;
+        var sesiones = await _context.UserSessions
+            .AsNoTracking()
+            .Where(s => s.UsuarioId == userId.Value && !s.Revocada && s.FechaExpiracion > now)
+            .OrderByDescending(s => s.FechaInicio)
+            .Select(s => new
+            {
+                s.Id,
+                s.FechaInicio,
+                s.FechaExpiracion,
+                s.IpAddress,
+                s.UserAgent,
+                actual = s.JwtId == currentJwtId
+            })
+            .ToListAsync();
+
+        return Ok(sesiones);
+    }
+
+    [Authorize]
+    [HttpDelete("sesiones/{id:guid}")]
+    public async Task<IActionResult> CerrarSesion(Guid id)
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var session = await _context.UserSessions
+            .FirstOrDefaultAsync(s => s.Id == id && s.UsuarioId == userId.Value && !s.Revocada);
+
+        if (session is null)
+        {
+            return NotFound(new { message = "Sesión no encontrada." });
+        }
+
+        session.Revocada = true;
+        session.FechaRevocacion = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpDelete("sesiones")]
+    public async Task<IActionResult> CerrarOtrasSesiones()
+    {
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var currentJwtId = User.FindFirstValue(JwtRegisteredClaimNames.Jti);
+        var sessions = await _context.UserSessions
+            .Where(s => s.UsuarioId == userId.Value && !s.Revocada && s.JwtId != currentJwtId)
+            .ToListAsync();
+
+        var now = DateTime.UtcNow;
+        foreach (var session in sessions)
+        {
+            session.Revocada = true;
+            session.FechaRevocacion = now;
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new { closed = sessions.Count });
+    }
+
+    private async Task<JwtTokenResult> GenerateJwtTokenAsync(Usuario user, IList<string> roles)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var key = Encoding.UTF8.GetBytes(jwtSettings["Secret"]!);
         var expiryMinutes = await GetSessionExpiryMinutesAsync();
+        var expiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes);
+        var jwtId = Guid.NewGuid().ToString("N");
 
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, jwtId),
             new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName!),
             new Claim(JwtRegisteredClaimNames.Email, user.Email!),
             new Claim("nombreCompleto", user.NombreCompleto)
@@ -193,7 +279,7 @@ public class AuthController : ControllerBase
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(expiryMinutes),
+            Expires = expiresAt,
             Issuer = jwtSettings["Issuer"],
             Audience = jwtSettings["Audience"],
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -202,7 +288,43 @@ public class AuthController : ControllerBase
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
-        return tokenHandler.WriteToken(token);
+        return new JwtTokenResult(tokenHandler.WriteToken(token), jwtId, expiresAt);
+    }
+
+    private async Task RegisterSessionAsync(Guid userId, string jwtId, DateTime expiresAt)
+    {
+        var ipAddress = Truncate(HttpContext.Connection.RemoteIpAddress?.ToString(), 80);
+        var userAgent = Truncate(Request.Headers.UserAgent.ToString(), 500);
+
+        _context.UserSessions.Add(new UserSession
+        {
+            UsuarioId = userId,
+            JwtId = jwtId,
+            FechaInicio = DateTime.UtcNow,
+            FechaExpiracion = expiresAt,
+            IpAddress = ipAddress,
+            UserAgent = userAgent
+        });
+
+        await _context.SaveChangesAsync();
+    }
+
+    private Guid? GetCurrentUserId()
+    {
+        var rawId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        return Guid.TryParse(rawId, out var userId) ? userId : null;
+    }
+
+    private static string? Truncate(string? value, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return value.Length <= maxLength ? value : value[..maxLength];
     }
 
     private async Task<double> GetSessionExpiryMinutesAsync()
@@ -251,3 +373,5 @@ public record SecurityTokenSettings(
     bool RequireDigit,
     bool RequireTwoFactor,
     int SessionTimeoutMinutes);
+
+public record JwtTokenResult(string Value, string JwtId, DateTime ExpiresAt);

@@ -9,6 +9,8 @@ using PEIA.Web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Serilog;
 
@@ -69,6 +71,27 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var jwtId = context.Principal?.FindFirstValue(JwtRegisteredClaimNames.Jti);
+            if (string.IsNullOrWhiteSpace(jwtId))
+            {
+                return;
+            }
+
+            var db = context.HttpContext.RequestServices.GetRequiredService<PeiaDbContext>();
+            var session = await db.UserSessions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.JwtId == jwtId);
+
+            if (session is not null && (session.Revocada || session.FechaExpiracion <= DateTime.UtcNow))
+            {
+                context.Fail("La sesión no está activa.");
+            }
+        }
     };
 });
 

@@ -343,6 +343,50 @@ namespace PEIA.Shared.Infra.Migrations
                     b.ToTable("UsuarioCentros", (string)null);
                 });
 
+            modelBuilder.Entity("PEIA.Shared.Infra.Identity.UserSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("FechaExpiracion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("FechaInicio")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FechaRevocacion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<bool>("Revocada")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JwtId")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioId", "Revocada", "FechaExpiracion");
+
+                    b.ToTable("UserSessions", (string)null);
+                });
+
             modelBuilder.Entity("PEIA.Shared.Infra.Inventory.Categoria", b =>
                 {
                     b.Property<Guid>("Id")
@@ -781,6 +825,17 @@ namespace PEIA.Shared.Infra.Migrations
                         .IsRequired();
 
                     b.Navigation("Centro");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("PEIA.Shared.Infra.Identity.UserSession", b =>
+                {
+                    b.HasOne("PEIA.Shared.Infra.Identity.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Usuario");
                 });

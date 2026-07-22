@@ -31,6 +31,7 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
     public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
     public DbSet<ReglaAutomatizacion> ReglasAutomatizacion => Set<ReglaAutomatizacion>();
     public DbSet<Captura> Capturas => Set<Captura>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -77,6 +78,22 @@ public class PeiaDbContext : IdentityDbContext<Usuario, Rol, Guid>
                 .WithMany(c => c.UsuarioCentros)
                 .HasForeignKey(uc => uc.CentroId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<UserSession>(b =>
+        {
+            b.ToTable("UserSessions");
+            b.HasKey(s => s.Id);
+            b.Property(s => s.JwtId).HasMaxLength(120).IsRequired();
+            b.Property(s => s.IpAddress).HasMaxLength(80);
+            b.Property(s => s.UserAgent).HasMaxLength(500);
+            b.HasIndex(s => s.JwtId).IsUnique();
+            b.HasIndex(s => new { s.UsuarioId, s.Revocada, s.FechaExpiracion });
+
+            b.HasOne(s => s.Usuario)
+                .WithMany()
+                .HasForeignKey(s => s.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
         // Configuración de Inventario
         builder.Entity<Categoria>(b =>
