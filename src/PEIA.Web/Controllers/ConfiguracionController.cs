@@ -39,7 +39,8 @@ public class ConfiguracionController : ControllerBase
         8,
         true,
         true,
-        false);
+        false,
+        180);
 
     private static readonly IReadOnlyList<IntegracionConfig> DefaultIntegraciones =
     [
@@ -92,6 +93,11 @@ public class ConfiguracionController : ControllerBase
         if (request.PasswordMinLength < 6)
         {
             return BadRequest(new { message = "La longitud mínima de contraseña debe ser al menos 6." });
+        }
+
+        if (request.SessionTimeoutMinutes is < 0 or > 43200)
+        {
+            return BadRequest(new { message = "La expiración de sesión debe estar entre 0 y 43200 minutos." });
         }
 
         await SetSettingAsync("seguridad", request);
@@ -151,6 +157,6 @@ public class ConfiguracionController : ControllerBase
 public record EmpresaConfig(string Nombre, string? Rfc, string? Telefono, string? Direccion, string? Email);
 public record PreferenciasConfig(string Timezone, string DateFormat, string Currency, int PageSize);
 public record NotificacionesConfig(bool Stock, bool Sla, bool Pedido, bool Camara, bool Email);
-public record SeguridadConfig(int PasswordMinLength, bool RequireUppercase, bool RequireDigit, bool RequireTwoFactor);
+public record SeguridadConfig(int PasswordMinLength, bool RequireUppercase, bool RequireDigit, bool RequireTwoFactor, int SessionTimeoutMinutes = 180);
 public record IntegracionConfig(string Id, string Nombre, bool Enabled, string? Endpoint);
 public record UpdateIntegracionRequest(bool Enabled, string? Endpoint);

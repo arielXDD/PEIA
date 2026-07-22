@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const seg = await safeLoad('/api/configuracion/seguridad');
     if (!seg) return;
     document.getElementById('pwdMinLen').value = String(seg.passwordMinLength || 8);
+    document.getElementById('sessionTimeout').value = String(seg.sessionTimeoutMinutes ?? 180);
     document.getElementById('chk-pwdComplex').checked = !!(seg.requireUppercase || seg.requireDigit);
     document.getElementById('chk-2fa').checked = !!seg.requireTwoFactor;
   }
@@ -199,6 +200,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const complex = document.getElementById('chk-pwdComplex').checked;
     const payload = {
       passwordMinLength: Number(document.getElementById('pwdMinLen').value),
+      sessionTimeoutMinutes: Number(document.getElementById('sessionTimeout').value),
       requireUppercase: complex,
       requireDigit: complex,
       requireTwoFactor: document.getElementById('chk-2fa').checked,
