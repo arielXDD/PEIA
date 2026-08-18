@@ -22,4 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', () => {
     if (window.innerWidth > 768) setSidebar(false);
   });
+
+  if (typeof PEIA?.connectHub === 'function') {
+    PEIA.connectHub().then(hub => {
+      hub?.on('notificacion', () => {
+        PEIA.updateNotificationBadge?.();
+      });
+    }).catch(() => null);
+  }
 });

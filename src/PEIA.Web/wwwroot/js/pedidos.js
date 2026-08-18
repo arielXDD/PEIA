@@ -28,6 +28,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Cerrar al hacer clic en el backdrop oscuro
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('open');
+      }
+    });
+  });
+
+  // Cerrar modal con la tecla Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+        modal.classList.remove('open');
+      });
+    }
+  });
+
   // Botones para abrir modals de creación
   document.getElementById('btnOpenNewPedido')?.addEventListener('click', () => {
     document.getElementById('formNewPedido')?.reset();

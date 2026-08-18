@@ -34,17 +34,68 @@ document.addEventListener('DOMContentLoaded', async () => {
     Creado: 'status-pending',
     Asignado: 'status-info',
     EnRuta: 'status-info',
+    'En ruta': 'status-info',
     Entregado: 'status-active',
     Cancelado: 'status-critical',
+    creado: 'status-pending',
+    asignado: 'status-info',
+    enruta: 'status-info',
+    enRuta: 'status-info',
+    'en ruta': 'status-info',
+    entregado: 'status-active',
+    cancelado: 'status-critical',
   };
   const estadoLabel = {
     Creado: 'Creado',
     Asignado: 'Asignado',
     EnRuta: 'En ruta',
+    'En ruta': 'En ruta',
     Entregado: 'Entregado',
     Cancelado: 'Cancelado',
+    creado: 'Creado',
+    asignado: 'Asignado',
+    enruta: 'En ruta',
+    enRuta: 'En ruta',
+    'en ruta': 'En ruta',
+    entregado: 'Entregado',
+    cancelado: 'Cancelado',
   };
-  const donutColors = { Creado: '#f59e0b', Asignado: '#3b82f6', EnRuta: '#6366f1', Entregado: '#22c55e', Cancelado: '#ef4444' };
+  const donutColors = {
+    Creado: '#f59e0b',
+    Asignado: '#3b82f6',
+    EnRuta: '#6366f1',
+    'En ruta': '#6366f1',
+    Entregado: '#22c55e',
+    Cancelado: '#ef4444',
+    creado: '#f59e0b',
+    asignado: '#3b82f6',
+    enruta: '#6366f1',
+    enRuta: '#6366f1',
+    'en ruta': '#6366f1',
+    entregado: '#22c55e',
+    cancelado: '#ef4444',
+  };
+
+  const getDonutColor = key => {
+    if (!key) return '#9ca3af';
+    if (donutColors[key]) return donutColors[key];
+    const norm = String(key).replace(/[\s_-]+/g, '').toLowerCase();
+    return donutColors[norm] || '#9ca3af';
+  };
+
+  const getEstadoLabel = key => {
+    if (!key) return '';
+    if (estadoLabel[key]) return estadoLabel[key];
+    const norm = String(key).replace(/[\s_-]+/g, '').toLowerCase();
+    return estadoLabel[norm] || key;
+  };
+
+  const getEstadoPill = key => {
+    if (!key) return 'status-info';
+    if (estadoPill[key]) return estadoPill[key];
+    const norm = String(key).replace(/[\s_-]+/g, '').toLowerCase();
+    return estadoPill[norm] || 'status-info';
+  };
 
   // ─── Tabs ───────────────────────────────────
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -191,8 +242,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  document.getElementById('dateFrom').addEventListener('change', () => loadMovimientos().catch(err => PEIA.toast.error(err.message)));
-  document.getElementById('dateTo').addEventListener('change', () => loadMovimientos().catch(err => PEIA.toast.error(err.message)));
+  document.getElementById('dateFrom')?.addEventListener('change', () => loadMovimientos().catch(err => PEIA.toast.error(err.message)));
+  document.getElementById('dateTo')?.addEventListener('change', () => loadMovimientos().catch(err => PEIA.toast.error(err.message)));
 
   // ─── Tab 3: Pedidos ─────────────────────────
   async function loadPedidos() {
@@ -220,10 +271,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       chartPedEstados = new Chart(document.getElementById('chartPedEstados'), {
         type: 'doughnut',
         data: {
-          labels: labels.map(l => estadoLabel[l] || l),
-          datasets: [{ data: labels.map(l => estados[l]), backgroundColor: labels.map(l => donutColors[l] || '#9ca3af'), borderWidth: 0, hoverOffset: 6 }],
+          labels: labels.map(l => getEstadoLabel(l)),
+          datasets: [{
+            data: labels.map(l => estados[l]),
+            backgroundColor: labels.map(l => getDonutColor(l)),
+            borderWidth: 0,
+            hoverOffset: 6
+          }],
         },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10 } } } },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 10
+              }
+            }
+          }
+        },
       });
     }
 
@@ -232,7 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         columns: [
           { key: 'pedido', label: 'Pedido', render: v => `<span class="cell-mono">${v}</span>` },
           { key: 'cliente', label: 'Cliente', render: v => `<span class="cell-primary">${v}</span>` },
-          { key: 'estado', label: 'Estado', render: v => `<span class="status-badge ${estadoPill[v] || ''}">${estadoLabel[v] || v}</span>` },
+          { key: 'estado', label: 'Estado', render: v => `<span class="status-badge ${getEstadoPill(v)}">${getEstadoLabel(v)}</span>` },
           { key: 'fecha', label: 'Fecha pedido' },
           { key: 'fechaEstimada', label: 'Entrega estimada' },
           { key: 'sla', label: 'SLA' },
@@ -248,13 +317,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function applyPedFilter() {
-    const s = document.getElementById('filterEstadoPed').value;
-    pedTable.setData(s ? pedidos.filter(p => p.estado === s) : [...pedidos]);
+    const s = document.getElementById('filterEstadoPed')?.value.trim();
+    if (!s) {
+      pedTable.setData([...pedidos]);
+      return;
+    }
+    const normFilter = s.replace(/[\s_-]+/g, '').toLowerCase();
+    pedTable.setData(pedidos.filter(p => String(p.estado || '').replace(/[\s_-]+/g, '').toLowerCase() === normFilter));
   }
 
-  document.getElementById('filterEstadoPed').addEventListener('change', applyPedFilter);
-
-  // ─── Export Modal System ────────────────────────────────────
+  document.getElementById('filterEstadoPed')?.addEventListener('change', applyPedFilter);
 
   // SVG icons
   const SVG_PDF_FILE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
@@ -552,12 +624,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('exportPedPdf').addEventListener('click', () =>
     openPdfConfig('ped', 'Reporte Pedidos',
       ['Pedido','Cliente','Estado','Fecha pedido','Entrega estimada','SLA'],
-      () => pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado]||r.estado, r.fecha, r.fechaEstimada, r.sla])));
+      () => pedidos.map(r => [r.pedido, r.cliente, getEstadoLabel(r.estado) || r.estado, r.fecha, r.fechaEstimada, r.sla])));
 
   document.getElementById('exportPedExcel').addEventListener('click', () =>
     openExcelConfig('ped', 'Pedidos',
       ['Pedido','Cliente','Estado','Fecha pedido','Entrega estimada','SLA'],
-      () => pedidos.map(r => [r.pedido, r.cliente, estadoLabel[r.estado]||r.estado, r.fecha, r.fechaEstimada, r.sla])));
+      () => pedidos.map(r => [r.pedido, r.cliente, getEstadoLabel(r.estado) || r.estado, r.fecha, r.fechaEstimada, r.sla])));
 
   // ── Print Modal ────────────────────────────────────────────
   function getPrintReport(reportTitle) {
@@ -580,7 +652,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return {
       chart: chartPedEstados,
       headers: ['Pedido', 'Cliente', 'Estado', 'Fecha pedido', 'Entrega estimada', 'SLA'],
-      rows: pedidos.map(item => [item.pedido, item.cliente, estadoLabel[item.estado] || item.estado, item.fecha, item.fechaEstimada, item.sla]),
+      rows: pedidos.map(item => [item.pedido, item.cliente, getEstadoLabel(item.estado) || item.estado, item.fecha, item.fechaEstimada, item.sla]),
       summary: [`${pedidos.length} pedidos`, `${pedidos.filter(item => item.estado === 'Entregado').length} entregados`]
     };
   }

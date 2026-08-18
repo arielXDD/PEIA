@@ -6,37 +6,8 @@
     ViewData["ActivePage"] = "Pedidos";
 }
 @section Styles {
-    <style>
-    /* Estilos Adicionales Específicos para Modals, Formularios y Timeline de Pedidos */
-    .btn-primary {
-      background-color: #3b82f6;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background-color 0.2s;
-    }
-    .btn-primary:hover {
-      background-color: #2563eb;
-    }
-    .btn-secondary {
-      background-color: #f3f4f6;
-      color: #374151;
-      border: 1px solid #d1d5db;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .btn-secondary:hover {
-      background-color: #e5e7eb;
-    }
+  <style>
+    /* Botones de acción en tabla */
     .btn-action-sm {
       padding: 4px 8px;
       font-size: 11px;
@@ -81,76 +52,55 @@
       margin-bottom: 20px;
     }
 
-    /* Modal Styles */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+    /* Diálogos principales de pedidos: espaciado y jerarquía visual */
+    .pedido-form-modal .modal-container {
+      max-width: 560px;
+      border: 1px solid rgba(148, 163, 184, .28);
+      border-radius: 14px;
+      box-shadow: 0 28px 72px rgba(15, 23, 42, .24), 0 8px 24px rgba(15, 23, 42, .10);
+      overflow: hidden;
     }
-    .modal-overlay.open {
-      display: flex;
-      animation: modalFadeIn 0.2s ease-in-out;
+    .pedido-form-modal .modal-header {
+      padding: 22px 26px 18px;
+      background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
     }
-    @@keyframes modalFadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .modal-title {
+    .pedido-form-modal .modal-header h2 {
       font-size: 18px;
-      font-weight: 600;
-      color: #111827;
+      letter-spacing: -.01em;
     }
-    .btn-close-modal {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #9ca3af;
+    .pedido-form-modal .modal-close {
+      width: 32px;
+      height: 32px;
+      justify-content: center;
     }
-    .btn-close-modal:hover {
-      color: #374151;
+    .pedido-form-modal .modal-body {
+      padding: 24px 26px 26px;
+      gap: 18px;
+      background: #fff;
     }
-    .form-group {
-      margin-bottom: 16px;
+    .pedido-form-modal .form-field {
+      gap: 7px;
     }
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      color: #4b5563;
-      margin-bottom: 6px;
+    .pedido-form-modal .form-field label {
+      color: #334155;
+      line-height: 1.25;
     }
-    .form-control {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 14px;
-      color: #111827;
-      transition: border-color 0.15s;
+    .pedido-form-modal .form-field input {
+      min-height: 42px;
+      border-color: #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
     }
-    .form-control:focus {
-      outline: none;
-      border-color: #3b82f6;
+    .pedido-form-modal .form-field input:hover {
+      border-color: #94a3b8;
     }
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 24px;
+    .pedido-form-modal .modal-footer {
+      padding: 16px 26px 20px;
+      background: #f8fafc;
+    }
+    .pedido-form-modal .modal-footer .btn {
+      min-height: 38px;
+      padding-inline: 16px;
     }
 
     /* Timeline Styles */
@@ -237,143 +187,291 @@
       .actions-header button { flex: 1 1 180px; justify-content: center; }
     }
     @@media (max-width: 560px) {
-      .modal-box { width: calc(100% - 24px); max-height: calc(100vh - 24px); overflow-y: auto; padding: 18px; }
-      .modal-footer { flex-direction: column-reverse; }
-      .modal-footer button { width: 100%; justify-content: center; }
       .actions-cell { flex-wrap: wrap; }
+      .pedido-form-modal .modal-header,
+      .pedido-form-modal .modal-body,
+      .pedido-form-modal .modal-footer { padding-left: 20px; padding-right: 20px; }
     }
   </style>
 }
 <div class="page-header">
-          <h1>Logística y Distribución</h1>
-          <p>Gestión de envíos, asignación de rutas, control de SLAs y rastreo de entregas en tiempo real.</p>
+  <h1>Logística y Distribución</h1>
+  <p>Gestión de envíos, asignación de rutas, control de SLAs y rastreo de entregas en tiempo real.</p>
+</div>
+
+<!-- KPI Cards -->
+<section class="kpi-grid" aria-label="Indicadores de logística">
+  <div class="kpi-card">
+    <div class="kpi-icon blue">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>
+    </div>
+    <div class="kpi-body">
+      <p class="kpi-label">Pedidos Totales</p>
+      <p class="kpi-value" id="kpi-total">0</p>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon orange">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div class="kpi-body">
+      <p class="kpi-label">Pendientes / Creados</p>
+      <p class="kpi-value" id="kpi-pendientes">0</p>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon teal">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+    </div>
+    <div class="kpi-body">
+      <p class="kpi-label">Asignados</p>
+      <p class="kpi-value" id="kpi-asignados">0</p>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon purple">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2" ry="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    </div>
+    <div class="kpi-body">
+      <p class="kpi-label">En Ruta</p>
+      <p class="kpi-value" id="kpi-enruta">0</p>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon green">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div class="kpi-body">
+      <p class="kpi-label">Entregados</p>
+      <p class="kpi-value" id="kpi-entregados">0</p>
+    </div>
+  </div>
+</section>
+
+<!-- Actions Panel -->
+<div class="actions-header">
+  <button class="btn btn-primary" id="btnOpenNewPedido">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Nuevo Pedido
+  </button>
+  <button class="btn btn-secondary" id="btnOpenNewRuta">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 15 9 18 3 15"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+    Crear Ruta
+  </button>
+</div>
+
+<!-- Main Content Grid -->
+<section class="tables-grid pedidos-tables">
+  <!-- Lista de Pedidos -->
+  <div class="table-card">
+    <div class="table-header">
+      <h3>Pedidos del Almacén</h3>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="tablePedidos">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Cliente</th>
+            <th>Ruta</th>
+            <th>Transportista</th>
+            <th>SLA Estado</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyPedidos">
+          <!-- Se llena dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Lista de Rutas -->
+  <div class="table-card">
+    <div class="table-header">
+      <h3>Rutas Activas</h3>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="tableRutas">
+        <thead>
+          <tr>
+            <th>Ruta</th>
+            <th>Trayecto</th>
+            <th>Distancia</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyRutas">
+          <!-- Se llena dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Modal: Nuevo Pedido -->
+<div class="modal-overlay pedido-form-modal" id="modalNewPedido" role="dialog" aria-modal="true" aria-labelledby="newPedidoTitle">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="newPedidoTitle">Nuevo pedido</h2>
+      <button class="modal-close" type="button" data-close="modalNewPedido" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="formNewPedido">
+      <div class="modal-body">
+        <div class="form-field">
+          <label for="pedCodigo">Código <span class="required">*</span></label>
+          <input id="pedCodigo" required maxlength="50" placeholder="PED-0001" />
         </div>
-
-        <!-- KPI Cards -->
-        <section class="kpi-grid" aria-label="Indicadores de logística">
-          <div class="kpi-card">
-            <div class="kpi-icon blue">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>
-            </div>
-            <div class="kpi-body">
-              <p class="kpi-label">Pedidos Totales</p>
-              <p class="kpi-value" id="kpi-total">0</p>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon orange">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div class="kpi-body">
-              <p class="kpi-label">Pendientes / Creados</p>
-              <p class="kpi-value" id="kpi-pendientes">0</p>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon teal">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
-            </div>
-            <div class="kpi-body">
-              <p class="kpi-label">Asignados</p>
-              <p class="kpi-value" id="kpi-asignados">0</p>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon purple">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2" ry="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            </div>
-            <div class="kpi-body">
-              <p class="kpi-label">En Ruta</p>
-              <p class="kpi-value" id="kpi-enruta">0</p>
-            </div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-icon green">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            </div>
-            <div class="kpi-body">
-              <p class="kpi-label">Entregados</p>
-              <p class="kpi-value" id="kpi-entregados">0</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Actions Panel -->
-        <div class="actions-header">
-          <button class="btn-primary" id="btnOpenNewPedido">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nuevo Pedido
-          </button>
-          <button class="btn-secondary" id="btnOpenNewRuta">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 15 9 18 3 15"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-            Crear Ruta
-          </button>
+        <div class="form-field">
+          <label for="pedCliente">Cliente <span class="required">*</span></label>
+          <input id="pedCliente" required maxlength="200" placeholder="Nombre de la empresa o cliente" />
         </div>
+        <div class="form-field">
+          <label for="pedDireccion">Dirección de entrega <span class="required">*</span></label>
+          <input id="pedDireccion" required maxlength="300" placeholder="Calle, número, colonia, ciudad" />
+        </div>
+        <div class="form-field">
+          <label for="pedFechaSla">Fecha límite de entrega <span class="required">*</span></label>
+          <input type="datetime-local" id="pedFechaSla" required />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-close="modalNewPedido">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Registrar pedido</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-        <!-- Main Content Grid -->
-        <section class="tables-grid pedidos-tables">
-          
-          <!-- Lista de Pedidos -->
-          <div class="table-card">
-            <div class="table-header">
-              <h3>Pedidos del Almacén</h3>
-            </div>
-            <div class="table-scroll">
-              <table class="data-table" id="tablePedidos">
-                <thead>
-                  <tr>
-                    <th>Código</th>
-                    <th>Cliente</th>
-                    <th>Ruta</th>
-                    <th>Transportista</th>
-                    <th>SLA Estado</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="tbodyPedidos">
-                  <!-- Se llena dinámicamente -->
-                </tbody>
-              </table>
-            </div>
-          </div>
+<!-- Modal: Crear Ruta -->
+<div class="modal-overlay pedido-form-modal" id="modalNewRuta" role="dialog" aria-modal="true" aria-labelledby="newRutaTitle">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="newRutaTitle">Crear ruta</h2>
+      <button class="modal-close" type="button" data-close="modalNewRuta" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="formNewRuta">
+      <div class="modal-body">
+        <div class="form-field">
+          <label for="rutaNombre">Nombre de la ruta <span class="required">*</span></label>
+          <input id="rutaNombre" required maxlength="150" placeholder="Ej. Ruta Norte Express" />
+        </div>
+        <div class="form-field">
+          <label for="rutaOrigen">Origen <span class="required">*</span></label>
+          <input id="rutaOrigen" required maxlength="250" placeholder="Ej. Bodega Central" />
+        </div>
+        <div class="form-field">
+          <label for="rutaDestino">Destino <span class="required">*</span></label>
+          <input id="rutaDestino" required maxlength="250" placeholder="Ej. Zona Industrial Norte" />
+        </div>
+        <div class="form-field">
+          <label for="rutaDistancia">Distancia (km) <span class="required">*</span></label>
+          <input type="number" id="rutaDistancia" required min="0.1" step="0.1" placeholder="Ej. 15.5" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-close="modalNewRuta">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Crear ruta</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-          <!-- Lista de Rutas -->
-          <div class="table-card">
-            <div class="table-header">
-              <h3>Rutas Activas</h3>
-            </div>
-            <div class="table-scroll">
-              <table class="data-table" id="tableRutas">
-                <thead>
-                  <tr>
-                    <th>Ruta</th>
-                    <th>Trayecto</th>
-                    <th>Distancia</th>
-                  </tr>
-                </thead>
-                <tbody id="tbodyRutas">
-                  <!-- Se llena dinámicamente -->
-                </tbody>
-              </table>
-            </div>
-          </div>
+<!-- Modal: Asignar Pedido -->
+<div class="modal-overlay" id="modalAssignPedido" role="dialog" aria-modal="true">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Asignar pedido</h2>
+      <button class="modal-close" type="button" data-close="modalAssignPedido" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="formAssignPedido">
+      <div class="modal-body">
+        <input type="hidden" id="assignPedidoId" />
+        <div class="form-field">
+          <label for="assignRuta">Ruta <span class="required">*</span></label>
+          <select id="assignRuta" required></select>
+        </div>
+        <div class="form-field">
+          <label for="assignDriver">Transportista <span class="required">*</span></label>
+          <select id="assignDriver" required></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-close="modalAssignPedido">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Asignar</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-        </section>
+<!-- Modal: Actualizar Envío -->
+<div class="modal-overlay" id="modalUpdateEstado" role="dialog" aria-modal="true">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Actualizar envío</h2>
+      <button class="modal-close" type="button" data-close="modalUpdateEstado" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="formUpdateEstado">
+      <div class="modal-body">
+        <input type="hidden" id="updatePedidoId" />
+        <div class="form-field">
+          <label for="updateEstadoSelect">Nuevo estado <span class="required">*</span></label>
+          <select id="updateEstadoSelect" required></select>
+        </div>
+        <div class="form-field">
+          <label for="updateDesc">Descripción o motivo</label>
+          <input id="updateDesc" maxlength="500" placeholder="Detalles sobre el cambio de estado" />
+        </div>
+        <div class="form-field">
+          <label for="updateLat">Latitud (opcional)</label>
+          <input type="number" step="any" id="updateLat" placeholder="Ej. 19.4326" />
+        </div>
+        <div class="form-field">
+          <label for="updateLon">Longitud (opcional)</label>
+          <input type="number" step="any" id="updateLon" placeholder="Ej. -99.1332" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-close="modalUpdateEstado">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Actualizar</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-        <div class="modal-overlay" id="modalNewPedido" role="dialog" aria-modal="true" aria-labelledby="newPedidoTitle"><div class="modal-box"><div class="modal-header"><h2 class="modal-title" id="newPedidoTitle">Nuevo pedido</h2><button class="btn-close-modal" type="button" data-close="modalNewPedido" aria-label="Cerrar">×</button></div><form id="formNewPedido"><div class="form-group"><label for="pedCodigo">Código</label><input class="form-control" id="pedCodigo" required maxlength="50" placeholder="PED-0001" /></div><div class="form-group"><label for="pedCliente">Cliente</label><input class="form-control" id="pedCliente" required maxlength="200" /></div><div class="form-group"><label for="pedDireccion">Dirección de entrega</label><input class="form-control" id="pedDireccion" required maxlength="300" /></div><div class="form-group"><label for="pedFechaSla">Fecha límite de entrega</label><input class="form-control" type="datetime-local" id="pedFechaSla" required /></div><div class="modal-footer"><button class="btn-secondary" type="button" data-close="modalNewPedido">Cancelar</button><button class="btn-primary" type="submit">Registrar pedido</button></div></form></div></div>
-
-        <div class="modal-overlay" id="modalNewRuta" role="dialog" aria-modal="true" aria-labelledby="newRutaTitle"><div class="modal-box"><div class="modal-header"><h2 class="modal-title" id="newRutaTitle">Crear ruta</h2><button class="btn-close-modal" type="button" data-close="modalNewRuta" aria-label="Cerrar">×</button></div><form id="formNewRuta"><div class="form-group"><label for="rutaNombre">Nombre</label><input class="form-control" id="rutaNombre" required maxlength="150" placeholder="Ruta Norte" /></div><div class="form-group"><label for="rutaOrigen">Origen</label><input class="form-control" id="rutaOrigen" required maxlength="250" /></div><div class="form-group"><label for="rutaDestino">Destino</label><input class="form-control" id="rutaDestino" required maxlength="250" /></div><div class="form-group"><label for="rutaDistancia">Distancia (km)</label><input class="form-control" type="number" id="rutaDistancia" required min="0.1" step="0.1" /></div><div class="modal-footer"><button class="btn-secondary" type="button" data-close="modalNewRuta">Cancelar</button><button class="btn-primary" type="submit">Crear ruta</button></div></form></div></div>
-
-        <div class="modal-overlay" id="modalAssignPedido" role="dialog" aria-modal="true"><div class="modal-box"><div class="modal-header"><h2 class="modal-title">Asignar pedido</h2><button class="btn-close-modal" type="button" data-close="modalAssignPedido" aria-label="Cerrar">×</button></div><form id="formAssignPedido"><input type="hidden" id="assignPedidoId" /><div class="form-group"><label for="assignRuta">Ruta</label><select class="form-control" id="assignRuta" required></select></div><div class="form-group"><label for="assignDriver">Transportista</label><select class="form-control" id="assignDriver" required></select></div><div class="modal-footer"><button class="btn-secondary" type="button" data-close="modalAssignPedido">Cancelar</button><button class="btn-primary" type="submit">Asignar</button></div></form></div></div>
-
-        <div class="modal-overlay" id="modalUpdateEstado" role="dialog" aria-modal="true"><div class="modal-box"><div class="modal-header"><h2 class="modal-title">Actualizar envío</h2><button class="btn-close-modal" type="button" data-close="modalUpdateEstado" aria-label="Cerrar">×</button></div><form id="formUpdateEstado"><input type="hidden" id="updatePedidoId" /><div class="form-group"><label for="updateEstadoSelect">Nuevo estado</label><select class="form-control" id="updateEstadoSelect" required></select></div><div class="form-group"><label for="updateDesc">Descripción</label><input class="form-control" id="updateDesc" maxlength="500" /></div><div class="form-group"><label for="updateLat">Latitud (opcional)</label><input class="form-control" type="number" step="any" id="updateLat" /></div><div class="form-group"><label for="updateLon">Longitud (opcional)</label><input class="form-control" type="number" step="any" id="updateLon" /></div><div class="modal-footer"><button class="btn-secondary" type="button" data-close="modalUpdateEstado">Cancelar</button><button class="btn-primary" type="submit">Actualizar</button></div></form></div></div>
-
-        <div class="modal-overlay" id="modalTrackDetail" role="dialog" aria-modal="true"><div class="modal-box"><div class="modal-header"><h2 class="modal-title" id="trackPedidoCode">Rastreo</h2><button class="btn-close-modal" type="button" data-close="modalTrackDetail" aria-label="Cerrar">×</button></div><div class="sla-progress-box"><span class="sla-status-badge" id="trackSlaBadge"></span><p id="trackSlaDetail"></p></div><div class="timeline" id="trackTimeline"></div></div></div>
+<!-- Modal: Rastreo y SLAs -->
+<div class="modal-overlay" id="modalTrackDetail" role="dialog" aria-modal="true">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="trackPedidoCode">Rastreo de pedido</h2>
+      <button class="modal-close" type="button" data-close="modalTrackDetail" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="sla-progress-box">
+        <span class="sla-status-badge" id="trackSlaBadge"></span>
+        <p id="trackSlaDetail"></p>
+      </div>
+      <div class="timeline" id="trackTimeline"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" data-close="modalTrackDetail">Cerrar</button>
+    </div>
+  </div>
+</div>
 @section Scripts {
     <script src="~/js/pedidos.js" asp-append-version="true"></script>
 }

@@ -100,6 +100,24 @@ window.PEIA = (() => {
     return hubConnection;
   }
 
+  async function updateNotificationBadge() {
+    const centro = getActiveCentro();
+    if (!centro?.id || !getToken()) return;
+    try {
+      const data = await request(`/api/notificaciones?centroId=${encodeURIComponent(centro.id)}`);
+      if (Array.isArray(data)) {
+        const unread = data.filter(item => !item.leida).length;
+        const badges = document.querySelectorAll('a[href="/Notificaciones"] .badge, a[href*="Notificaciones"] .badge, #navNotifBadge');
+        badges.forEach(badge => {
+          badge.textContent = unread;
+          badge.style.display = unread > 0 ? '' : 'none';
+        });
+      }
+    } catch {
+      // Silenciar errores de red en segundo plano
+    }
+  }
+
   function hydrateShell() {
     const user = getUser();
     if (user?.nombreCompleto) {
@@ -114,6 +132,7 @@ window.PEIA = (() => {
     if (activeEl && active?.nombre) activeEl.textContent = active.nombre;
 
     document.getElementById('btnLogout')?.addEventListener('click', logout);
+    updateNotificationBadge();
   }
 
   function getActiveCentro() {
@@ -181,5 +200,7 @@ window.PEIA = (() => {
     });
   }
 
-  return { request, setSession, clearSession, requireAuth, logout, hydrateShell, bindWarehouseSelector, getUser, getActiveCentro, connectHub };
+  window.addEventListener('peia:centro-changed', () => updateNotificationBadge());
+
+  return { request, setSession, clearSession, requireAuth, logout, hydrateShell, bindWarehouseSelector, getUser, getActiveCentro, connectHub, updateNotificationBadge };
 })();
