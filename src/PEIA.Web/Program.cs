@@ -16,9 +16,13 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Soporte para Render (PORT variable de entorno)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5273";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("logs/peia-.log", rollingInterval: RollingInterval.Day)
+    .MinimumLevel.Information()
     .CreateLogger();
 
 builder.Host.UseSerilog();

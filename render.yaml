@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: peia
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        fromDatabase:
+          name: peia-db
+          property: connectionString
+      - key: JwtSettings__Secret
+        generateValue: true
+      - key: JwtSettings__Issuer
+        value: PEIA
+      - key: JwtSettings__Audience
+        value: PEIA
+
+databases:
+  - name: peia-db
+    plan: free
+    databaseName: peiadb
